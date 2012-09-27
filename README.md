@@ -1,4 +1,4 @@
 Paula
 =====
 
-a interactive music generation game
+an interactive music generation game
