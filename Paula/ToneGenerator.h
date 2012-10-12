@@ -10,7 +10,7 @@
 
 @interface ToneGenerator : NSObject
 
-- (void)noteOn:(double)freq withGain:(double)g;
+- (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
 - (void)noteOff;
 
 @end

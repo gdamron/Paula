@@ -29,18 +29,21 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        
+        self.view.backgroundColor = [UIColor blackColor];
+        
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         tone = [[ToneGenerator alloc] init];
         backButton = [self addBackButton];
-        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8 AndName:@"1"];
-        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8 AndName:@"2"];
-        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8 AndName:@"3"];
-        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+8 AndName:@"4"];
-        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+8 AndName:@"5"];
-        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8 AndName:@"6"];
-        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8 AndName:@"7"];
-        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8 AndName:@"8"];
+        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
+        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
+        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
+        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+8];
+        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+8];
+        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8];
+        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
+        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         [sineButton1 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
         [sineButton1 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
@@ -79,29 +82,30 @@
 }
 
 - (void) noteOn:(id)sender {
+    int s = 1;
     if (sender==sineButton1) {
-        [tone noteOn:440 withGain:1.0];
+        [tone noteOn:220 withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton2) {
-        [tone noteOn:440*(pow (2, (2.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton3) {
-        [tone noteOn:440*(pow (2, (3.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton4) {
-        [tone noteOn:440*(pow (2, (5.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton5) {
-        [tone noteOn:440*(pow (2, (7.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton6) {
-        [tone noteOn:440*(pow (2, (9.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton7) {
-        [tone noteOn:440*(pow (2, (10.0/12))) withGain:1.0];
+        [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
     }
     if (sender==sineButton8) {
-        [tone noteOn:880 withGain:1.0];
+        [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
     }
 }
 
@@ -121,14 +125,14 @@
     return back;
 }
 
-- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y AndName:(NSString *)name{
+- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:0.25 green:1.0 blue:0.5 alpha:1.0];
+    sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
-    [sender setTitle:name forState:UIControlStateNormal];
+    [sender setTitle:nil forState:UIControlStateNormal];
     [self.view addSubview:sender];
     return sender;
 }

@@ -84,7 +84,7 @@
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:0.25 green:1.0 blue:0.5 alpha:1.0];
+    sender.backgroundColor = [UIColor colorWithRed:(rand()%1000)/1000.0 green:(rand()%1000)/1000.0 blue:(rand()%1000)/1000.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(width/2+x, height/2+y, 76, 76);
     [sender setTitle:name forState:UIControlStateNormal];
