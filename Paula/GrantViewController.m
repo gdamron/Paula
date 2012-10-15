@@ -35,7 +35,6 @@
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         tone = [[ToneGenerator alloc] init];
-        backButton = [self addBackButton];
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
         sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
@@ -44,6 +43,7 @@
         sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8];
         sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
         sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
+        backButton = [self addBackButton];
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         [sineButton1 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
         [sineButton1 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];

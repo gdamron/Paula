@@ -7,7 +7,7 @@
 //
 
 #import "ToneGenerator.h"
-#import "mo_audio.h"
+#import "momu/mo_audio.h"
 
 #define SRATE 44100
 #define FRAMESIZE 128
