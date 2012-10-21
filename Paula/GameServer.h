@@ -6,8 +6,15 @@
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
+@class GameServer;
+
+@protocol GameServerDelegate <NSObject>
+@optional
+- (void) acceptConnection:(GameServer*)server inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr;
+- (void) test;
+@end
+
 #import <Foundation/Foundation.h>
-#import "GameServerDelegate.h"
 
 NSString * const GameServerErrorDomain;
 static NSString* _broadcastName = @"Paula";
@@ -20,13 +27,13 @@ typedef enum {
 
 @interface GameServer : NSObject <NSNetServiceDelegate> {
     @private
-    id _serverDelegate;
+//    id _delegate;
     uint16_t _port;
     CFSocketRef socketRef;
     NSNetService* _netService;
 }
-
-- (BOOL) startServer:(NSError **)error;
+@property(assign) id<GameServerDelegate> delegate;
+- (BOOL) startServer:(NSError *)error;
 - (BOOL) stopServer;
 - (BOOL) enableBonjour:(NSString*)domain appProtocol:(NSString*)appProtocol name:(NSString*)name;
 - (void) disableBonjour;

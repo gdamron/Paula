@@ -7,9 +7,13 @@
 //
 
 #import "GrantViewController.h"
+#import "GameServer.h"
+#import "SocketDelegate.h"
 
 @interface GrantViewController ()
-
+@property (nonatomic) GameServer *server;
+@property (nonatomic) NSError *error;
+@property (strong) SocketDelegate *socketDelegate;
 @end
 
 @implementation GrantViewController
@@ -24,6 +28,8 @@
 @synthesize sineButton7;
 @synthesize sineButton8;
 @synthesize tone;
+
+@synthesize server, error, socketDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -61,6 +67,15 @@
         [sineButton7 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
         [sineButton8 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
         [sineButton8 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
+        
+        server = [GameServer alloc];
+        socketDelegate = [[SocketDelegate alloc] init];
+        [server setDelegate:socketDelegate];
+        [socketDelegate setController:self];
+        
+        BOOL result = [server startServer:error];
+        
+        NSLog(@"Server Started : %d", result);
     }
     return self;
 }
@@ -79,6 +94,44 @@
 
 - (void) backButtonPressed {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void) playNote:(NSInteger)num {
+    int s = 1;
+    switch (num) {
+        case 1: {
+            [tone noteOn:220 withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 2: {
+            [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 3: {
+            [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 4: {
+            [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 5: {
+            [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 6: {
+            [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 7: {
+            [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 8: {
+            [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+    }
 }
 
 - (void) noteOn:(id)sender {

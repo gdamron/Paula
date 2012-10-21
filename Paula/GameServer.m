@@ -14,26 +14,28 @@
 #import "GameServer.h"
 
 @interface GameServer ()
-@property(assign) id<GameServerDelegate> delegate;
-@property(nonatomic,retain) NSNetService* netService;
+@property(retain) NSNetService* netService;
 @property(assign) uint16_t port;
 @property(nonatomic) CFSocketRef socketRef;
-
 @property(nonatomic) uint32_t protocolType;
 @end
 
 @implementation GameServer
 
-@synthesize port=_port, netService=_netService, delegate=_delegate, socketRef;
+@synthesize delegate=_delegate, port=_port, netService=_netService;
+@synthesize socketRef;
 
 - (id)init {
     return self;
 }
 
-- (BOOL) startServer:(NSError **)error {
-    CFSocketContext *socketCtx = {0, self, NULL, NULL, NULL};
+- (BOOL) startServer:(NSError *)error {
     
-    self.protocolType = PF_INET6;
+    NSLog(@"Starting Server : ");
+    
+    CFSocketContext socketCtx = {0, (__bridge void *)(self), NULL, NULL, NULL};
+    
+    self.protocolType = PF_INET;
     
     self.socketRef = [self createSocket:self.protocolType socketCtx:socketCtx];
     if(self.socketRef == NULL) {
@@ -44,6 +46,7 @@
     //if we're still unable to create a socket, stop creating anything
     if(self.socketRef == NULL) {
         [self deallocWithError:error code:GameServerNoSocketsAvailable];
+        NSLog(@"Server not started no socket available");
     }
     
     int yes = 1;
@@ -64,7 +67,7 @@
     return YES;
 }
 
-- (BOOL) setupIP6:(NSError **)error {
+- (BOOL) setupIP6:(NSError *)error {
     struct sockaddr_in6 address6;
     memset(&address6, 0, sizeof(address6));
     address6.sin6_len = sizeof(address6);
@@ -87,7 +90,7 @@
     return YES;
 }
 
-- (BOOL) setupIP4:(NSError **)error {
+- (BOOL) setupIP4:(NSError *)error {
     struct sockaddr_in address4;
     memset(&address4, 0, sizeof(address4));
     address4.sin_len = sizeof(address4);
@@ -106,12 +109,15 @@
     memcpy(&address4, [addr bytes], [addr length]);
     self.port = ntohs(address4.sin_port);
     
+    NSLog(@"Address: %d", address4.sin_addr.s_addr);
+    NSLog(@"Port: %d", self.port);
+    
     return YES;
 }
 
-- (void) deallocWithError:(NSError **)error code:(GameServerErrorCode)code {
+- (void) deallocWithError:(NSError *)error code:(GameServerErrorCode)code {
     if(error) {
-        *error = [[NSError alloc] initWithDomain:GameServerErrorDomain code:code userInfo:nil];
+        error = [[NSError alloc] initWithDomain:GameServerErrorDomain code:code userInfo:nil];
         if(self.socketRef) {
             CFRelease(self.socketRef);
             self.socketRef = NULL;
@@ -119,14 +125,50 @@
     }
 }
 
-- (CFSocketRef) createSocket:(uint32_t) protocolType socketCtx:(CFSocketContext*)socketCtx {
-    CFSocketRef ref = CFSocketCreate(kCFAllocatorDefault, protocolType, SOCK_STREAM, IPPROTO_TCP, kCFSocketAcceptCallBack, (CFSocketCallBack)&gameServerCallBackFunc, socketCtx);
+- (CFSocketRef) createSocket:(uint32_t) protocolType socketCtx:(CFSocketContext)socketCtx {
+    CFSocketRef ref = CFSocketCreate(kCFAllocatorDefault, protocolType, SOCK_STREAM, IPPROTO_TCP, kCFSocketAcceptCallBack, gameServerCallBackFunc, &socketCtx);
     
     return ref;
 }
 
+- (void)handleIncomingSocket:(NSData *)addr inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr {
+    NSLog(@"handling incoming sockets");
+//    (GameServer *)server inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr
+    [self.delegate acceptConnection:self inputStream:istr outputStream:ostr];
+}
+
 static void gameServerCallBackFunc(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address, const void *data, void *info) {
+    NSLog(@"CONNECTION ESTABLISHED");
     
+    GameServer *server = (__bridge GameServer *)info;
+    
+    if (kCFSocketAcceptCallBack == type) {
+        CFSocketNativeHandle nativeSocketHandle = *(CFSocketNativeHandle *)data;
+        uint8_t name[SOCK_MAXADDRLEN];
+        socklen_t namelen = sizeof(name);
+        NSData *peer = nil;
+        if (0 == getpeername(nativeSocketHandle, (struct sockaddr *)name, &namelen)) {
+            peer = [NSData dataWithBytes:name length:namelen];
+        }
+
+        CFReadStreamRef readStream = NULL;
+		CFWriteStreamRef writeStream = NULL;
+        CFStreamCreatePairWithSocket(kCFAllocatorDefault, nativeSocketHandle, &readStream, &writeStream);
+        if (readStream && writeStream) {
+            NSLog(@"here");
+            CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+            CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+            
+            [server handleIncomingSocket:peer inputStream:(__bridge NSInputStream *)readStream outputStream:(__bridge NSOutputStream *)writeStream];
+            NSLog(@"hmmmm");
+        } else {
+            NSLog(@"here2");
+            close(nativeSocketHandle);
+        }
+        if (readStream) CFRelease(readStream);
+        if (writeStream) CFRelease(writeStream);
+    }
+
 }
 
 - (BOOL) stopServer {

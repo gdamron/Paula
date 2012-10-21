@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GameServer.h"
 
 @interface KevinViewController : UIViewController
 
 @property (strong, nonatomic) UIButton *backButton;
+@property (nonatomic) GameServer *server;
 
 @end

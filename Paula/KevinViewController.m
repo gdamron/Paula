@@ -7,14 +7,20 @@
 //
 
 #import "KevinViewController.h"
+#import "GameServer.h"
+#import "SocketDelegate.h"
 
 @interface KevinViewController ()
-
+@property (nonatomic) NSError *error;
+@property (strong) SocketDelegate *socketDelegate;
 @end
 
 @implementation KevinViewController
 
 @synthesize backButton;
+@synthesize error;
+@synthesize server;
+@synthesize socketDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -22,6 +28,14 @@
     if (self) {
         backButton = [self addBackButton];
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+        
+//        server = [GameServer alloc];
+//        socketDelegate = [[SocketDelegate alloc] init];
+//        [server setDelegate:socketDelegate];
+//        
+//        BOOL result = [server startServer:error];
+//        
+//        NSLog(@"Server Started : %d", result);
     }
     return self;
 }
