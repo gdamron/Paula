@@ -7,6 +7,8 @@
 //
 
 #import "GrantViewController.h"
+#import "GameServer.h"
+#import "SocketDelegate.h"
 
 @interface GrantViewController () {
     NSArray *scale;
@@ -26,6 +28,8 @@
 @synthesize sineButton7;
 @synthesize sineButton8;
 @synthesize tone;
+
+@synthesize server, error, socketDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -93,6 +97,44 @@
 
 - (void) backButtonPressed {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void) playNote:(NSInteger)num {
+    int s = 1;
+    switch (num) {
+        case 1: {
+            [tone noteOn:220 withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 2: {
+            [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 3: {
+            [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 4: {
+            [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 5: {
+            [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 6: {
+            [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 7: {
+            [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+        case 8: {
+            [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
+            break;
+        }
+    }
 }
 
 - (void) noteOn:(id)sender {
