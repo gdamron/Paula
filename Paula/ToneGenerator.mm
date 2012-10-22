@@ -13,19 +13,29 @@
 #define FRAMESIZE 128
 #define NUMCHANNELS 2
 
+// blech, global variables! but I can't figure out another way to pass
+// data between objective-c and the C++ callbacks
 bool g_on = false;
 double frequency = 0.0;
 double gain = 0.0;
 int sound_type = 0;
+
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void sineCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void squareCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
+@interface ToneGenerator() {
+    NSMutableArray *freqs;
+}
+
+@end
+
 @implementation ToneGenerator
 
 - (id)init {
     if (self = [super init]) {
+        freqs = [[NSMutableArray alloc] init];
         NSLog(@"Starting real time audio...");
         if (!(MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS))) {
             NSLog(@"Cannot initialize real time audio. Exiting.");
@@ -41,19 +51,24 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s{
-    g_on = YES;
+    [freqs addObject:[NSNumber numberWithDouble:freq]];
     frequency = freq;
     gain = g;
     sound_type = s;
+    g_on = YES;
+    
     NSLog(@"Note on: %f", frequency);
 }
 
-- (void)noteOff {
-    g_on = NO;
-    NSLog(@"Note off");
+- (void)noteOff:(double) freq {
+    [freqs removeObject:[NSNumber numberWithDouble:freq]];
+    if (freqs.count>0) {
+        frequency = [[freqs lastObject] doubleValue];
+    } else {
+        g_on = NO;
+        NSLog(@"Note off");
+    }
 }
-
-@end
 
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
@@ -108,3 +123,5 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
         if (phase > 1.0f) phase -= 1.0f;
     }
 }
+
+@end

@@ -49,7 +49,6 @@
         UIImage *logo = [UIImage imageNamed:@"logo.gif"];
         UIImageView *logoView = [[UIImageView alloc] initWithImage:logo];
         logoView.frame = CGRectMake(width/2-86, height/2-135, 172, 49);
-        
         [self.view addSubview:logoView];
         
     }

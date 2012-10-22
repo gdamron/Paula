@@ -11,6 +11,6 @@
 @interface ToneGenerator : NSObject
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
-- (void)noteOff;
+- (void)noteOff:(double)freq;
 
 @end
