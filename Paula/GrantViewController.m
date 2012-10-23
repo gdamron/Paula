@@ -14,6 +14,9 @@
     NSArray *scale;
 }
 
+@property (nonatomic) GameServer *server;
+@property (nonatomic) NSError *error;
+@property (strong) SocketDelegate *socketDelegate;
 @end
 
 @implementation GrantViewController
@@ -78,7 +81,16 @@
         [sineButton7 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
         [sineButton7 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
         [sineButton8 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton8 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
+        [sineButton8 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
+        
+        server = [GameServer alloc];
+        socketDelegate = [[SocketDelegate alloc] init];
+        [server setDelegate:socketDelegate];
+        [socketDelegate setController:self];
+        
+        BOOL result = [server startServer:error];
+        
+        NSLog(@"Server Started : %d", result);
     }
     return self;
 }
@@ -196,6 +208,10 @@
         sineButton8.alpha = 0.8;
     }
     [tone noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
+}
+
+- (void)noteOff {
+    [tone noteOff];
 }
 
 - (UIButton *) addBackButton {

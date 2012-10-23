@@ -70,6 +70,10 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
     }
 }
 
+- (void)noteOff {
+    g_on = NO;
+}
+
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
     if (!g_on) {
