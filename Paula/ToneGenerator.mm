@@ -13,13 +13,10 @@
 #define FRAMESIZE 128
 #define NUMCHANNELS 2
 
-// blech, global variables! but I can't figure out another way to pass
-// data between objective-c and the C++ callbacks
 bool g_on = false;
 double frequency = 0.0;
 double gain = 0.0;
 int sound_type = 0;
-
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void sineCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void squareCallback(Float32 *buffer, UInt32 framesize, void *userData);
@@ -72,7 +69,10 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (void)noteOff {
     g_on = NO;
+    NSLog(@"Note off");
 }
+
+@end
 
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
@@ -127,5 +127,3 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
         if (phase > 1.0f) phase -= 1.0f;
     }
 }
-
-@end

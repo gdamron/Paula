@@ -38,7 +38,7 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.view.multipleTouchEnabled = YES;
+        
         self.view.backgroundColor = [UIColor blackColor];
         scale = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:0],
                  [NSNumber numberWithInt:2],
@@ -51,9 +51,7 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
-        
         tone = [[ToneGenerator alloc] init];
-        // create a grid of tiles
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
         sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
@@ -63,25 +61,6 @@
         sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
         sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
         backButton = [self addBackButton];
-        // add target to back button to reactivate main view
-        [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-        // noteOn and noteOff targets to all 8 tiles
-        [sineButton1 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton1 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton2 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton2 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton3 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton3 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton4 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton4 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton5 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton5 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton6 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton6 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton7 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton7 addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
-        [sineButton8 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton8 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside];
         
         server = [GameServer alloc];
         socketDelegate = [[SocketDelegate alloc] init];
@@ -223,6 +202,7 @@
     back.frame = CGRectMake(16, height-32, 32, 16);
     [back setTitle:@"<<" forState:UIControlStateNormal];
     [self.view addSubview:back];
+    [back addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     return back;
 }
 
@@ -230,12 +210,13 @@
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:0.8];
-    sender.alpha = 0.8;
+    sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
     [sender setTitle:nil forState:UIControlStateNormal];
     [self.view addSubview:sender];
+    [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
+    [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
     return sender;
 }
 
