@@ -22,10 +22,17 @@ void sineCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void squareCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
+@interface ToneGenerator() {
+    NSMutableArray *freqs;
+}
+
+@end
+
 @implementation ToneGenerator
 
 - (id)init {
     if (self = [super init]) {
+        freqs = [[NSMutableArray alloc] init];
         NSLog(@"Starting real time audio...");
         if (!(MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS))) {
             NSLog(@"Cannot initialize real time audio. Exiting.");
@@ -41,11 +48,23 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s{
-    g_on = YES;
+    [freqs addObject:[NSNumber numberWithDouble:freq]];
     frequency = freq;
     gain = g;
     sound_type = s;
+    g_on = YES;
+    
     NSLog(@"Note on: %f", frequency);
+}
+
+- (void)noteOff:(double) freq {
+    [freqs removeObject:[NSNumber numberWithDouble:freq]];
+    if (freqs.count>0) {
+        frequency = [[freqs lastObject] doubleValue];
+    } else {
+        g_on = NO;
+        NSLog(@"Note off");
+    }
 }
 
 - (void)noteOff {

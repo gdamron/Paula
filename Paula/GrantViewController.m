@@ -10,7 +10,10 @@
 #import "GameServer.h"
 #import "SocketDelegate.h"
 
-@interface GrantViewController ()
+@interface GrantViewController () {
+    NSArray *scale;
+}
+
 @property (nonatomic) GameServer *server;
 @property (nonatomic) NSError *error;
 @property (strong) SocketDelegate *socketDelegate;
@@ -42,6 +45,14 @@
     if (self) {
         
         self.view.backgroundColor = [UIColor blackColor];
+        scale = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:0],
+                 [NSNumber numberWithInt:2],
+                 [NSNumber numberWithInt:5],
+                 [NSNumber numberWithInt:7],
+                 [NSNumber numberWithInt:8],
+                 [NSNumber numberWithInt:9],
+                 [NSNumber numberWithInt:12],
+                 [NSNumber numberWithInt:14], nil];
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
@@ -54,23 +65,6 @@
         sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
         sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
         backButton = [self addBackButton];
-        [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton1 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton1 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton2 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton2 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton3 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton3 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton4 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton4 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton5 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton5 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton6 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton6 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton7 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton7 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
-        [sineButton8 addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown];
-        [sineButton8 addTarget:self action:@selector(noteOff) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
 }
@@ -149,6 +143,7 @@
 
 - (void) noteOn:(id)sender {
     int s = 1;
+    int index = 0;
     if (sender==sineButton1) {
         [tone noteOn:220 withGain:1.0 andSoundType:s];
         [self.socketDelegate send:'1'];
@@ -181,6 +176,37 @@
         [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
         [self.socketDelegate send:'8'];
     }
+    [tone noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
+}
+
+- (void)noteOff:(id)sender {
+    int index = 0;
+    if (sender==sineButton1) {
+        index = 0;
+        sineButton1.alpha = 0.8;
+    } else if (sender==sineButton2) {
+        index = 1;
+        sineButton2.alpha = 0.8;
+    } else if (sender==sineButton3) {
+        index = 2;
+        sineButton3.alpha = 0.8;
+    } else if (sender==sineButton4) {
+        index = 3;
+        sineButton4.alpha = 0.8;
+    } else if (sender==sineButton5) {
+        index = 4;
+        sineButton5.alpha = 0.8;
+    } else if (sender==sineButton6) {
+        index = 5;
+        sineButton6.alpha = 0.8;
+    } else if (sender==sineButton7) {
+        index = 6;
+        sineButton7.alpha = 0.8;
+    } else if (sender==sineButton8) {
+        index = 7;
+        sineButton8.alpha = 0.8;
+    }
+    [tone noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
 }
 
 - (void) playNoteOff {
@@ -201,6 +227,7 @@
     back.frame = CGRectMake(16, height-32, 32, 16);
     [back setTitle:@"<<" forState:UIControlStateNormal];
     [self.view addSubview:back];
+    [back addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     return back;
 }
 
@@ -213,6 +240,8 @@
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
     [sender setTitle:nil forState:UIControlStateNormal];
     [self.view addSubview:sender];
+    [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
+    [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
     return sender;
 }
 
