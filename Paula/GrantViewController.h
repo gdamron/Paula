@@ -27,4 +27,6 @@
 - (void) playMelody;
 - (void) noteOff;
 
+- (void) setToneGen:(ToneGenerator *)tone;
+
 @end

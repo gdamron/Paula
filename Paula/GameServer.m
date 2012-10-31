@@ -202,6 +202,8 @@ static void gameServerCallBackFunc(CFSocketRef socket, CFSocketCallBackType type
     [self.netService publish];
     [self.netService setDelegate:self];
     
+    NSLog(@"bonjour initialized");
+    
     return YES;
 }
 
@@ -211,6 +213,14 @@ static void gameServerCallBackFunc(CFSocketRef socket, CFSocketCallBackType type
         [self.netService removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         self.netService = nil;
     }
+}
+
+- (void) netServiceDidPublish:(NSNetService *)sender {
+    NSLog(@"Bonjour service did published...%@", sender.name);
+}
+
+- (void)netService:(NSNetService *)sender didNotPublish:(NSDictionary *)errorDict {
+    NSLog(@"Bonjour service did not publish...%@", sender.name);
 }
 
 @end

@@ -11,7 +11,9 @@
 @protocol GameServerDelegate <NSObject>
 @optional
 - (void) acceptConnection:(GameServer*)server inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr;
-- (void) test;
+- (void) openStream;
+- (void) closeStream;
+- (void) didResolveInstance:(NSNetService *)netService;
 @end
 
 #import <Foundation/Foundation.h>

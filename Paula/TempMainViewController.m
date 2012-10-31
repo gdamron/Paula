@@ -9,7 +9,7 @@
 #import "TempMainViewController.h"
 
 @interface TempMainViewController ()
-
+@property (strong) ToneGenerator *tone;
 @end
 
 
@@ -30,6 +30,9 @@
     if (self) {
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
+        
+        uint8_t w = '0';
+        NSLog(@"code point = %d", w);
         
         [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
         enyuViewController = [[EnyuViewController alloc] init];
@@ -77,6 +80,8 @@
         grantViewController = [[GrantViewController alloc] init];
         [self presentViewController:grantViewController animated:YES completion:nil];
     } else if (sender==toKevin) {
+        kevinViewController = [[KevinViewController alloc] init];
+        [kevinViewController setToneGen:self.tone];
         [self presentViewController:kevinViewController animated:YES completion:nil];
     }
 }

@@ -21,6 +21,7 @@
 @property (nonatomic) GameServer *server;
 @property (nonatomic) NSError *error;
 @property (strong) SocketDelegate *socketDelegate;
+@property (strong) NSNetServiceBrowser *browser;
 @end
 
 @implementation GrantViewController
@@ -37,6 +38,10 @@
 @synthesize toneGen;
 
 @synthesize server, error, socketDelegate;
+
+- (void) setToneGen:(ToneGenerator *)tone {
+    self.tone = tone;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -85,6 +90,24 @@
     [super viewDidLoad];
     //[self playMelody];
 	// Do any additional setup after loading the view.
+
+    self.server = [GameServer alloc];
+    self.socketDelegate = [[SocketDelegate alloc] init];
+    [self.server setDelegate:socketDelegate];
+    [self.socketDelegate setGController:self];
+    
+    BOOL result = [server startServer:error];
+    
+    NSString *test = [NSString stringWithFormat:@"_%@._tcp.", @"Paula"];
+    
+    if(result) {
+        NSLog(@"init bonjour with %@", test);
+        if(![server enableBonjour:@"local" appProtocol:test name:nil]) {
+            NSLog(@"bonjour failed");
+        }
+    }
+    
+    NSLog(@"Server Started : %d", result);
 }
 
 - (void)didReceiveMemoryWarning
@@ -126,29 +149,36 @@
     int s = 1;
     int index = 0;
     if (sender==sineButton1) {
-        index = 0;
-        sineButton1.alpha = 1.0;
-    } else if (sender==sineButton2) {
-        index = 1;
-        sineButton2.alpha = 1.0;
-    } else if (sender==sineButton3) {
-        index = 2;
-        sineButton3.alpha = 1.0;
-    } else if (sender==sineButton4) {
-        index = 3;
-        sineButton4.alpha = 1.0;
-    } else if (sender==sineButton5) {
-        index = 4;
-        sineButton5.alpha = 1.0;
-    } else if (sender==sineButton6) {
-        index = 5;
-        sineButton6.alpha = 1.0;
-    } else if (sender==sineButton7) {
-        index = 6;
-        sineButton7.alpha = 1.0;
-    } else if (sender==sineButton8) {
-        index = 7;
-        sineButton8.alpha = 1.0;
+        [tone noteOn:220 withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'1'];
+    }
+    if (sender==sineButton2) {
+        [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'2'];
+    }
+    if (sender==sineButton3) {
+        [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'3'];
+    }
+    if (sender==sineButton4) {
+        [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'4'];
+    }
+    if (sender==sineButton5) {
+        [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'5'];
+    }
+    if (sender==sineButton6) {
+        [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'6'];
+    }
+    if (sender==sineButton7) {
+        [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'7'];
+    }
+    if (sender==sineButton8) {
+        [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
+        [self.socketDelegate send:'8'];
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
@@ -202,6 +232,10 @@
         sineButton8.alpha = OFFALPHA;
     }
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
+}
+
+- (void) playNoteOff {
+    [tone noteOff];
 }
 
 - (void)noteOff {
