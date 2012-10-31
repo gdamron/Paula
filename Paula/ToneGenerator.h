@@ -17,7 +17,7 @@
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
 - (void)noteOff:(double)freq;
 - (void)noteOff;
-- (void)start;
+//- (void)start;
 - (void)stop;
 
 @end

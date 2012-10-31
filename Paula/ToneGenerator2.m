@@ -217,7 +217,7 @@ void MyInterruptionListener (void *inUserData, UInt32 inInterruptionState) {
 }
 
 - (void)stop {
-    CheckError(AudioQueueStop(audioQueue, YES), "Couldn't start the AudioQueue");
+    CheckError(AudioQueueStop(audioQueue, NO), "Couldn't stop the AudioQueue");
 }
 
 @end

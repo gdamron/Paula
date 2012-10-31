@@ -40,7 +40,7 @@
 @synthesize server, error, socketDelegate;
 
 - (void) setToneGen:(ToneGenerator *)tone {
-    self.tone = tone;
+    self.toneGen = tone;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -61,7 +61,7 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
-        toneGen = [[ToneGenerator2 alloc] init];
+        toneGen = [[ToneGenerator alloc] init];
         
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
@@ -72,15 +72,8 @@
         sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
         sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
         backButton = [self addBackButton];
+        //[toneGen start];
         
-        server = [GameServer alloc];
-        socketDelegate = [[SocketDelegate alloc] init];
-        [server setDelegate:socketDelegate];
-        [socketDelegate setController:self];
-        
-        BOOL result = [server startServer:error];
-        [toneGen start];
-        NSLog(@"Server Started : %d", result);
     }
     return self;
 }
@@ -88,7 +81,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    //[self playMelody];
+    
 	// Do any additional setup after loading the view.
 
     self.server = [GameServer alloc];
@@ -117,13 +110,13 @@
 }
 
 - (void) backButtonPressed {
-    [self dismissViewControllerAnimated:YES completion:nil];
     //[toneGen stop];
     melIndex = 0;
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 
-- (void) noteOnWithNumber:(NSInteger)num {
+- (void) playNote:(NSInteger)num {
     int s = 1;
     if (num==1) {
         sineButton1.alpha = 1.0;
@@ -149,35 +142,43 @@
     int s = 1;
     int index = 0;
     if (sender==sineButton1) {
-        [tone noteOn:220 withGain:1.0 andSoundType:s];
+        index = 0;
+        sineButton1.alpha = 1.0;
         [self.socketDelegate send:'1'];
     }
     if (sender==sineButton2) {
-        [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
+        index = 1;
+        sineButton2.alpha = 1.0;
         [self.socketDelegate send:'2'];
     }
     if (sender==sineButton3) {
-        [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
+        index = 2;
+        sineButton3.alpha = 1.0;
         [self.socketDelegate send:'3'];
     }
     if (sender==sineButton4) {
-        [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
+        index = 3;
+        sineButton4.alpha = 1.0;
         [self.socketDelegate send:'4'];
     }
     if (sender==sineButton5) {
-        [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
+        index = 4;
+        sineButton5.alpha = 1.0;
         [self.socketDelegate send:'5'];
     }
     if (sender==sineButton6) {
-        [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
+        index = 5;
+        sineButton6.alpha = 1.0;
         [self.socketDelegate send:'6'];
     }
     if (sender==sineButton7) {
-        [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
+        index = 6;
+        sineButton7.alpha = 1.0;
         [self.socketDelegate send:'7'];
     }
     if (sender==sineButton8) {
-        [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
+        index = 7;
+        sineButton8.alpha = 1.0;
         [self.socketDelegate send:'8'];
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
@@ -213,33 +214,13 @@
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
 }
 
-- (void)noteOffWithNumber:(NSInteger)num {
-    if (num==1) {
-        sineButton1.alpha = OFFALPHA;
-    } else if (num==2) {
-        sineButton2.alpha = OFFALPHA;
-    } else if (num==3) {
-        sineButton3.alpha = OFFALPHA;
-    } else if (num==4) {
-        sineButton4.alpha = OFFALPHA;
-    } else if (num==5) {
-        sineButton5.alpha = OFFALPHA;
-    } else if (num==6) {
-        sineButton6.alpha = OFFALPHA;
-    } else if (num==7) {
-        sineButton7.alpha = OFFALPHA;
-    } else if (num==8) {
-        sineButton8.alpha = OFFALPHA;
-    }
-    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
-}
-
-- (void) playNoteOff {
-    [tone noteOff];
+- (void)playNoteOff {
+    [toneGen noteOff];
 }
 
 - (void)noteOff {
     [toneGen noteOff];
+    [self.socketDelegate send:'0'];
 }
 
 - (UIButton *) addBackButton {
@@ -266,11 +247,12 @@
     [self.view addSubview:sender];
     [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
     [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
+    sender.alpha = OFFALPHA;
     return sender;
 }
 
 
-- (void) playMelody {
+/*- (void) playMelody {
     NSArray *durs = [[NSArray alloc] initWithObjects:
                      [NSNumber numberWithDouble:0.5],
                      [NSNumber numberWithDouble:0.5],
@@ -331,8 +313,8 @@
                          [NSNumber numberWithInt:8],
                          nil];
     NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
-    [self noteOffWithNumber:i];
-}
+    [self playNoteOff];
+}*/
 
 
 

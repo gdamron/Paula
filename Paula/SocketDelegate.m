@@ -149,7 +149,13 @@
                                 [self.kevinController playNoteOff];
                             }
                         } else {
-                            [self.grantController noteOnWithNumber:note];
+                            if(self.grantController != nil) {
+                                NSLog(@"calling grant");
+                                [self.grantController playNote:note];
+                            } else if (self.kevinController != nil) {
+                                NSLog(@"calling kevin");
+                                [self.kevinController playNote:note];
+                            }
                         }
                     } else {
                         [self.data setLength:0];

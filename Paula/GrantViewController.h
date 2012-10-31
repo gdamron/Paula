@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ToneGenerator2.h"
+#import "ToneGenerator.h"
+//#import "ToneGenerator2.h"
 
 @interface GrantViewController : UIViewController
 
@@ -20,13 +21,11 @@
 @property (strong, nonatomic) UIButton *sineButton6;
 @property (strong, nonatomic) UIButton *sineButton7;
 @property (strong, nonatomic) UIButton *sineButton8;
-@property (strong, nonatomic) ToneGenerator2 *toneGen;
+@property (strong, nonatomic) ToneGenerator *toneGen;
 
-- (void) noteOnWithNumber:(NSInteger)num;
-- (void) noteOffWithNumber:(NSInteger)num;
-- (void) playMelody;
+- (void) playNote:(NSInteger)num;
+- (void) playNoteOff;
 - (void) noteOff;
-
 - (void) setToneGen:(ToneGenerator *)tone;
 
 @end
