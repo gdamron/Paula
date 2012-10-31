@@ -9,7 +9,7 @@
 #import "TempMainViewController.h"
 
 @interface TempMainViewController ()
-
+@property (strong) ToneGenerator *tone;
 @end
 
 
@@ -31,11 +31,18 @@
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
+        uint8_t w = '0';
+        NSLog(@"code point = %d", w);
+        
         [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
-        enyuViewController = [[EnyuViewController alloc] init];
-        eugeneViewController = [[EugeneViewController alloc] init];
-        grantViewController = [[GrantViewController alloc] init];
-        kevinViewController = [[KevinViewController alloc] init];
+        
+        self.tone = [[ToneGenerator alloc] init];
+        
+//        enyuViewController = [[EnyuViewController alloc] init];
+//        eugeneViewController = [[EugeneViewController alloc] init];
+//        grantViewController = [[GrantViewController alloc] init];
+//        [grantViewController setToneGen:self.tone];
+//        kevinViewController = [[KevinViewController alloc] init];
         
         toEnyu = [self setupButton:toEnyu OnScreenWithX:-86 YOffset:-72 AndName:[NSString stringWithFormat:@"Enyu"]];
         [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
@@ -74,8 +81,12 @@
     } else if (sender==toEugene) {
         [self presentViewController:eugeneViewController animated:YES completion:nil];
     } else if (sender==toGrant) {
+        grantViewController = [[GrantViewController alloc] init];
+        [grantViewController setToneGen:self.tone];
         [self presentViewController:grantViewController animated:YES completion:nil];
     } else if (sender==toKevin) {
+        kevinViewController = [[KevinViewController alloc] init];
+        [kevinViewController setToneGen:self.tone];
         [self presentViewController:kevinViewController animated:YES completion:nil];
     }
 }

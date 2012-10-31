@@ -24,6 +24,10 @@
 
 - (void) playNote:(NSInteger)num;
 
+- (void) playNoteOff;
+
 - (void) noteOff;
+
+- (void) setToneGen:(ToneGenerator *)tone;
 
 @end
