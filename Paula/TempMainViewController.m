@@ -34,7 +34,7 @@
         [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
         enyuViewController = [[EnyuViewController alloc] init];
         eugeneViewController = [[EugeneViewController alloc] init];
-        grantViewController = [[GrantViewController alloc] init];
+        //grantViewController = [[GrantViewController alloc] init];
         kevinViewController = [[KevinViewController alloc] init];
         
         toEnyu = [self setupButton:toEnyu OnScreenWithX:-86 YOffset:-72 AndName:[NSString stringWithFormat:@"Enyu"]];
@@ -74,6 +74,7 @@
     } else if (sender==toEugene) {
         [self presentViewController:eugeneViewController animated:YES completion:nil];
     } else if (sender==toGrant) {
+        grantViewController = [[GrantViewController alloc] init];
         [self presentViewController:grantViewController animated:YES completion:nil];
     } else if (sender==toKevin) {
         [self presentViewController:kevinViewController animated:YES completion:nil];

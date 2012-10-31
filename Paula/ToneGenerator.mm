@@ -12,6 +12,8 @@
 #define SRATE 44100
 #define FRAMESIZE 128
 #define NUMCHANNELS 2
+#define BUFFER_COUNT    3
+#define BUFFER_DURATION 0.5
 
 bool g_on = false;
 double frequency = 0.0;
@@ -22,6 +24,7 @@ void sineCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void squareCallback(Float32 *buffer, UInt32 framesize, void *userData);
 void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
+
 @interface ToneGenerator() {
     NSMutableArray *freqs;
 }
@@ -29,6 +32,10 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 @end
 
 @implementation ToneGenerator
+
+@synthesize isOn;
+@synthesize globalGain;
+@synthesize waveForm;
 
 - (id)init {
     if (self = [super init]) {
@@ -70,6 +77,12 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 - (void)noteOff {
     g_on = NO;
     NSLog(@"Note off");
+}
+
+
+- (void) stop {
+    //MoAudio::stop();
+    MoAudio::shutdown();
 }
 
 @end
@@ -127,3 +140,13 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
         if (phase > 1.0f) phase -= 1.0f;
     }
 }
+
+/*@implementation Tone
+
+@synthesize frequency;
+@synthesize phase;
+@synthesize j;
+@synthesize cycleLength;
+@synthesize sample;
+
+@end*/

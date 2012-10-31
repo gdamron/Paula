@@ -93,7 +93,7 @@
                         if(note == 0) {
                             [self.grantController noteOff];
                         } else {
-                            [self.grantController playNote:note];
+                            [self.grantController noteOnWithNumber:note];
                         }
                     } else {
                         [self.data setLength:0];

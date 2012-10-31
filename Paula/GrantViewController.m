@@ -10,8 +10,12 @@
 #import "GameServer.h"
 #import "SocketDelegate.h"
 
+#define OFFALPHA 0.5;
+
 @interface GrantViewController () {
     NSArray *scale;
+    int melIndex;
+    double totalDur;
 }
 
 @property (nonatomic) GameServer *server;
@@ -30,7 +34,7 @@
 @synthesize sineButton6;
 @synthesize sineButton7;
 @synthesize sineButton8;
-@synthesize tone;
+@synthesize toneGen;
 
 @synthesize server, error, socketDelegate;
 
@@ -38,7 +42,8 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        
+        melIndex = 0;
+        totalDur = 0.0;
         self.view.backgroundColor = [UIColor blackColor];
         scale = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:0],
                  [NSNumber numberWithInt:2],
@@ -51,7 +56,8 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
-        tone = [[ToneGenerator alloc] init];
+        toneGen = [[ToneGenerator2 alloc] init];
+        
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
         sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
@@ -68,7 +74,7 @@
         [socketDelegate setController:self];
         
         BOOL result = [server startServer:error];
-        
+        [toneGen start];
         NSLog(@"Server Started : %d", result);
     }
     return self;
@@ -77,6 +83,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    //[self playMelody];
 	// Do any additional setup after loading the view.
 }
 
@@ -88,44 +95,31 @@
 
 - (void) backButtonPressed {
     [self dismissViewControllerAnimated:YES completion:nil];
+    //[toneGen stop];
+    melIndex = 0;
 }
 
-- (void) playNote:(NSInteger)num {
+
+- (void) noteOnWithNumber:(NSInteger)num {
     int s = 1;
-    switch (num) {
-        case 1: {
-            [tone noteOn:220 withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 2: {
-            [tone noteOn:220*(pow (2, (2.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 3: {
-            [tone noteOn:220*(pow (2, (5.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 4: {
-            [tone noteOn:220*(pow (2, (7.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 5: {
-            [tone noteOn:220*(pow (2, (8.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 6: {
-            [tone noteOn:220*(pow (2, (9.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 7: {
-            [tone noteOn:220*(pow (2, (12.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
-        case 8: {
-            [tone noteOn:220*(pow (2, (14.0/12))) withGain:1.0 andSoundType:s];
-            break;
-        }
+    if (num==1) {
+        sineButton1.alpha = 1.0;
+    } else if (num==2) {
+        sineButton2.alpha = 1.0;
+    } else if (num==3) {
+        sineButton3.alpha = 1.0;
+    } else if (num==4) {
+        sineButton4.alpha = 1.0;
+    } else if (num==5) {
+        sineButton5.alpha = 1.0;
+    } else if (num==6) {
+        sineButton6.alpha = 1.0;
+    } else if (num==7) {
+        sineButton7.alpha = 1.0;
+    } else if (num==8) {
+        sineButton8.alpha = 1.0;
     }
+    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
 - (void) noteOn:(id)sender {
@@ -156,41 +150,62 @@
         index = 7;
         sineButton8.alpha = 1.0;
     }
-    [tone noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
+    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
 - (void)noteOff:(id)sender {
     int index = 0;
     if (sender==sineButton1) {
         index = 0;
-        sineButton1.alpha = 0.8;
+        sineButton1.alpha = OFFALPHA;
     } else if (sender==sineButton2) {
         index = 1;
-        sineButton2.alpha = 0.8;
+        sineButton2.alpha = OFFALPHA;
     } else if (sender==sineButton3) {
         index = 2;
-        sineButton3.alpha = 0.8;
+        sineButton3.alpha = OFFALPHA;
     } else if (sender==sineButton4) {
         index = 3;
-        sineButton4.alpha = 0.8;
+        sineButton4.alpha = OFFALPHA;
     } else if (sender==sineButton5) {
         index = 4;
-        sineButton5.alpha = 0.8;
+        sineButton5.alpha = OFFALPHA;
     } else if (sender==sineButton6) {
         index = 5;
-        sineButton6.alpha = 0.8;
+        sineButton6.alpha = OFFALPHA;
     } else if (sender==sineButton7) {
         index = 6;
-        sineButton7.alpha = 0.8;
+        sineButton7.alpha = OFFALPHA;
     } else if (sender==sineButton8) {
         index = 7;
-        sineButton8.alpha = 0.8;
+        sineButton8.alpha = OFFALPHA;
     }
-    [tone noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
+    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
+}
+
+- (void)noteOffWithNumber:(NSInteger)num {
+    if (num==1) {
+        sineButton1.alpha = OFFALPHA;
+    } else if (num==2) {
+        sineButton2.alpha = OFFALPHA;
+    } else if (num==3) {
+        sineButton3.alpha = OFFALPHA;
+    } else if (num==4) {
+        sineButton4.alpha = OFFALPHA;
+    } else if (num==5) {
+        sineButton5.alpha = OFFALPHA;
+    } else if (num==6) {
+        sineButton6.alpha = OFFALPHA;
+    } else if (num==7) {
+        sineButton7.alpha = OFFALPHA;
+    } else if (num==8) {
+        sineButton8.alpha = OFFALPHA;
+    }
+    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
 }
 
 - (void)noteOff {
-    [tone noteOff];
+    [toneGen noteOff];
 }
 
 - (UIButton *) addBackButton {
@@ -218,6 +233,71 @@
     [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
     [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
     return sender;
+}
+
+
+- (void) playMelody {
+    NSArray *durs = [[NSArray alloc] initWithObjects:
+                     [NSNumber numberWithDouble:0.5],
+                     [NSNumber numberWithDouble:0.5],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:0.5],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:0.5],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:0.5],
+                     [NSNumber numberWithDouble:0.25],
+                     [NSNumber numberWithDouble:1.0],
+                     nil];
+    
+    for (int i = 0; i < durs.count; i++) {
+        double dur = (60.0/80.0) * [[durs objectAtIndex:i] doubleValue];
+        [NSTimer scheduledTimerWithTimeInterval:totalDur target:self selector:@selector(melNoteOn:) userInfo:nil repeats:NO];
+        totalDur += dur;
+        [NSTimer scheduledTimerWithTimeInterval:totalDur target:self selector:@selector(melNoteOff:) userInfo:nil repeats:NO];
+    }
+    melIndex = 0;
+}
+
+- (void)melNoteOn:(NSTimer *)theTimer {
+    NSArray *melNotes = [[NSArray alloc] initWithObjects:
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:1],
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:3],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:5],
+                         [NSNumber numberWithInt:6],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         nil];
+    NSInteger i = [[melNotes objectAtIndex:melIndex] integerValue];
+    [self noteOnWithNumber:i];
+   
+}
+
+- (void)melNoteOff:(NSTimer *)theTimer {
+    NSArray *melNotes = [[NSArray alloc] initWithObjects:
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:1],
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:3],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:5],
+                         [NSNumber numberWithInt:6],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         nil];
+    NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
+    [self noteOffWithNumber:i];
 }
 
 
