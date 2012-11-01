@@ -85,7 +85,7 @@
     if(serviceBrowser) {
         
         self.socketDelegate = [[SocketDelegate alloc] init];
-        [self.socketDelegate setKController:self];
+        //[self.socketDelegate setKController:self];
         
         NSLog(@"net service browser initialized");
         serviceBrowser.delegate = self;

@@ -17,7 +17,6 @@
 @property (strong, nonatomic) NSNetService *currentResolve;
 
 @property (retain) GrantViewController *grantController;
-@property (retain) KevinViewController *kevinController;
 @end
 
 @implementation SocketDelegate
@@ -29,12 +28,8 @@
     return self;
 }
 
-- (void) setGController:(GrantViewController*) controller {
+- (void) setController:(GrantViewController*) controller {
     self.grantController = controller;
-}
-
-- (void) setKController:(KevinViewController *)controller {
-    self.kevinController = controller;
 }
 
 @end
@@ -144,17 +139,12 @@
                         
                         if(note == 0) {
                             if(self.grantController != nil) {
-                                [self.grantController playNoteOff];
-                            } else if (self.kevinController != nil) {
-                                [self.kevinController playNoteOff];
+                                [self.grantController allNotesOff];
                             }
                         } else {
                             if(self.grantController != nil) {
                                 NSLog(@"calling grant");
-                                [self.grantController playNote:note];
-                            } else if (self.kevinController != nil) {
-                                NSLog(@"calling kevin");
-                                [self.kevinController playNote:note];
+                                [self.grantController noteOnWithNumber:note];
                             }
                         }
                     } else {

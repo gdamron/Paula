@@ -8,9 +8,11 @@
 
 #import "GrantViewController.h"
 #import "GameServer.h"
+#import "GameClient.h"
 #import "SocketDelegate.h"
 
-#define OFFALPHA 0.5;
+#define OFFALPHA 0.5
+#define BUTTONOFFSET 8.0
 
 @interface GrantViewController () {
     NSArray *scale;
@@ -19,9 +21,11 @@
 }
 
 @property (nonatomic) GameServer *server;
-@property (nonatomic) NSError *error;
-@property (strong) SocketDelegate *socketDelegate;
+@property (nonatomic) GameClient *client;
+@property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong) NSNetServiceBrowser *browser;
+@property (nonatomic) NSError *error;
+@property (assign) BOOL isServer;
 @end
 
 @implementation GrantViewController
@@ -36,11 +40,23 @@
 @synthesize sineButton7;
 @synthesize sineButton8;
 @synthesize toneGen;
+@synthesize isServer;
 
-@synthesize server, error, socketDelegate;
+@synthesize server, error;
 
-- (void) setToneGen:(ToneGenerator *)tone {
-    self.toneGen = tone;
+- (id)initWithType:(GameTypeCode)code {
+    if(code == ServerMode) {
+        self = [self initWithNibName:nil bundle:nil];
+        self.server = [[GameServer alloc] initWithController:self];
+        self.socketDelegate = [self.server getSocketDelegate];
+        isServer = YES;
+    } else if (code == ClientMode) {
+        self = [self initWithNibName:nil bundle:nil];
+        self.client = [[GameClient alloc] initWithController:self];
+        self.socketDelegate = [self.client getSocketDelegate];
+        isServer = NO;
+    }
+    return self;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -63,14 +79,14 @@
         CGFloat height = self.view.bounds.size.height;
         toneGen = [[ToneGenerator alloc] init];
         
-        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
-        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
-        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
-        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+8];
-        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+8];
-        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8];
-        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
-        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
+        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:BUTTONOFFSET andNumber:1];
+        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:BUTTONOFFSET andNumber:2];
+        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+BUTTONOFFSET andNumber:3];
+        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+BUTTONOFFSET andNumber:4];
+        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+BUTTONOFFSET andNumber:5];
+        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+BUTTONOFFSET andNumber:6];
+        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+BUTTONOFFSET andNumber:7];
+        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+BUTTONOFFSET andNumber:8];
         backButton = [self addBackButton];
         //[toneGen start];
         
@@ -81,26 +97,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
 	// Do any additional setup after loading the view.
-
-    self.server = [GameServer alloc];
-    self.socketDelegate = [[SocketDelegate alloc] init];
-    [self.server setDelegate:socketDelegate];
-    [self.socketDelegate setGController:self];
-    
-    BOOL result = [server startServer:error];
-    
-    NSString *test = [NSString stringWithFormat:@"_%@._tcp.", @"Paula"];
-    
-    if(result) {
-        NSLog(@"init bonjour with %@", test);
-        if(![server enableBonjour:@"local" appProtocol:test name:nil]) {
-            NSLog(@"bonjour failed");
-        }
-    }
-    
-    NSLog(@"Server Started : %d", result);
 }
 
 - (void)didReceiveMemoryWarning
@@ -116,111 +113,88 @@
 }
 
 
-- (void) playNote:(NSInteger)num {
+- (void) noteOnWithNumber:(NSInteger)num {
     int s = 1;
+    
     if (num==1) {
         sineButton1.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'1'];
     } else if (num==2) {
         sineButton2.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'2'];
     } else if (num==3) {
         sineButton3.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'3'];
     } else if (num==4) {
         sineButton4.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'4'];
     } else if (num==5) {
         sineButton5.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'5'];
     } else if (num==6) {
         sineButton6.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'6'];
     } else if (num==7) {
         sineButton7.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'7'];
     } else if (num==8) {
         sineButton8.alpha = 1.0;
+        if (isServer) [self.socketDelegate send:'8'];
+        
     }
+    
+    /*if (isServer) {
+        unsigned char socketChar = (unsigned char) num;
+        [self.socketDelegate send:socketChar];
+    }*/
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
-- (void) noteOn:(id)sender {
-    int s = 1;
-    int index = 0;
-    if (sender==sineButton1) {
-        index = 0;
-        sineButton1.alpha = 1.0;
-        [self.socketDelegate send:'1'];
+- (void) noteOffWithNumber:(NSInteger)num {
+    
+    if (num==1) {
+        sineButton1.alpha = OFFALPHA;
+    } else if (num==2) {
+        sineButton2.alpha = OFFALPHA;
+    } else if (num==3) {
+        sineButton3.alpha = OFFALPHA;
+    } else if (num==4) {
+        sineButton4.alpha = OFFALPHA;
+    } else if (num==5) {
+        sineButton5.alpha = OFFALPHA;
+    } else if (num==6) {
+        sineButton6.alpha = OFFALPHA;
+    } else if (num==7) {
+        sineButton7.alpha = OFFALPHA;
+    } else if (num==8) {
+        sineButton8.alpha = OFFALPHA;
     }
-    if (sender==sineButton2) {
-        index = 1;
-        sineButton2.alpha = 1.0;
-        [self.socketDelegate send:'2'];
-    }
-    if (sender==sineButton3) {
-        index = 2;
-        sineButton3.alpha = 1.0;
-        [self.socketDelegate send:'3'];
-    }
-    if (sender==sineButton4) {
-        index = 3;
-        sineButton4.alpha = 1.0;
-        [self.socketDelegate send:'4'];
-    }
-    if (sender==sineButton5) {
-        index = 4;
-        sineButton5.alpha = 1.0;
-        [self.socketDelegate send:'5'];
-    }
-    if (sender==sineButton6) {
-        index = 5;
-        sineButton6.alpha = 1.0;
-        [self.socketDelegate send:'6'];
-    }
-    if (sender==sineButton7) {
-        index = 6;
-        sineButton7.alpha = 1.0;
-        [self.socketDelegate send:'7'];
-    }
-    if (sender==sineButton8) {
-        index = 7;
-        sineButton8.alpha = 1.0;
-        [self.socketDelegate send:'8'];
-    }
-    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
+    
+    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
+    if (isServer) [self.socketDelegate send:'0'];
+}
+
+- (void)noteOn:(id)sender {
+    UIButton *button = (UIButton *)sender;
+    [self noteOnWithNumber:[button.titleLabel.text integerValue]];
 }
 
 - (void)noteOff:(id)sender {
-    int index = 0;
-    if (sender==sineButton1) {
-        index = 0;
-        sineButton1.alpha = OFFALPHA;
-    } else if (sender==sineButton2) {
-        index = 1;
-        sineButton2.alpha = OFFALPHA;
-    } else if (sender==sineButton3) {
-        index = 2;
-        sineButton3.alpha = OFFALPHA;
-    } else if (sender==sineButton4) {
-        index = 3;
-        sineButton4.alpha = OFFALPHA;
-    } else if (sender==sineButton5) {
-        index = 4;
-        sineButton5.alpha = OFFALPHA;
-    } else if (sender==sineButton6) {
-        index = 5;
-        sineButton6.alpha = OFFALPHA;
-    } else if (sender==sineButton7) {
-        index = 6;
-        sineButton7.alpha = OFFALPHA;
-    } else if (sender==sineButton8) {
-        index = 7;
-        sineButton8.alpha = OFFALPHA;
-    }
-    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
+    UIButton *button = (UIButton *)sender;
+    [self noteOffWithNumber:[button.titleLabel.text integerValue]];
 }
 
-- (void)playNoteOff {
+- (void)allNotesOff {
+    sineButton1.alpha = OFFALPHA;
+    sineButton2.alpha = OFFALPHA;
+    sineButton3.alpha = OFFALPHA;
+    sineButton4.alpha = OFFALPHA;
+    sineButton5.alpha = OFFALPHA;
+    sineButton6.alpha = OFFALPHA;
+    sineButton7.alpha = OFFALPHA;
+    sineButton8.alpha = OFFALPHA;
     [toneGen noteOff];
-}
-
-- (void)noteOff {
-    [toneGen noteOff];
-    [self.socketDelegate send:'0'];
+    if (isServer) [self.socketDelegate send:'0'];
 }
 
 - (UIButton *) addBackButton {
@@ -236,14 +210,15 @@
     return back;
 }
 
-- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y {
+- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y andNumber:(int)num {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
     sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
-    [sender setTitle:nil forState:UIControlStateNormal];
+    sender.titleLabel.alpha = 0.0;
+    [sender setTitle:[NSString stringWithFormat:@"%d", num] forState:UIControlStateNormal];
     [self.view addSubview:sender];
     [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
     [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
@@ -315,7 +290,5 @@
     NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
     [self playNoteOff];
 }*/
-
-
 
 @end

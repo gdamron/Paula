@@ -10,6 +10,12 @@
 #import "ToneGenerator.h"
 //#import "ToneGenerator2.h"
 
+typedef enum {
+    ServerMode = 1,
+    ClientMode = 2,
+    NoMode = 3
+} GameTypeCode;
+
 @interface GrantViewController : UIViewController
 
 @property (strong, nonatomic) UIButton *backButton;
@@ -23,9 +29,11 @@
 @property (strong, nonatomic) UIButton *sineButton8;
 @property (strong, nonatomic) ToneGenerator *toneGen;
 
-- (void) playNote:(NSInteger)num;
-- (void) playNoteOff;
-- (void) noteOff;
-- (void) setToneGen:(ToneGenerator *)tone;
+- (id)initWithType:(GameTypeCode)code;
+- (void) noteOnWithNumber:(NSInteger)num;
+- (void) noteOffWithNumber:(NSInteger)num;
+- (void)noteOn:(id)sender;
+- (void)noteOff:(id)sender;
+- (void) allNotesOff;
 
 @end

@@ -10,7 +10,6 @@
 #import "EnyuViewController.h"
 #import "EugeneViewController.h"
 #import "GrantViewController.h"
-#import "KevinViewController.h"
 
 @interface TempMainViewController : UIViewController
 
@@ -21,6 +20,6 @@
 @property (strong, nonatomic) EnyuViewController *enyuViewController;
 @property (strong, nonatomic) EugeneViewController *eugeneViewController;
 @property (strong, nonatomic) GrantViewController *grantViewController;
-@property (strong, nonatomic) KevinViewController *kevinViewController;
+@property (strong, nonatomic) GrantViewController *kevinViewController;
 
 @end
