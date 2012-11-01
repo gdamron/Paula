@@ -10,4 +10,6 @@
 
 @interface Metronome : NSObject
 
+@property (assign, nonatomic) double bpm;
+@property (strong, nonatomic) NSDate *startTime;
 @end
