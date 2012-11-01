@@ -12,21 +12,48 @@
 #include <CFNetwork/CFSocketStream.h>
 
 #import "GameServer.h"
+#import "SocketDelegate.h"
 
 @interface GameServer ()
 @property(retain) NSNetService* netService;
 @property(assign) uint16_t port;
 @property(nonatomic) CFSocketRef socketRef;
 @property(nonatomic) uint32_t protocolType;
+@property (nonatomic) NSError *error;
+
+@property (strong, nonatomic) SocketDelegate *socketDelegate;
 @end
 
 @implementation GameServer
 
 @synthesize delegate=_delegate, port=_port, netService=_netService;
 @synthesize socketRef;
+@synthesize error;
 
-- (id)init {
+
+- (id) initWithController:(GrantViewController*) controller {
+    self.socketDelegate = [[SocketDelegate alloc] init];
+    [self.socketDelegate setController:controller];
+    [self setDelegate:self.socketDelegate];
+    
+    BOOL result = [self startServer:error];
+    
+    NSString *bonjourName = [NSString stringWithFormat:@"_%@._tcp.", _broadcastName];
+    
+    if(result) {
+        NSLog(@"init bonjour with %@", bonjourName);
+    }
+    if(![self enableBonjour:@"local" appProtocol:bonjourName name:nil]) {
+        NSLog(@"bonjour failed");
+    }
+    
+    NSLog(@"Server Started : %d", result);
+    
     return self;
+}
+
+- (id) getSocketDelegate {
+    return self.socketDelegate;
 }
 
 - (BOOL) startServer:(NSError *)error {
@@ -35,7 +62,7 @@
     
     CFSocketContext socketCtx = {0, (__bridge void *)(self), NULL, NULL, NULL};
     
-    self.protocolType = PF_INET;
+    self.protocolType = PF_INET6;
     
     self.socketRef = [self createSocket:self.protocolType socketCtx:socketCtx];
     if(self.socketRef == NULL) {

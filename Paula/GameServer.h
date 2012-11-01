@@ -3,8 +3,10 @@
 //  Paula
 //
 //  Created by Kevin Tseng on 10/17/12.
-//  Copyright (c) 2012 Grant Damron. All rights reserved.
+//  Copyright (c) 2012 Kevin Tseng. All rights reserved.
 //
+
+#import "GrantViewController.h"
 
 @class GameServer;
 
@@ -35,8 +37,10 @@ typedef enum {
     NSNetService* _netService;
 }
 @property(assign) id<GameServerDelegate> delegate;
+- (id) initWithController:(GrantViewController*) controller;
 - (BOOL) startServer:(NSError *)error;
 - (BOOL) stopServer;
 - (BOOL) enableBonjour:(NSString*)domain appProtocol:(NSString*)appProtocol name:(NSString*)name;
 - (void) disableBonjour;
+- (id) getSocketDelegate;
 @end

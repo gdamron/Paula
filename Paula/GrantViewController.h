@@ -16,7 +16,7 @@ typedef enum {
     NoMode = 3
 } GameTypeCode;
 
-@interface GrantViewController : UIViewController <NSNetServiceDelegate, NSNetServiceBrowserDelegate>
+@interface GrantViewController : UIViewController
 
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *sineButton1;

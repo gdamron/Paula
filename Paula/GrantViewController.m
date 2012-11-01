@@ -8,6 +8,7 @@
 
 #import "GrantViewController.h"
 #import "GameServer.h"
+#import "GameClient.h"
 #import "SocketDelegate.h"
 
 #define OFFALPHA 0.5;
@@ -19,9 +20,10 @@
 }
 
 @property (nonatomic) GameServer *server;
-@property (nonatomic) NSError *error;
-@property (strong) SocketDelegate *socketDelegate;
+@property (nonatomic) GameClient *client;
+@property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong) NSNetServiceBrowser *browser;
+@property (nonatomic) NSError *error;
 @end
 
 @implementation GrantViewController
@@ -37,59 +39,19 @@
 @synthesize sineButton8;
 @synthesize toneGen;
 
-@synthesize server, error, socketDelegate;
+@synthesize server, error;
 
 - (id)initWithType:(GameTypeCode)code {
     if(code == ServerMode) {
         self = [self initWithNibName:nil bundle:nil];
-        [self startAsServer];
+        self.server = [[GameServer alloc] initWithController:self];
+        self.socketDelegate = [self.server getSocketDelegate];
     } else if (code == ClientMode) {
         self = [self initWithNibName:nil bundle:nil];
-        [self startAsClient];
+        self.client = [[GameClient alloc] initWithController:self];
+        self.socketDelegate = [self.client getSocketDelegate];
     }
     return self;
-}
-
-- (void) startAsServer {
-    self.server = [GameServer alloc];
-    self.socketDelegate = [[SocketDelegate alloc] init];
-    [self.server setDelegate:socketDelegate];
-    [self.socketDelegate setController:self];
-    
-    BOOL result = [server startServer:error];
-    
-    NSString *test = [NSString stringWithFormat:@"_%@._tcp.", @"Paula"];
-
-    if(result) {
-        NSLog(@"init bonjour with %@", test);
-    }
-    if(![server enableBonjour:@"local" appProtocol:test name:nil]) {
-        NSLog(@"bonjour failed");
-    }
-       
-    NSLog(@"Server Started : %d", result);
-}
-
-- (void) startAsClient {
-    NSNetServiceBrowser *serviceBrowser = [[NSNetServiceBrowser alloc] init];
-    
-    if(serviceBrowser) {
-        
-        self.socketDelegate = [[SocketDelegate alloc] init];
-        [self.socketDelegate setController:self];
-        
-        NSLog(@"net service browser initialized");
-        serviceBrowser.delegate = self;
-        self.browser = serviceBrowser;
-        NSLog(@"call to searchForServicesOfType");
-        NSString *test = [NSString stringWithFormat:@"_%@._tcp.", @"Paula"];
-        
-        NSLog(@"Search String: %@", test);
-        
-        [self.browser searchForServicesOfType:test inDomain:@"local"];
-    } else {
-        NSLog(@"Bonjour browser failed");
-    }
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -355,23 +317,5 @@
     NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
     [self playNoteOff];
 }*/
-
-- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)service moreComing:(BOOL)moreComing {
-    
-    NSLog(@"service browser found service %c", moreComing);
-    
-    NSLog(@"%@", service.name);
-    
-    NSLog(@"connecting to server...");
-    [self.socketDelegate resolveInstance:service];
-}
-
-- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindDomain:(NSString *)domainString moreComing:(BOOL)moreComing {
-    NSLog(@"domain found");
-}
-
-- (void)netServiceBrowserWillSearch:(NSNetServiceBrowser *)aNetServiceBrowser {
-    NSLog(@"will search bonjour service");
-}
 
 @end
