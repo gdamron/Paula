@@ -15,7 +15,9 @@
 #define BUTTONOFFSET 8.0
 
 @interface GrantViewController () {
+    // These are all temporary
     NSArray *scale;
+    // used for keeping track of time while a melody plays
     int melIndex;
     double totalDur;
 }
@@ -106,16 +108,19 @@
     // Dispose of any resources that can be recreated.
 }
 
+// Back to the main view controller
 - (void) backButtonPressed {
     //[toneGen stop];
     melIndex = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-
+// Actually plays a tone. num correspoonds to a tile in the UI.
+// If audio engine is monophonic, tones are LIFO, so the most recent
+// tone is the one that is heard.  Otherwise, the waveforms are summed
+// in polyphony.
 - (void) noteOnWithNumber:(NSInteger)num {
     int s = 1;
-    
     if (num==1) {
         sineButton1.alpha = 1.0;
         if (isServer) [self.socketDelegate send:'1'];
@@ -150,6 +155,8 @@
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
+
+// Removes a tone from the 'tone stack'
 - (void) noteOffWithNumber:(NSInteger)num {
     
     if (num==1) {
@@ -174,16 +181,19 @@
     if (isServer) [self.socketDelegate send:'0'];
 }
 
+// wrapper for noteOnWithNumber, used by UIButtons
 - (void)noteOn:(id)sender {
     UIButton *button = (UIButton *)sender;
     [self noteOnWithNumber:[button.titleLabel.text integerValue]];
 }
 
+// wrapper for noteOffWithNumber, used by UIButtons
 - (void)noteOff:(id)sender {
     UIButton *button = (UIButton *)sender;
     [self noteOffWithNumber:[button.titleLabel.text integerValue]];
 }
 
+// Stops all tones currently playing.  Bonjour currently uses this
 - (void)allNotesOff {
     sineButton1.alpha = OFFALPHA;
     sineButton2.alpha = OFFALPHA;
@@ -197,6 +207,8 @@
     if (isServer) [self.socketDelegate send:'0'];
 }
 
+
+// The small button in the bottom left of the screen, which will eventually disappear
 - (UIButton *) addBackButton {
     //CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
@@ -210,6 +222,7 @@
     return back;
 }
 
+// The individual tiles
 - (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y andNumber:(int)num {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
@@ -226,6 +239,8 @@
     return sender;
 }
 
+
+/*----------------EXPERIMENTING WITH MELODY PLAYBACK---------------------*/
 
 /*- (void) playMelody {
     NSArray *durs = [[NSArray alloc] initWithObjects:
