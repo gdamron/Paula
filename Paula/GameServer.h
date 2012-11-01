@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Kevin Tseng. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
 #import "GrantViewController.h"
 
 @class GameServer;
@@ -15,10 +16,9 @@
 - (void) acceptConnection:(GameServer*)server inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr;
 - (void) openStream;
 - (void) closeStream;
+- (void) resolveInstance:(NSNetService *)service;
 - (void) didResolveInstance:(NSNetService *)netService;
 @end
-
-#import <Foundation/Foundation.h>
 
 NSString * const GameServerErrorDomain;
 static NSString* _broadcastName = @"Paula";
@@ -37,7 +37,7 @@ typedef enum {
     NSNetService* _netService;
 }
 @property(assign) id<GameServerDelegate> delegate;
-- (id) initWithController:(GrantViewController*) controller;
+- (id) init;
 - (BOOL) startServer:(NSError *)error;
 - (BOOL) stopServer;
 - (BOOL) enableBonjour:(NSString*)domain appProtocol:(NSString*)appProtocol name:(NSString*)name;

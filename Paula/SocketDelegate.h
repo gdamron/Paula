@@ -7,14 +7,14 @@
 //
 
 #import "GameServer.h"
-#import "GrantViewController.h"
 
 @interface SocketDelegate : NSObject <NSStreamDelegate, GameServerDelegate, NSNetServiceDelegate> {
-NSInputStream *_inStream;
-NSOutputStream *_outStream;
+    NSInputStream *_inStream;
+    NSOutputStream *_outStream;
 }
 
-- (void) setController:(GrantViewController*) controller;
+@property(assign) id<GameCommunicationDelegate> controller;
+
 - (void) didResolveInstance:(NSNetService *)netService;
 - (void) resolveInstance:(NSNetService *)netService;
 - (void) send:(const uint8_t)message;

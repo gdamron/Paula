@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
-#import "GameServer.h"
 #import "SocketDelegate.h"
 
 @interface SocketDelegate ()
@@ -15,21 +14,15 @@
 @property (nonatomic) GameServer *server;
 @property (nonatomic) NSMutableData *data;
 @property (strong, nonatomic) NSNetService *currentResolve;
-
-@property (retain) GrantViewController *grantController;
 @end
 
 @implementation SocketDelegate
 
-@synthesize grantController;
+@synthesize _inStream, _outStream, controller=_controller;
 
 - (id)init {
     self.data = [[NSMutableData alloc] init];
     return self;
-}
-
-- (void) setController:(GrantViewController*) controller {
-    self.grantController = controller;
 }
 
 @end
@@ -40,6 +33,9 @@
     self.server = server;
     self._inStream = istr;
     self._outStream = ostr;
+    
+    [self.controller presentGame];
+    
     [self openStreams];
 }
 
@@ -63,6 +59,9 @@
     } else {
         self._inStream = inStream;
         self._outStream = outStream;
+        
+        [self.controller presentGame];
+        
         [self openStreams];
     }
 }
@@ -138,13 +137,13 @@
                         NSLog(@"reading...%d", note);
                         
                         if(note == 0) {
-                            if(self.grantController != nil) {
-                                [self.grantController playNoteOff];
+                            if(self.controller != nil) {
+                                [self.controller playNoteOff];
                             }
                         } else {
-                            if(self.grantController != nil) {
+                            if(self.controller != nil) {
                                 NSLog(@"calling grant");
-                                [self.grantController playNote:note];
+                                [self.controller playNote:note];
                             }
                         }
                     } else {

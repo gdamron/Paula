@@ -12,7 +12,6 @@
 #include <CFNetwork/CFSocketStream.h>
 
 #import "GameServer.h"
-#import "SocketDelegate.h"
 
 @interface GameServer ()
 @property(retain) NSNetService* netService;
@@ -20,8 +19,6 @@
 @property(nonatomic) CFSocketRef socketRef;
 @property(nonatomic) uint32_t protocolType;
 @property (nonatomic) NSError *error;
-
-@property (strong, nonatomic) SocketDelegate *socketDelegate;
 @end
 
 @implementation GameServer
@@ -30,12 +27,7 @@
 @synthesize socketRef;
 @synthesize error;
 
-
-- (id) initWithController:(GrantViewController*) controller {
-    self.socketDelegate = [[SocketDelegate alloc] init];
-    [self.socketDelegate setController:controller];
-    [self setDelegate:self.socketDelegate];
-    
+- (id) init {
     BOOL result = [self startServer:error];
     
     NSString *bonjourName = [NSString stringWithFormat:@"_%@._tcp.", _broadcastName];
@@ -52,17 +44,13 @@
     return self;
 }
 
-- (id) getSocketDelegate {
-    return self.socketDelegate;
-}
-
 - (BOOL) startServer:(NSError *)error {
     
     NSLog(@"Starting Server : ");
     
     CFSocketContext socketCtx = {0, (__bridge void *)(self), NULL, NULL, NULL};
     
-    self.protocolType = PF_INET6;
+    self.protocolType = PF_INET;
     
     self.socketRef = [self createSocket:self.protocolType socketCtx:socketCtx];
     if(self.socketRef == NULL) {
@@ -177,6 +165,9 @@ static void gameServerCallBackFunc(CFSocketRef socket, CFSocketCallBackType type
         if (0 == getpeername(nativeSocketHandle, (struct sockaddr *)name, &namelen)) {
             peer = [NSData dataWithBytes:name length:namelen];
         }
+        
+        NSString *test = [[NSString alloc] initWithBytes:peer.bytes length:sizeof(peer) encoding:NSASCIIStringEncoding];
+        NSLog(@"...................%@", test);
 
         CFReadStreamRef readStream = NULL;
 		CFWriteStreamRef writeStream = NULL;
