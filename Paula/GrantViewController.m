@@ -8,7 +8,8 @@
 
 #import "GrantViewController.h"
 
-#define OFFALPHA 0.5;
+#define OFFALPHA 0.5
+#define BUTTONOFFSET 8.0
 
 @interface GrantViewController () {
     NSArray *scale;
@@ -18,6 +19,7 @@
 
 @property (strong) NSNetServiceBrowser *browser;
 @property (nonatomic) NSError *error;
+@property (assign) BOOL isMultiPlayerMode;
 @end
 
 @implementation GrantViewController
@@ -33,6 +35,7 @@
 @synthesize sineButton7;
 @synthesize sineButton8;
 @synthesize toneGen;
+@synthesize isMultiPlayerMode;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -54,14 +57,14 @@
         CGFloat height = self.view.bounds.size.height;
         toneGen = [[ToneGenerator alloc] init];
         
-        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:8];
-        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:8];
-        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+8];
-        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+8];
-        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+8];
-        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8];
-        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
-        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
+        sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:BUTTONOFFSET andNumber:1];
+        sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:BUTTONOFFSET andNumber:2];
+        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:10 YOffset:height/4+BUTTONOFFSET andNumber:3];
+        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+5 YOffset:height/4+BUTTONOFFSET andNumber:4];
+        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:10 YOffset:height/2+BUTTONOFFSET andNumber:5];
+        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+BUTTONOFFSET andNumber:6];
+        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+BUTTONOFFSET andNumber:7];
+        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+BUTTONOFFSET andNumber:8];
 
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
@@ -92,8 +95,9 @@
 }
 
 
-- (void) playNote:(NSInteger)num {
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
     int s = 1;
+    
     if (num==1) {
         sineButton1.alpha = 1.0;
     } else if (num==2) {
@@ -111,112 +115,92 @@
     } else if (num==8) {
         sineButton8.alpha = 1.0;
     }
+    
+    if(send) {
+        uint8_t c = 0;
+        switch (num) {
+                case 1: c = '1'; break;
+                case 2: c = '2'; break;
+                case 3: c = '3'; break;
+                case 4: c = '4'; break;
+                case 5: c = '5'; break;
+                case 6: c = '6'; break;
+                case 7: c = '7'; break;
+                case 8: c = '8'; break;
+        }
+        [self.controller send:c];
+    }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
-- (void) noteOn:(id)sender {
-    int s = 1;
-    int index = 0;
-    if (sender==sineButton1) {
-        index = 0;
-        sineButton1.alpha = 1.0;
-        [self.controller send:'1'];
+- (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
+    if (num==1) {
+        sineButton1.alpha = OFFALPHA;
+    } else if (num==2) {
+        sineButton2.alpha = OFFALPHA;
+    } else if (num==3) {
+        sineButton3.alpha = OFFALPHA;
+    } else if (num==4) {
+        sineButton4.alpha = OFFALPHA;
+    } else if (num==5) {
+        sineButton5.alpha = OFFALPHA;
+    } else if (num==6) {
+        sineButton6.alpha = OFFALPHA;
+    } else if (num==7) {
+        sineButton7.alpha = OFFALPHA;
+    } else if (num==8) {
+        sineButton8.alpha = OFFALPHA;
     }
-    if (sender==sineButton2) {
-        index = 1;
-        sineButton2.alpha = 1.0;
-        [self.controller send:'2'];
+    if(send) {
+        [self.controller send:'0'];
     }
-    if (sender==sineButton3) {
-        index = 2;
-        sineButton3.alpha = 1.0;
-        [self.controller send:'3'];
-    }
-    if (sender==sineButton4) {
-        index = 3;
-        sineButton4.alpha = 1.0;
-        [self.controller send:'4'];
-    }
-    if (sender==sineButton5) {
-        index = 4;
-        sineButton5.alpha = 1.0;
-        [self.controller send:'5'];
-    }
-    if (sender==sineButton6) {
-        index = 5;
-        sineButton6.alpha = 1.0;
-        [self.controller send:'6'];
-    }
-    if (sender==sineButton7) {
-        index = 6;
-        sineButton7.alpha = 1.0;
-        [self.controller send:'7'];
-    }
-    if (sender==sineButton8) {
-        index = 7;
-        sineButton8.alpha = 1.0;
-        [self.controller send:'8'];
-    }
-    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
+    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
+}
+
+- (void)noteOn:(id)sender {
+    UIButton *button = (UIButton *)sender;
+    [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:YES];
 }
 
 - (void)noteOff:(id)sender {
-    int index = 0;
-    if (sender==sineButton1) {
-        index = 0;
-        sineButton1.alpha = OFFALPHA;
-    } else if (sender==sineButton2) {
-        index = 1;
-        sineButton2.alpha = OFFALPHA;
-    } else if (sender==sineButton3) {
-        index = 2;
-        sineButton3.alpha = OFFALPHA;
-    } else if (sender==sineButton4) {
-        index = 3;
-        sineButton4.alpha = OFFALPHA;
-    } else if (sender==sineButton5) {
-        index = 4;
-        sineButton5.alpha = OFFALPHA;
-    } else if (sender==sineButton6) {
-        index = 5;
-        sineButton6.alpha = OFFALPHA;
-    } else if (sender==sineButton7) {
-        index = 6;
-        sineButton7.alpha = OFFALPHA;
-    } else if (sender==sineButton8) {
-        index = 7;
-        sineButton8.alpha = OFFALPHA;
-    }
-    [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
-    [self.controller send:'0'];
+    UIButton *button = (UIButton *)sender;
+    [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:YES];
 }
 
-- (void)playNoteOff {
-        sineButton1.alpha = OFFALPHA;
-        sineButton2.alpha = OFFALPHA;
-        sineButton3.alpha = OFFALPHA;
-        sineButton4.alpha = OFFALPHA;
-        sineButton5.alpha = OFFALPHA;
-        sineButton6.alpha = OFFALPHA;
-        sineButton7.alpha = OFFALPHA;
-        sineButton8.alpha = OFFALPHA;
-    
+- (void)allNotesOff {
+    sineButton1.alpha = OFFALPHA;
+    sineButton2.alpha = OFFALPHA;
+    sineButton3.alpha = OFFALPHA;
+    sineButton4.alpha = OFFALPHA;
+    sineButton5.alpha = OFFALPHA;
+    sineButton6.alpha = OFFALPHA;
+    sineButton7.alpha = OFFALPHA;
+    sineButton8.alpha = OFFALPHA;
     [toneGen noteOff];
 }
 
-- (void)noteOff {
-    [toneGen noteOff];
-    [self.controller send:'0'];
+- (UIButton *) addBackButton {
+    //CGFloat width = self.view.bounds.size.width;
+    CGFloat height = self.view.bounds.size.height;
+    UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
+    back.backgroundColor = [UIColor colorWithRed:0.25 green:1.0 blue:0.5 alpha:1.0];
+    [back setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    back.frame = CGRectMake(16, height-32, 32, 16);
+    [back setTitle:@"<<" forState:UIControlStateNormal];
+    [self.view addSubview:back];
+    [back addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    return back;
 }
 
-- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y {
+- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y andNumber:(int)num {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
     sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
-    [sender setTitle:nil forState:UIControlStateNormal];
+    sender.titleLabel.alpha = 0.0;
+    [sender setTitle:[NSString stringWithFormat:@"%d", num] forState:UIControlStateNormal];
     [self.view addSubview:sender];
     [sender addTarget:self action:@selector(noteOn:) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
     [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];

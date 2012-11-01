@@ -138,12 +138,11 @@
                         
                         if(note == 0) {
                             if(self.controller != nil) {
-                                [self.controller playNoteOff];
+                                [self.controller allNotesOff];
                             }
                         } else {
                             if(self.controller != nil) {
-                                NSLog(@"calling grant");
-                                [self.controller playNote:note];
+                                [self.controller noteOnWithNumber:note sendMessage:NO];
                             }
                         }
                     } else {

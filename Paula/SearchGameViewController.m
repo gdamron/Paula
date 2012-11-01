@@ -59,12 +59,12 @@
     [self.socketDelegate send:message];
 }
 
-- (void) playNote:(NSInteger)num {
-    [self.grantController playNote:num];
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
+    [self.grantController noteOnWithNumber:num sendMessage:send];
 }
 
-- (void) playNoteOff {
-    [self.grantController playNoteOff];
+- (void) allNotesOff {
+    [self.grantController allNotesOff];
 }
 
 - (void) presentGame {

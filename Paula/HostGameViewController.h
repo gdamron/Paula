@@ -11,8 +11,8 @@
 @protocol GameCommunicationDelegate <NSObject>
 @required
 - (void) send:(uint8_t)message;
-- (void) playNote:(NSInteger)num;
-- (void) playNoteOff;
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
+- (void) allNotesOff;
 - (void) presentGame;
 @end
 

@@ -27,8 +27,10 @@
 @property (strong, nonatomic) UIButton *sineButton8;
 @property (strong, nonatomic) ToneGenerator *toneGen;
 
-- (void) playNote:(NSInteger)num;
-- (void) playNoteOff;
-- (void) noteOff;
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
+- (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;
+- (void)noteOn:(id)sender;
+- (void)noteOff:(id)sender;
+- (void) allNotesOff;
 
 @end
