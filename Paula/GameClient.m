@@ -7,22 +7,21 @@
 //
 
 #import "GameClient.h"
-#import "SocketDelegate.h"
 
 @interface GameClient ()
-@property (strong, nonatomic) SocketDelegate *socketDelegate;
+//@property (strong, nonatomic) SocketDelegate *socketDelegate;
 @property (strong) NSNetServiceBrowser *browser;
 @end
 
 @implementation GameClient
 
-- (id) initWithController:(GrantViewController*) controller {
+@synthesize delegate=_delegate;
+
+- (id) init {
+    
     NSNetServiceBrowser *serviceBrowser = [[NSNetServiceBrowser alloc] init];
     
     if(serviceBrowser) {
-        self.socketDelegate = [[SocketDelegate alloc] init];
-        [self.socketDelegate setController:controller];
-        
         NSLog(@"net service browser initialized");
         serviceBrowser.delegate = self;
         self.browser = serviceBrowser;
@@ -40,10 +39,6 @@
     return self;
 }
 
-- (id) getSocketDelegate {
-    return self.socketDelegate;
-}
-
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didFindService:(NSNetService *)service moreComing:(BOOL)moreComing {
     
     NSLog(@"service browser found service %c", moreComing);
@@ -51,7 +46,7 @@
     NSLog(@"%@", service.name);
     
     NSLog(@"connecting to server...");
-    [self.socketDelegate resolveInstance:service];
+    [self.delegate resolveInstance:service];
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindDomain:(NSString *)domainString moreComing:(BOOL)moreComing {

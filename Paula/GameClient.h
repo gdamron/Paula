@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#include "GrantViewController.h"
+#import "SocketDelegate.h"
+#import "GrantViewController.h"
 
 @interface GameClient : NSObject <NSNetServiceDelegate, NSNetServiceBrowserDelegate>
 
-- (id) initWithController:(GrantViewController*) controller;
-- (id) getSocketDelegate;
+@property(assign) id<GameServerDelegate> delegate;
+
+- (id) init;
 
 @end

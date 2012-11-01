@@ -22,7 +22,7 @@
 @synthesize enyuViewController;
 @synthesize eugeneViewController;
 @synthesize grantViewController;
-@synthesize kevinViewController;
+@synthesize networkViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -35,24 +35,21 @@
         
         enyuViewController = [[EnyuViewController alloc] init];
         eugeneViewController = [[EugeneViewController alloc] init];
-//        grantViewController = [[GrantViewController alloc] init];
-//        kevinViewController = [[KevinViewController alloc] init];
         
-        toEnyu = [self setupButton:toEnyu OnScreenWithX:-86 YOffset:-72 AndName:[NSString stringWithFormat:@"Enyu"]];
+        toEnyu = setupMenuButton(toEnyu, 1, @"Enyu", width, height);
         [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = [self setupButton:toEugene OnScreenWithX:-86 YOffset:22 AndName:[NSString stringWithFormat:@"Eugene"]];
+        toEugene = setupMenuButton(toEugene, 2, @"Eugene", width, height);
         [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toGrant = [self setupButton:toGrant OnScreenWithX:10 YOffset:-72 AndName:[NSString stringWithFormat:@"Grant"]];
+        toGrant = setupMenuButton(toGrant, 3, @"Grant", width, height);
         [toGrant addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toKevin = [self setupButton:toKevin OnScreenWithX:10 YOffset:22 AndName:[NSString stringWithFormat:@"Kevin"]];
+        toKevin = setupMenuButton(toKevin, 4, @"Multi-Player", width, height);
         [toKevin addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
-        UIImage *logo = [UIImage imageNamed:@"logo.gif"];
-        UIImageView *logoView = [[UIImageView alloc] initWithImage:logo];
-        logoView.frame = CGRectMake(width/2-86, height/2-135, 172, 49);
-        
-        [self.view addSubview:logoView];
-        
+        [self.view addSubview:setupLogo(width, height)];
+        [self.view addSubview:toEnyu];
+        [self.view addSubview:toEugene];
+        [self.view addSubview:toGrant];
+        [self.view addSubview:toKevin];
     }
     return self;
 }
@@ -75,24 +72,12 @@
     } else if (sender==toEugene) {
         [self presentViewController:eugeneViewController animated:YES completion:nil];
     } else if (sender==toGrant) {
-        grantViewController = [[GrantViewController alloc] initWithType:ServerMode];
+        grantViewController = [[GrantViewController alloc] init];
         [self presentViewController:grantViewController animated:YES completion:nil];
     } else if (sender==toKevin) {
-        kevinViewController = [[GrantViewController alloc] initWithType:ClientMode];
-        [self presentViewController:kevinViewController animated:YES completion:nil];
+        networkViewController = [[NetworkViewController alloc] init];
+        [self presentViewController:networkViewController animated:NO completion:nil];
     }
-}
-
-- (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y AndName:(NSString *)name{
-    CGFloat width = self.view.bounds.size.width;
-    CGFloat height = self.view.bounds.size.height;
-    sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:(rand()%1000)/1000.0 green:(rand()%1000)/1000.0 blue:(rand()%1000)/1000.0 alpha:1.0];
-    [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    sender.frame = CGRectMake(width/2+x, height/2+y, 76, 76);
-    [sender setTitle:name forState:UIControlStateNormal];
-    [self.view addSubview:sender];
-    return sender;
 }
 
 @end

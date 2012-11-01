@@ -10,6 +10,8 @@
 #import "EnyuViewController.h"
 #import "EugeneViewController.h"
 #import "GrantViewController.h"
+#import "NetworkViewController.h"
+#import "PaulaUtilities.m"
 
 @interface TempMainViewController : UIViewController
 
@@ -20,6 +22,6 @@
 @property (strong, nonatomic) EnyuViewController *enyuViewController;
 @property (strong, nonatomic) EugeneViewController *eugeneViewController;
 @property (strong, nonatomic) GrantViewController *grantViewController;
-@property (strong, nonatomic) GrantViewController *kevinViewController;
+@property (strong, nonatomic) NetworkViewController *networkViewController;
 
 @end
