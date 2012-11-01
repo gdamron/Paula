@@ -10,6 +10,7 @@
 #import "ToneGenerator.h"
 #import "PaulaUtilities.m"
 #import "HostGameViewController.h"
+#import "Metronome.h"
 
 //#import "ToneGenerator2.h"
 

@@ -17,6 +17,7 @@
     // used for keeping track of time while a melody plays
     int melIndex;
     double totalDur;
+    Metronome *met;
 }
 
 @property (strong) NSNetServiceBrowser *browser;
@@ -97,12 +98,10 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-// Actually plays a tone. num correspoonds to a tile in the UI.
-// If audio engine is monophonic, tones are LIFO, so the most recent
-// tone is the one that is heard.  Otherwise, the waveforms are summed
-// in polyphony.
-- (void) noteOnWithNumber:(NSInteger)num {
+
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
     int s = 1;
+    
     if (num==1) {
         sineButton1.alpha = 1.0;
     } else if (num==2) {
@@ -138,10 +137,7 @@
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
 
-
-// Removes a tone from the 'tone stack'
-- (void) noteOffWithNumber:(NSInteger)num {
-    
+- (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
     if (num==1) {
         sineButton1.alpha = OFFALPHA;
     } else if (num==2) {
