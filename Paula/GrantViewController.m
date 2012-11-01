@@ -7,9 +7,6 @@
 //
 
 #import "GrantViewController.h"
-#import "GameServer.h"
-#import "GameClient.h"
-#import "SocketDelegate.h"
 
 #define OFFALPHA 0.5;
 
@@ -19,15 +16,13 @@
     double totalDur;
 }
 
-@property (nonatomic) GameServer *server;
-@property (nonatomic) GameClient *client;
-@property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong) NSNetServiceBrowser *browser;
 @property (nonatomic) NSError *error;
 @end
 
 @implementation GrantViewController
 
+@synthesize controller=_controller;
 @synthesize backButton;
 @synthesize sineButton1;
 @synthesize sineButton2;
@@ -38,21 +33,6 @@
 @synthesize sineButton7;
 @synthesize sineButton8;
 @synthesize toneGen;
-
-@synthesize server, error;
-
-- (id)initWithType:(GameTypeCode)code {
-    if(code == ServerMode) {
-        self = [self initWithNibName:nil bundle:nil];
-        self.server = [[GameServer alloc] initWithController:self];
-        self.socketDelegate = [self.server getSocketDelegate];
-    } else if (code == ClientMode) {
-        self = [self initWithNibName:nil bundle:nil];
-        self.client = [[GameClient alloc] initWithController:self];
-        self.socketDelegate = [self.client getSocketDelegate];
-    }
-    return self;
-}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -82,7 +62,11 @@
         sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+5 YOffset:height/2+8];
         sineButton7 = [self setupButton:sineButton7 OnScreenWithX:10 YOffset:height*.75+8];
         sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+5 YOffset:height*.75+8];
-        backButton = [self addBackButton];
+
+        backButton = addBackButton(width, height);
+        [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.view addSubview:backButton];
         //[toneGen start];
         
     }
@@ -136,42 +120,42 @@
     if (sender==sineButton1) {
         index = 0;
         sineButton1.alpha = 1.0;
-        [self.socketDelegate send:'1'];
+        [self.controller send:'1'];
     }
     if (sender==sineButton2) {
         index = 1;
         sineButton2.alpha = 1.0;
-        [self.socketDelegate send:'2'];
+        [self.controller send:'2'];
     }
     if (sender==sineButton3) {
         index = 2;
         sineButton3.alpha = 1.0;
-        [self.socketDelegate send:'3'];
+        [self.controller send:'3'];
     }
     if (sender==sineButton4) {
         index = 3;
         sineButton4.alpha = 1.0;
-        [self.socketDelegate send:'4'];
+        [self.controller send:'4'];
     }
     if (sender==sineButton5) {
         index = 4;
         sineButton5.alpha = 1.0;
-        [self.socketDelegate send:'5'];
+        [self.controller send:'5'];
     }
     if (sender==sineButton6) {
         index = 5;
         sineButton6.alpha = 1.0;
-        [self.socketDelegate send:'6'];
+        [self.controller send:'6'];
     }
     if (sender==sineButton7) {
         index = 6;
         sineButton7.alpha = 1.0;
-        [self.socketDelegate send:'7'];
+        [self.controller send:'7'];
     }
     if (sender==sineButton8) {
         index = 7;
         sineButton8.alpha = 1.0;
-        [self.socketDelegate send:'8'];
+        [self.controller send:'8'];
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0)) withGain:1.0 andSoundType:s];
 }
@@ -204,7 +188,7 @@
         sineButton8.alpha = OFFALPHA;
     }
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:index]intValue])/12.0))];
-    [self.socketDelegate send:'0'];
+    [self.controller send:'0'];
 }
 
 - (void)playNoteOff {
@@ -222,20 +206,7 @@
 
 - (void)noteOff {
     [toneGen noteOff];
-    [self.socketDelegate send:'0'];
-}
-
-- (UIButton *) addBackButton {
-    //CGFloat width = self.view.bounds.size.width;
-    CGFloat height = self.view.bounds.size.height;
-    UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
-    back.backgroundColor = [UIColor colorWithRed:0.25 green:1.0 blue:0.5 alpha:1.0];
-    [back setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    back.frame = CGRectMake(16, height-32, 32, 16);
-    [back setTitle:@"<<" forState:UIControlStateNormal];
-    [self.view addSubview:back];
-    [back addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-    return back;
+    [self.controller send:'0'];
 }
 
 - (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y {

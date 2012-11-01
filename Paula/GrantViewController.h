@@ -8,16 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import "ToneGenerator.h"
-//#import "ToneGenerator2.h"
+#import "PaulaUtilities.m"
+#import "HostGameViewController.h"
 
-typedef enum {
-    ServerMode = 1,
-    ClientMode = 2,
-    NoMode = 3
-} GameTypeCode;
+//#import "ToneGenerator2.h"
 
 @interface GrantViewController : UIViewController
 
+@property(assign) id<GameCommunicationDelegate> controller;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *sineButton1;
 @property (strong, nonatomic) UIButton *sineButton2;
@@ -28,7 +26,7 @@ typedef enum {
 @property (strong, nonatomic) UIButton *sineButton7;
 @property (strong, nonatomic) UIButton *sineButton8;
 @property (strong, nonatomic) ToneGenerator *toneGen;
-- (id)initWithType:(GameTypeCode)code;
+
 - (void) playNote:(NSInteger)num;
 - (void) playNoteOff;
 - (void) noteOff;

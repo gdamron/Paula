@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PaulaUtilities.m"
 
 @interface EugeneViewController : UIViewController
 
