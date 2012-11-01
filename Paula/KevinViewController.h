@@ -30,6 +30,6 @@
 
 - (void) playNoteOff;
 
-- (void) setToneGen:(ToneGenerator *)tone;
+- (void) setToneGen:(ToneGenerator *)t;
 
 @end

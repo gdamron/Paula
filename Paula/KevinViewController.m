@@ -33,8 +33,8 @@
 @synthesize socketDelegate;
 @synthesize browser;
 
-- (void) setToneGen:(ToneGenerator *)tone {
-    self.tone = tone;
+- (void) setToneGen:(ToneGenerator *)t {
+    self.tone = t;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
