@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ToneDelegate : NSObject
+@protocol ToneDelegate <NSObject>
+
+- (void) playNote:(NSInteger)num;
+- (void) playNoteOff;
 
 @end
