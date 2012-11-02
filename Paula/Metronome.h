@@ -24,6 +24,6 @@
 - (void)turnOnWithBPM:(double)tempo AndResolution:(int)res;
 - (void)turnOff;
 - (void)click;
-- (void)clickWithEvent;
+//- (void)clickWithEvent;
 
 @end

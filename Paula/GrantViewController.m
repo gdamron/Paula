@@ -18,6 +18,7 @@
     int melIndex;
     double totalDur;
     Metronome *met;
+    NSArray *melNotes;
 }
 
 @property (strong) NSNetServiceBrowser *browser;
@@ -71,7 +72,8 @@
 
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-        
+        met = [[Metronome alloc] initWithBPM:80.0 AndResolution:2];
+        [met turnOn];
         [self.view addSubview:backButton];
         //[toneGen start];
         
@@ -82,7 +84,33 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:met];
+    // for testing out melody playback with metronome
+    melNotes = [[NSArray alloc] initWithObjects:
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:1],
+                         [NSNumber numberWithInt:2],
+                         [NSNumber numberWithInt:3],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:4],
+                         [NSNumber numberWithInt:5],
+                         [NSNumber numberWithInt:6],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         [NSNumber numberWithInt:7],
+                         [NSNumber numberWithInt:8],
+                         nil];
 	// Do any additional setup after loading the view.
+}
+
+- (void)clickListen:(id)sender {
+    /*[self allNotesOff];*/
+    NSLog(@"Click!");
+    /*NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
+    [self noteOnWithNumber:i sendMessage:NO];
+    if (melIndex >= melNotes.count) {
+        melIndex = 0;
+    }*/
 }
 
 - (void)didReceiveMemoryWarning

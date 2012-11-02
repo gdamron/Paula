@@ -130,6 +130,8 @@
         AudioServicesPlaySystemSound(clickSound);
         //NSLog(@"beat start: %f | beat end: %f | beat count: %d", currentBeat, elapsedTime, beatCount);
     }
+    NSNotification *notice = [NSNotification notificationWithName:@"metronomeClick" object:self];
+    [[NSNotificationCenter defaultCenter] postNotification:notice];
 }
 
 - (void)setBpm:(double)tempo {
