@@ -1,5 +1,5 @@
 //
-//  GrantViewController.h
+//  SinglePlayerViewController.h
 //  Paula
 //
 //  Created by Grant Damron on 10/10/12.
@@ -14,7 +14,7 @@
 
 //#import "ToneGenerator2.h"
 
-@interface GrantViewController : UIViewController
+@interface SinglePlayerViewController : UIViewController
 
 @property(assign) id<GameCommunicationDelegate> controller;
 @property (strong, nonatomic) UIButton *backButton;
@@ -27,6 +27,7 @@
 @property (strong, nonatomic) UIButton *sineButton7;
 @property (strong, nonatomic) UIButton *sineButton8;
 @property (strong, nonatomic) ToneGenerator *toneGen;
+@property (strong, nonatomic) Metronome *metronome;
 
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;

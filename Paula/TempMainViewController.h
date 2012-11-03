@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "EnyuViewController.h"
 #import "EugeneViewController.h"
-#import "GrantViewController.h"
+#import "SinglePlayerViewController.h"
 #import "NetworkViewController.h"
 #import "PaulaUtilities.m"
 
@@ -17,11 +17,11 @@
 
 @property (strong, nonatomic) UIButton *toEnyu;
 @property (strong, nonatomic) UIButton *toEugene;
-@property (strong, nonatomic) UIButton *toGrant;
-@property (strong, nonatomic) UIButton *toKevin;
+@property (strong, nonatomic) UIButton *toSinglePlayer;
+@property (strong, nonatomic) UIButton *toMultiPlayer;
 @property (strong, nonatomic) EnyuViewController *enyuViewController;
 @property (strong, nonatomic) EugeneViewController *eugeneViewController;
-@property (strong, nonatomic) GrantViewController *grantViewController;
+@property (strong, nonatomic) SinglePlayerViewController *singlePlayerViewController;
 @property (strong, nonatomic) NetworkViewController *networkViewController;
 
 @end

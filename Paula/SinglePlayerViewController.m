@@ -1,23 +1,23 @@
 //
-//  GrantViewController.m
+//  SinglePlayerViewController.m
 //  Paula
 //
 //  Created by Grant Damron on 10/10/12.
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
-#import "GrantViewController.h"
+#import "SinglePlayerViewController.h"
 
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 8.0
 
-@interface GrantViewController () {
+@interface SinglePlayerViewController () {
     // These are all temporary
     NSArray *scale;
     // used for keeping track of time while a melody plays
     int melIndex;
     double totalDur;
-    Metronome *met;
+    //Metronome *met;
     NSArray *melNotes;
 }
 
@@ -26,7 +26,7 @@
 @property (assign) BOOL isMultiPlayerMode;
 @end
 
-@implementation GrantViewController
+@implementation SinglePlayerViewController
 
 @synthesize controller=_controller;
 @synthesize backButton;
@@ -40,6 +40,7 @@
 @synthesize sineButton8;
 @synthesize toneGen;
 @synthesize isMultiPlayerMode;
+@synthesize metronome;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -59,7 +60,6 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
-        toneGen = [[ToneGenerator alloc] init];
         
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:10 YOffset:BUTTONOFFSET andNumber:1];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+5 YOffset:BUTTONOFFSET andNumber:2];
@@ -72,10 +72,8 @@
 
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-        met = [[Metronome alloc] initWithBPM:80.0 AndResolution:2];
-        [met turnOn];
-        [self.view addSubview:backButton];
-        //[toneGen start];
+        
+        [self.view addSubview:backButton];;
         
     }
     return self;
@@ -84,7 +82,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:met];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:metronome];
     // for testing out melody playback with metronome
     melNotes = [[NSArray alloc] initWithObjects:
                          [NSNumber numberWithInt:2],
@@ -100,7 +98,14 @@
                          [NSNumber numberWithInt:7],
                          [NSNumber numberWithInt:8],
                          nil];
-	// Do any additional setup after loading the view.
+    toneGen = [[ToneGenerator alloc] init];
+    [toneGen start];
+	metronome = [[Metronome alloc] initWithBPM:80.0 AndResolution:2];
+    [metronome turnOn];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [metronome turnOff];
 }
 
 - (void)clickListen:(id)sender {
@@ -234,7 +239,7 @@
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:(rand()%10)/10.0 green:(rand()%10)/10.0 blue:(rand()%10)/10.0 alpha:1.0];
+    sender.backgroundColor = [UIColor colorWithRed:(arc4random()%11)/10.0 green:(arc4random()%11)/10.0 blue:(arc4random()%11)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(x, y, width/2-15, (height-15)/4-10);
     sender.titleLabel.alpha = 0.0;

@@ -45,11 +45,6 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
             NSLog(@"Cannot initialize real time audio. Exiting.");
             return nil;
         }
-        
-        if (!(MoAudio::start(audioCallback, nil))) {
-            NSLog(@"Cannot start real time audio. Exiting.");
-            return nil;
-        }
     }
     return self;
 }
@@ -79,10 +74,15 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
     NSLog(@"Note off");
 }
 
+- (void) start {
+    if (!(MoAudio::start(audioCallback, nil))) {
+        NSLog(@"Cannot start real time audio.");
+    }
+}
 
 - (void) stop {
-    //MoAudio::stop();
-    MoAudio::shutdown();
+    MoAudio::stop();
+    //MoAudio::shutdown();
 }
 
 @end

@@ -11,7 +11,7 @@
 #import "SocketDelegate.h"
 
 @interface SearchGameViewController ()
-@property GrantViewController* grantController;
+@property SinglePlayerViewController* singlePlayerController;
 @property (nonatomic) GameClient *client;
 @property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong, nonatomic) UIButton* startButton;
@@ -35,8 +35,8 @@
 }
 
 - (void) startGame {
-    self.grantController = [[GrantViewController alloc] init];
-    [self.grantController setController:self];
+    self.singlePlayerController = [[SinglePlayerViewController alloc] init];
+    [self.singlePlayerController setController:self];
     self.client = [[GameClient alloc] init];
     self.socketDelegate = [[SocketDelegate alloc] init];
     [self.client setDelegate:self.socketDelegate];
@@ -60,15 +60,15 @@
 }
 
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    [self.grantController noteOnWithNumber:num sendMessage:send];
+    [self.singlePlayerController noteOnWithNumber:num sendMessage:send];
 }
 
 - (void) allNotesOff {
-    [self.grantController allNotesOff];
+    [self.singlePlayerController allNotesOff];
 }
 
 - (void) presentGame {
-    [self presentViewController:self.grantController animated:YES completion:nil];
+    [self presentViewController:self.singlePlayerController animated:YES completion:nil];
 }
 
 @end

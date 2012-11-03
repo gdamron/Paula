@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "SocketDelegate.h"
-#import "GrantViewController.h"
+#import "SinglePlayerViewController.h"
 
 @interface GameClient : NSObject <NSNetServiceDelegate, NSNetServiceBrowserDelegate>
 

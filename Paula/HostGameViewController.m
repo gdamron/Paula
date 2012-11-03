@@ -11,7 +11,7 @@
 #import "SocketDelegate.h"
 
 @interface HostGameViewController ()
-@property GrantViewController* grantController;
+@property SinglePlayerViewController* singlePlayerController;
 @property (nonatomic) GameServer *server;
 @property (nonatomic) SocketDelegate *socketDelegate;
 
@@ -19,7 +19,7 @@
 
 @implementation HostGameViewController
 
-//@synthesize grantController, server, socketDelegate;
+//@synthesize singlePlayerController, server, socketDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,8 +42,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.grantController = [[GrantViewController alloc] init];
-    [self.grantController setController:self];
+    self.singlePlayerController = [[SinglePlayerViewController alloc] init];
+    [self.singlePlayerController setController:self];
     self.server = [[GameServer alloc] init];
     self.socketDelegate = [[SocketDelegate alloc] init];
     [self.server setDelegate:self.socketDelegate];
@@ -61,15 +61,15 @@
 }
 
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    [self.grantController noteOnWithNumber:num sendMessage:send];
+    [self.singlePlayerController noteOnWithNumber:num sendMessage:send];
 }
 
 - (void) allNotesOff {
-    [self.grantController allNotesOff];
+    [self.singlePlayerController allNotesOff];
 }
 
 - (void) presentGame {
-    [self presentViewController:self.grantController animated:YES completion:nil];
+    [self presentViewController:self.singlePlayerController animated:YES completion:nil];
 }
 
 @end

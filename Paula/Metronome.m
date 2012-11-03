@@ -90,30 +90,14 @@
 - (void)turnOnWithBPM:(double)tempo {
     bpm = tempo;
     beatDuration = 60.0/bpm/beatResolution;
-    isOn = YES;
-    startTime = [NSDate date];
-    elapsedTime = 0.0;
-    currentBeat = 0.0;
-    timer = [NSTimer scheduledTimerWithTimeInterval:beatDuration
-                                             target:self
-                                           selector:@selector(click)
-                                           userInfo:[self userInfo]
-                                            repeats:YES];
+    [self turnOn];
 }
 
 - (void)turnOnWithBPM:(double)tempo AndResolution:(int)res {
     bpm = tempo;
     beatResolution = res;
     beatDuration = 60.0/bpm/beatResolution;
-    isOn = YES;
-    startTime = [NSDate date];
-    elapsedTime = 0.0;
-    currentBeat = 0.0;
-    timer = [NSTimer scheduledTimerWithTimeInterval:beatDuration
-                                             target:self
-                                           selector:@selector(click)
-                                           userInfo:[self userInfo]
-                                            repeats:YES];
+    [self turnOn];
 }
 
 - (void)turnOff {

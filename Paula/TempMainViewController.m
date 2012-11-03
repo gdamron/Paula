@@ -17,11 +17,11 @@
 
 @synthesize toEnyu;
 @synthesize toEugene;
-@synthesize toGrant;
-@synthesize toKevin;
+@synthesize toSinglePlayer;
+@synthesize toMultiPlayer;
 @synthesize enyuViewController;
 @synthesize eugeneViewController;
-@synthesize grantViewController;
+@synthesize singlePlayerViewController;
 @synthesize networkViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -33,23 +33,20 @@
         
         [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
         
-        enyuViewController = [[EnyuViewController alloc] init];
-        eugeneViewController = [[EugeneViewController alloc] init];
-        
-        toEnyu = setupMenuButton(toEnyu, 1, @"Enyu", width, height);
+        toSinglePlayer = setupMenuButton(toSinglePlayer, 1, @"Single Player", width, height);
+        [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        toMultiPlayer = setupMenuButton(toMultiPlayer, 2, @"Multi-Player", width, height);
+        [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        toEnyu = setupMenuButton(toEnyu, 3, @"Enyu", width, height);
         [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = setupMenuButton(toEugene, 2, @"Eugene", width, height);
+        toEugene = setupMenuButton(toEugene, 4, @"Eugene", width, height);
         [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toGrant = setupMenuButton(toGrant, 3, @"Grant", width, height);
-        [toGrant addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toKevin = setupMenuButton(toKevin, 4, @"Multi-Player", width, height);
-        [toKevin addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];
         [self.view addSubview:toEnyu];
         [self.view addSubview:toEugene];
-        [self.view addSubview:toGrant];
-        [self.view addSubview:toKevin];
+        [self.view addSubview:toSinglePlayer];
+        [self.view addSubview:toMultiPlayer];
     }
     return self;
 }
@@ -68,13 +65,15 @@
 
 - (void)nameButtonPressed:(id)sender {
     if (sender==toEnyu) {
+        enyuViewController = [[EnyuViewController alloc] init];
         [self presentViewController:enyuViewController animated:YES completion:nil];
     } else if (sender==toEugene) {
+        eugeneViewController = [[EugeneViewController alloc] init];
         [self presentViewController:eugeneViewController animated:YES completion:nil];
-    } else if (sender==toGrant) {
-        grantViewController = [[GrantViewController alloc] init];
-        [self presentViewController:grantViewController animated:YES completion:nil];
-    } else if (sender==toKevin) {
+    } else if (sender==toSinglePlayer) {
+        singlePlayerViewController = [[SinglePlayerViewController alloc] init];
+        [self presentViewController:singlePlayerViewController animated:YES completion:nil];
+    } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];
         [self presentViewController:networkViewController animated:NO completion:nil];
     }

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GrantViewController.h"
+#import "SinglePlayerViewController.h"
 
 @class GameServer;
 
