@@ -10,7 +10,10 @@ static UIButton* setupMenuButton(UIButton* sender, NSInteger idx, NSString* name
     CGFloat width = screenWidth;
     CGFloat height = screenHeight;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
-    sender.backgroundColor = [UIColor colorWithRed:(rand()%1000)/1000.0 green:(rand()%1000)/1000.0 blue:(rand()%1000)/1000.0 alpha:1.0];
+    sender.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                             green:(arc4random()%1000+1)/1000.0
+                                              blue:(arc4random()%1000+1)/1000.0
+                                             alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     sender.frame = CGRectMake(width/2 - 75, (height/8) * idx + 80, 155, 35);
     [sender setTitle:name forState:UIControlStateNormal];
