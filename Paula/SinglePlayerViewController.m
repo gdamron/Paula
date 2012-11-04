@@ -48,6 +48,7 @@
 @synthesize isMultiPlayerMode;
 @synthesize metronome;
 @synthesize paula;
+@synthesize game;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -90,11 +91,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:metronome];
-    // for testing out melody playback with metronome
-    paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-    melNotes = [NSArray arrayWithArray:[paula generateRandomLayer]];
-	metronome = [[Metronome alloc] initWithBPM:80.0 AndResolution:2];
     
 }
 
@@ -104,12 +102,15 @@
 
 - (void)clickListen:(id)sender {
     [self allNotesOff];
-    //NSLog(@"Click!");
-    if (melIndex < melNotes.count) {
-        NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
+    Section *currentSection = game.level.song.sections[0];
+    Layer *currentLayer = currentSection.layers[0];
+    int index = [currentLayer.currentNote intValue];
+    if (index < currentLayer.notes.count) {
+        NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
         if (i>0) {
             [self noteOnWithNumber:i sendMessage:NO];
         }
+        currentLayer.currentNote = [NSNumber numberWithInt:index];
     } else {
         [self allNotesOff];
         [metronome turnOff];
@@ -261,9 +262,25 @@
 }
 
 - (void)startGame {
+    paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
+    //melNotes = [NSArray arrayWithArray:[paula generateRandomLayer]];
     toneGen = [[ToneGenerator alloc] init];
+    game = [self setupGame];
     [toneGen start];
     [metronome turnOn];
+}
+
+- (Game *)setupGame {
+    Game *g = [[Game alloc] init];
+    Layer *newLayer = [[Layer alloc] init];
+    newLayer.notes = [[NSArray alloc] initWithArray:[paula generateRandomLayer]];
+    Section *newSection = [[Section alloc] init];
+    [newSection addLayer:newLayer];
+    
+    [g.level.song addSection:newSection];
+    
+    return g;
+
 }
 
 @end

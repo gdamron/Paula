@@ -12,6 +12,7 @@
 #import "HostGameViewController.h"
 #import "Metronome.h"
 #import "Paula.h"
+#import "Game.h"
 
 //#import "ToneGenerator2.h"
 
@@ -30,6 +31,7 @@
 @property (strong, nonatomic) ToneGenerator *toneGen;
 @property (strong, nonatomic) Metronome *metronome;
 @property (strong, nonatomic) Paula *paula;
+@property (strong, nonatomic) Game *game;
 
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;
