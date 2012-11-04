@@ -7,9 +7,15 @@
 //
 
 #import "SinglePlayerViewController.h"
+#import "Countdown.h"
 
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 8.0
+
+#define TEMP_BPM 100.0
+#define TEMP_DUR 30.0
+#define TEMP_LAYERS 1
+#define TEMP_SECTIONS 1
 
 @interface SinglePlayerViewController () {
     // These are all temporary
@@ -41,6 +47,7 @@
 @synthesize toneGen;
 @synthesize isMultiPlayerMode;
 @synthesize metronome;
+@synthesize paula;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -73,7 +80,8 @@
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         
-        [self.view addSubview:backButton];;
+        [self.view addSubview:backButton];
+        [self playCountdownAndStartGame];
         
     }
     return self;
@@ -84,24 +92,10 @@
     [super viewDidLoad];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:metronome];
     // for testing out melody playback with metronome
-    melNotes = [[NSArray alloc] initWithObjects:
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:1],
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:3],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:5],
-                         [NSNumber numberWithInt:6],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         nil];
-    toneGen = [[ToneGenerator alloc] init];
-    [toneGen start];
+    paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
+    melNotes = [NSArray arrayWithArray:[paula generateRandomLayer]];
 	metronome = [[Metronome alloc] initWithBPM:80.0 AndResolution:2];
-    [metronome turnOn];
+    
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -109,13 +103,17 @@
 }
 
 - (void)clickListen:(id)sender {
-    /*[self allNotesOff];*/
-    NSLog(@"Click!");
-    /*NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
-    [self noteOnWithNumber:i sendMessage:NO];
-    if (melIndex >= melNotes.count) {
-        melIndex = 0;
-    }*/
+    [self allNotesOff];
+    //NSLog(@"Click!");
+    if (melIndex < melNotes.count) {
+        NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
+        if (i>0) {
+            [self noteOnWithNumber:i sendMessage:NO];
+        }
+    } else {
+        [self allNotesOff];
+        [metronome turnOff];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -251,71 +249,21 @@
     return sender;
 }
 
-
-/*----------------EXPERIMENTING WITH MELODY PLAYBACK---------------------*/
-
-/*- (void) playMelody {
-    NSArray *durs = [[NSArray alloc] initWithObjects:
-                     [NSNumber numberWithDouble:0.5],
-                     [NSNumber numberWithDouble:0.5],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:0.5],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:0.5],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:0.5],
-                     [NSNumber numberWithDouble:0.25],
-                     [NSNumber numberWithDouble:1.0],
-                     nil];
+- (void)playCountdownAndStartGame {
+    [NSTimer scheduledTimerWithTimeInterval:(3.5*(60.0/TEMP_BPM)) target:self selector:@selector(startGame) userInfo:nil repeats:NO];
+    Countdown *countdown = [[Countdown alloc] initWithWidth:self.view.frame.size.width AndHeight:self.view.frame.size.height];
+    UILabel *tempLabel = countdown.label;
+    [self.view addSubview:tempLabel];
+    [self.view bringSubviewToFront:tempLabel];
+    [countdown countdownWithTempo:TEMP_BPM];
     
-    for (int i = 0; i < durs.count; i++) {
-        double dur = (60.0/80.0) * [[durs objectAtIndex:i] doubleValue];
-        [NSTimer scheduledTimerWithTimeInterval:totalDur target:self selector:@selector(melNoteOn:) userInfo:nil repeats:NO];
-        totalDur += dur;
-        [NSTimer scheduledTimerWithTimeInterval:totalDur target:self selector:@selector(melNoteOff:) userInfo:nil repeats:NO];
-    }
-    melIndex = 0;
+    
 }
 
-- (void)melNoteOn:(NSTimer *)theTimer {
-    NSArray *melNotes = [[NSArray alloc] initWithObjects:
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:1],
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:3],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:5],
-                         [NSNumber numberWithInt:6],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         nil];
-    NSInteger i = [[melNotes objectAtIndex:melIndex] integerValue];
-    [self noteOnWithNumber:i];
-   
+- (void)startGame {
+    toneGen = [[ToneGenerator alloc] init];
+    [toneGen start];
+    [metronome turnOn];
 }
-
-- (void)melNoteOff:(NSTimer *)theTimer {
-    NSArray *melNotes = [[NSArray alloc] initWithObjects:
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:1],
-                         [NSNumber numberWithInt:2],
-                         [NSNumber numberWithInt:3],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:4],
-                         [NSNumber numberWithInt:5],
-                         [NSNumber numberWithInt:6],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         [NSNumber numberWithInt:7],
-                         [NSNumber numberWithInt:8],
-                         nil];
-    NSInteger i = [[melNotes objectAtIndex:melIndex++] integerValue];
-    [self playNoteOff];
-}*/
 
 @end

@@ -71,6 +71,7 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (void)noteOff {
     g_on = NO;
+    [freqs removeAllObjects];
     NSLog(@"Note off");
 }
 
