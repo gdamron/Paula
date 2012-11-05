@@ -39,6 +39,7 @@ enum gameModes {
 @property (strong, nonatomic) Instrument *instrument;
 @property (strong, nonatomic) NSArray *scale;
 @property (strong, nonatomic) NSNumber *currentNote;
+@property (strong, nonatomic) NSNumber *currentStopIndex;
 
 @end
 
@@ -88,6 +89,9 @@ enum gameModes {
 @property (strong, nonatomic) Player *player;
 @property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSDate *date;
-@property (strong, nonatomic) NSArray *currentRound;
+@property (strong, nonatomic) NSMutableArray *currentRound;
+@property (assign, nonatomic) BOOL isPaulasTurn;
+
+- (BOOL)addNoteAndCompare:(int)tile;
 
 @end

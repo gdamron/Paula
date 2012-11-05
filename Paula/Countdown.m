@@ -18,11 +18,12 @@
 
 - (id)initWithWidth:(double)width AndHeight:(double)height {
     if (self=[super init]) {
+        double r = (arc4random()%1000+1)/1000.0;
+        double g = (arc4random()%1000+1)/1000.0;
+        double b = (arc4random()%1000+1)/1000.0;
         label = [[UILabel alloc] initWithFrame:CGRectMake(width/2-75, height/2-75, 150, 150)];
-        label.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                                green:(arc4random()%1000+1)/1000.0
-                                                 blue:(arc4random()%1000+1)/1000.0
-                                                alpha:1.0];
+        label.backgroundColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
+        label.textColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
         label.text = @"3";
         label.textAlignment = NSTextAlignmentCenter;
         label.font = [UIFont systemFontOfSize:72];

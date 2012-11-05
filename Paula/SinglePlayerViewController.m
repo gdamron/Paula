@@ -13,7 +13,7 @@
 #define BUTTONOFFSET 8.0
 
 #define TEMP_BPM 100.0
-#define TEMP_DUR 30.0
+#define TEMP_DUR 10.0
 #define TEMP_LAYERS 1
 #define TEMP_SECTIONS 1
 
@@ -92,29 +92,13 @@
 {
     [super viewDidLoad];
 	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clickListen:) name:@"metronomeClick" object:metronome];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
     
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [metronome turnOff];
-}
-
-- (void)clickListen:(id)sender {
-    [self allNotesOff];
-    Section *currentSection = game.level.song.sections[0];
-    Layer *currentLayer = currentSection.layers[0];
-    int index = [currentLayer.currentNote intValue];
-    if (index < currentLayer.notes.count) {
-        NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
-        if (i>0) {
-            [self noteOnWithNumber:i sendMessage:NO];
-        }
-        currentLayer.currentNote = [NSNumber numberWithInt:index];
-    } else {
-        [self allNotesOff];
-        [metronome turnOff];
-    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -167,6 +151,20 @@
         [self.controller send:c];
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
+    
+    if (!game.isPaulasTurn) {
+        if (![game addNoteAndCompare:num]) {
+            NSLog(@"LINE 157");
+            game.isPaulasTurn = YES;
+            [metronome turnOnWithNotification:@"paulaClick"];
+        } else {
+            NSLog(@"LINE 161");
+            if (game.player.currentInput.count >= game.currentRound.count) {
+                game.isPaulasTurn = YES;
+                [metronome turnOnWithNotification:@"paulaClick"];
+            }
+        }
+    }
 }
 
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
@@ -267,7 +265,7 @@
     toneGen = [[ToneGenerator alloc] init];
     game = [self setupGame];
     [toneGen start];
-    [metronome turnOn];
+    [metronome turnOnWithNotification:@"paulaClick"];
 }
 
 - (Game *)setupGame {
@@ -280,7 +278,45 @@
     [g.level.song addSection:newSection];
     
     return g;
+}
 
+- (void)paulaClickListen:(id)sender {
+    [self allNotesOff];
+    Section *currentSection = game.level.song.sections[0];
+    Layer *currentLayer = currentSection.layers[0];
+    // get the index in the layer of the current note
+    int index = [currentLayer.currentNote intValue];
+    // get the index in the layer of the note stop at for this round
+    int stopNote = [currentLayer.currentStopIndex intValue];
+    //NSLog(@"%d %d %d", index, stopNote, currentLayer.notes.count);
+    if (index < currentLayer.notes.count) {
+        if (index >= stopNote) {
+            index = 0;
+            [metronome turnOff];
+            game.isPaulasTurn = NO;
+            //[metronome turnOnWithNotification:@"playerClick"];
+            currentLayer.currentStopIndex = [NSNumber numberWithInt:stopNote+1];
+        } else {
+            NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
+            if (i > 0) {
+                [self noteOnWithNumber:i sendMessage:NO];
+                [game.currentRound addObject:[NSNumber numberWithInt:i]];
+                for (int j = 0; j < game.currentRound.count; j++) {
+                    NSLog(@"%d", i);
+                }
+            }
+        }
+        currentLayer.currentNote = [NSNumber numberWithInt:index];
+    } else {
+        // round over
+        [self allNotesOff];
+        [metronome turnOff];
+    }
+}
+
+- (void)playerClickListen:(id)sender {
+    [self allNotesOff];
+    NSLog(@"click!");
 }
 
 @end

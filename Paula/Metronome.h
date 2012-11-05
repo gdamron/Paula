@@ -16,12 +16,14 @@
 @property (assign, nonatomic) BOOL clickIsOn;
 @property (assign, nonatomic) NSInteger beatCount;
 @property (assign, nonatomic) NSInteger beatResolution;
+@property (strong, nonatomic) NSString *notification;
 
 - (id)initWithBPM:(double)tempo;
 - (id)initWithBPM:(double)tempo AndResolution:(int)res;
 - (void)turnOn;
 - (void)turnOnWithBPM:(double)tempo;
 - (void)turnOnWithBPM:(double)tempo AndResolution:(int)res;
+- (void)turnOnWithNotification:(NSString *)notice;
 - (void)turnOff;
 - (void)click;
 //- (void)clickWithEvent;

@@ -32,6 +32,7 @@
 @synthesize beatCount;
 @synthesize clickSound;
 @synthesize beatResolution;
+@synthesize notification;
 
 - (id)init {
     self = [super init];
@@ -42,6 +43,7 @@
         beatDuration = 0.0;
         beatCount = 0;
         beatResolution = 1;
+        notification = @"metronomeClick";
         NSURL *path = [[NSBundle mainBundle] URLForResource:@"tap" withExtension:@"aif"];
         AudioServicesCreateSystemSoundID((__bridge CFURLRef) path, &clickSound);
     }
@@ -100,6 +102,11 @@
     [self turnOn];
 }
 
+- (void)turnOnWithNotification:(NSString *)notice {
+    notification = [NSString stringWithString:notice];
+    [self turnOn];
+}
+
 - (void)turnOff {
     isOn = NO;
     [timer invalidate];
@@ -114,7 +121,7 @@
         AudioServicesPlaySystemSound(clickSound);
         //NSLog(@"beat start: %f | beat end: %f | beat count: %d", currentBeat, elapsedTime, beatCount);
     }
-    NSNotification *notice = [NSNotification notificationWithName:@"metronomeClick" object:self];
+    NSNotification *notice = [NSNotification notificationWithName:notification object:self];
     [[NSNotificationCenter defaultCenter] postNotification:notice];
 }
 
