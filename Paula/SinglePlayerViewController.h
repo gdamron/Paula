@@ -28,6 +28,8 @@
 @property (strong, nonatomic) UIButton *sineButton6;
 @property (strong, nonatomic) UIButton *sineButton7;
 @property (strong, nonatomic) UIButton *sineButton8;
+@property (strong, nonatomic) UILabel *scoreDisplay;
+@property (strong, nonatomic) UILabel *mistakesLeftDisplay;
 @property (strong, nonatomic) ToneGenerator *toneGen;
 @property (strong, nonatomic) Metronome *metronome;
 @property (strong, nonatomic) Paula *paula;

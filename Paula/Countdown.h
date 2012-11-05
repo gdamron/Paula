@@ -18,3 +18,14 @@
 - (id)initWithWidth:(double)width AndHeight:(double)height;
 
 @end
+
+@interface GameOver : NSObject
+
+@property (strong,nonatomic) UILabel *label;
+@property (strong,nonatomic) UIButton *button;
+
+- (id)initWithWidth:(double)width AndHeight:(double)height;
+- (void)gameWon:(int)totalScore;
+- (void)gameLost;
+
+@end

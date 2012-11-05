@@ -78,7 +78,7 @@ enum gameModes {
 @property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSNumber *mistakesMade;
 @property (strong, nonatomic) NSNumber *mistakesAllowed;
-@property (strong, nonatomic) NSArray *currentInput;
+@property (strong, nonatomic) NSMutableArray *currentInput;
 
 
 @end
@@ -92,6 +92,6 @@ enum gameModes {
 @property (strong, nonatomic) NSMutableArray *currentRound;
 @property (assign, nonatomic) BOOL isPaulasTurn;
 
-- (BOOL)addNoteAndCompare:(int)tile;
+- (int)addNoteAndCompare:(int)tile;
 
 @end

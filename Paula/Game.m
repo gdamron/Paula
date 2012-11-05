@@ -27,17 +27,40 @@
     return self;
 }
 
-- (BOOL)addNoteAndCompare:(int)tile {
-    NSMutableArray *temp = [NSMutableArray arrayWithArray:player.currentInput];
-    [temp addObject:[NSNumber numberWithInt:tile]];
-    player.currentInput = [NSArray arrayWithArray:temp];
-    int playerTile = [[player.currentInput lastObject] intValue];
-    int paulaTile = [[currentRound lastObject] intValue];
+// returns 0 = continue, 1 = paula's turn, or 2 = game over
+- (int)addNoteAndCompare:(int)tile {
+    int retval = 0;
+    [player.currentInput addObject:[NSNumber numberWithInt:tile]];
+    int mistakes = [self checkMistakesInInput];
+    player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + mistakes)];
+    if (mistakes==0) {
+        score = [NSNumber numberWithInt:[score intValue]+5];
+    }
     
-    if (playerTile!=paulaTile)
-        player.mistakesMade = [NSNumber numberWithInt:[player.mistakesMade intValue]];
+    if (player.currentInput.count==currentRound.count) {
+        [player.currentInput removeAllObjects];
+        retval = 1;
+    }
     
-    return player.mistakesMade < player.mistakesAllowed;
+    if ([player.mistakesMade intValue] > [player.mistakesAllowed intValue])
+        retval = 2;
+    
+    //NSLog(@"mistakes = @d, allowed = %d, retval = %d", retval);
+    return retval;
+}
+
+- (int)checkMistakesInInput {
+    int mistakes = 0;
+    for (int i = 0; i < player.currentInput.count; i++) {
+        int playerInput = [player.currentInput[i] intValue];
+        int paulaInput = [currentRound[i] intValue];
+        NSLog(@"player: %d paula: %d count: %d", playerInput, paulaInput, player.currentInput.count);
+        if (playerInput!=paulaInput) mistakes++;
+        else score = [NSNumber numberWithInt:[score intValue]+1];
+    }
+    NSLog(@"%@ || %@", player.currentInput, currentRound);
+    NSLog(@"input size: %d round size %d mistakes %d", player.currentInput.count, currentRound.count, mistakes);
+    return mistakes;
 }
 
 @end
