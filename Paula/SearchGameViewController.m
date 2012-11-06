@@ -5,31 +5,47 @@
 //  Created by Kevin Tseng on 11/1/12.
 //  Copyright (c) 2012 inomadmusic.com. All rights reserved.
 //
-#import "HostGameViewController.h"
 #import "SearchGameViewController.h"
 #import "GameClient.h"
 #import "SocketDelegate.h"
+#import "NetworkTableViewController.h"
 
 @interface SearchGameViewController ()
 @property SinglePlayerViewController* singlePlayerController;
 @property (nonatomic) GameClient *client;
 @property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong, nonatomic) UIButton* startButton;
+@property (strong, nonatomic) UIButton *backButton;
+@property (strong, nonatomic) NetworkTableViewController *ntvc;
 @end
 
 @implementation SearchGameViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    self = [super initWithNibName:nil bundle:nil];
     if (self) {
         // Custom initialization
         [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
+
+        CGFloat width = self.view.bounds.size.width;
+        CGFloat height = self.view.bounds.size.height;
         
-        self.startButton = [[UIButton alloc] initWithFrame:CGRectMake(50, 50, 50, 50)];
-        [self.startButton setTitle:@"Start" forState:UIControlStateNormal];
-        [self.startButton addTarget:self action:@selector(startGame) forControlEvents:UIControlEventTouchUpInside];
-        [self.view addSubview:self.startButton];
+        UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 5, width, 30)];
+        [titleLabel setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
+        titleLabel.text = @"- Available Games -";
+        titleLabel.textAlignment = UITextAlignmentCenter;
+        
+        self.ntvc = [[NetworkTableViewController alloc] initWithTitle:@"Search Game" selectable:YES];
+
+        self.backButton = addBackButton(width, height);
+        [self.backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.view addSubview:titleLabel];
+        [self.view addSubview:self.backButton];
+        [self.view addSubview:self.ntvc.view];
+        
+        [self.ntvc setCommunicationDelegate:self];
     }
     return self;
 }
@@ -40,13 +56,24 @@
     self.client = [[GameClient alloc] init];
     self.socketDelegate = [[SocketDelegate alloc] init];
     [self.client setDelegate:self.socketDelegate];
+    [self.client setGameController:self];
     [self.socketDelegate setController:self];
+}
+
+- (void) insertGameService:(NSMutableArray *)services {
+    NSLog(@"number of host found: %d", services.count);
+    [self.ntvc reloadTableData:services];
+}
+
+- (void) selectedRowAtIndexPath:(NSUInteger*)idx {
+    [self.client connectToService:idx];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    [self startGame];
 }
 
 - (void)didReceiveMemoryWarning
@@ -69,6 +96,10 @@
 
 - (void) presentGame {
     [self presentViewController:self.singlePlayerController animated:YES completion:nil];
+}
+
+- (void) backButtonPressed {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

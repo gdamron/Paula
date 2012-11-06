@@ -37,6 +37,7 @@ typedef enum {
     NSNetService* _netService;
 }
 @property(assign) id<GameServerDelegate> delegate;
+@property(assign) HostGameViewController *gameController;
 - (id) init;
 - (BOOL) startServer:(NSError *)error;
 - (BOOL) stopServer;

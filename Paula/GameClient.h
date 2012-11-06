@@ -9,11 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "SocketDelegate.h"
 #import "SinglePlayerViewController.h"
+#import "SearchGameViewController.h"
 
 @interface GameClient : NSObject <NSNetServiceDelegate, NSNetServiceBrowserDelegate>
 
 @property(assign) id<GameServerDelegate> delegate;
-
+@property(assign) SearchGameViewController *gameController;
 - (id) init;
-
+- (void) connectToService:(NSUInteger*)idx;
 @end

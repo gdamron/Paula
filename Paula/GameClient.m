@@ -7,15 +7,19 @@
 //
 
 #import "GameClient.h"
+#import "SearchGameViewController.h"
 
 @interface GameClient ()
 //@property (strong, nonatomic) SocketDelegate *socketDelegate;
 @property (strong) NSNetServiceBrowser *browser;
+@property (strong, nonatomic) NSMutableArray *services;
+@property (strong, nonatomic) NSMutableArray *serviceNames;
 @end
 
 @implementation GameClient
 
 @synthesize delegate=_delegate;
+@synthesize gameController=_gameController;
 
 - (id) init {
     
@@ -32,6 +36,9 @@
         NSLog(@"Search String: %@", bonjourName);
         
         [self.browser searchForServicesOfType:bonjourName inDomain:@"local"];
+        
+        self.services = [[NSMutableArray alloc] initWithCapacity:5];
+        self.serviceNames = [[NSMutableArray alloc] initWithCapacity:5];
     } else {
         NSLog(@"Bonjour browser failed");
     }
@@ -46,6 +53,16 @@
     NSLog(@"%@", service.name);
     
     NSLog(@"connecting to server...");
+    
+    [self.services addObject:service];
+    [self.serviceNames addObject:service.name];
+    NSLog(@"ADDING SERVICE : %d", self.services.count);
+    [self.gameController insertGameService:self.serviceNames];
+//    [self.delegate resolveInstance:service];
+}
+
+- (void) connectToService:(NSUInteger*)idx {
+    NSNetService *service = [self.services objectAtIndex:*idx];
     [self.delegate resolveInstance:service];
 }
 
