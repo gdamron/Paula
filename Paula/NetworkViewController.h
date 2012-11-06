@@ -7,17 +7,23 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "HostGameViewController.h"
-#import "SearchGameViewController.h"
 #import "PaulaUtilities.m"
+
+@class NetworkViewController;
+
+@protocol GameCommunicationDelegate <NSObject>
+@required
+- (void) send:(uint8_t)message;
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
+- (void) allNotesOff;
+- (void) presentGame;
+- (void) selectedRowAtIndexPath:(NSUInteger*)idx;
+@end
 
 @interface NetworkViewController : UIViewController
 
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *hostGameButton;
 @property (strong, nonatomic) UIButton *searchGameButton;
-
-@property (strong, nonatomic) HostGameViewController *hostGameView;
-@property (strong, nonatomic) SearchGameViewController *searchGameView;
 
 @end

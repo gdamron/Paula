@@ -7,8 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "HostGameViewController.h"
+#import "NetworkViewController.h"
 
 @interface SearchGameViewController : UIViewController <GameCommunicationDelegate>
+
+- (void) insertGameService:(NSMutableArray*)services;
 
 @end

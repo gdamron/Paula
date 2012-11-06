@@ -18,17 +18,19 @@
 @property(assign) uint16_t port;
 @property(nonatomic) CFSocketRef socketRef;
 @property(nonatomic) uint32_t protocolType;
-@property (nonatomic) NSError *error;
+@property (nonatomic) NSError *errorRef;
+
+@property (nonatomic) NSMutableArray *players;
 @end
 
 @implementation GameServer
 
-@synthesize delegate=_delegate, port=_port, netService=_netService;
+@synthesize delegate=_delegate, port=_port, netService=_netService, gameController=_gameController;
 @synthesize socketRef;
-@synthesize error;
+@synthesize errorRef;
 
 - (id) init {
-    BOOL result = [self startServer:error];
+    BOOL result = [self startServer:errorRef];
     
     NSString *bonjourName = [NSString stringWithFormat:@"_%@._tcp.", _broadcastName];
     
@@ -38,6 +40,8 @@
     if(![self enableBonjour:@"local" appProtocol:bonjourName name:nil]) {
         NSLog(@"bonjour failed");
     }
+    
+    self.players = [[NSMutableArray alloc] initWithCapacity:5];
     
     NSLog(@"Server Started : %d", result);
     
@@ -149,6 +153,10 @@
 - (void)handleIncomingSocket:(NSData *)addr inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr {
     NSLog(@"handling incoming sockets");
 //    (GameServer *)server inputStream:(NSInputStream *)istr outputStream:(NSOutputStream *)ostr
+    
+    [self.players addObject:@"Player 1"];
+    [self.gameController insertPlayer:self.players];
+    
     [self.delegate acceptConnection:self inputStream:istr outputStream:ostr];
 }
 

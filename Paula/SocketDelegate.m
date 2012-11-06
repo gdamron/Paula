@@ -14,6 +14,8 @@
 @property (nonatomic) GameServer *server;
 @property (nonatomic) NSMutableData *data;
 @property (strong, nonatomic) NSNetService *currentResolve;
+
+@property (strong, nonatomic) NSMutableArray *services;
 @end
 
 @implementation SocketDelegate
@@ -34,7 +36,7 @@
     self._inStream = istr;
     self._outStream = ostr;
     
-    [self.controller presentGame];
+//    [self.controller presentGame];
     
     [self openStreams];
 }
@@ -60,7 +62,7 @@
         self._inStream = inStream;
         self._outStream = outStream;
         
-        [self.controller presentGame];
+//        [self.controller presentGame];
         
         [self openStreams];
     }
@@ -123,9 +125,9 @@
                 } else {
                     BOOL reset = NO;
                     if(byte[0] == '\n') {
-                        NSString *m = [[NSString alloc] initWithBytes:self.data.bytes length:self.data.length encoding:NSASCIIStringEncoding];
-                        NSLog(@"%@", m);
-                        NSLog(@"newline read");
+//                        NSString *m = [[NSString alloc] initWithBytes:self.data.bytes length:self.data.length encoding:NSASCIIStringEncoding];
+//                        NSLog(@"%@", m);
+//                        NSLog(@"newline read");
                         reset = YES;
                     }
                     
@@ -136,15 +138,16 @@
                         
                         NSLog(@"reading...%d", note);
                         
-                        if(note == 0) {
-                            if(self.controller != nil) {
-                                [self.controller allNotesOff];
-                            }
-                        } else {
-                            if(self.controller != nil) {
+                        if(self.controller) {
+                            if(note == 0) {
+                                    [self.controller allNotesOff];
+                            } else if (note == 9) {
+                                [self.controller presentGame];
+                            } else {
                                 [self.controller noteOnWithNumber:note sendMessage:NO];
                             }
                         }
+                        
                     } else {
                         [self.data setLength:0];
                     }

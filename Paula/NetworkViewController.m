@@ -7,9 +7,12 @@
 //
 
 #import "NetworkViewController.h"
+#import "HostGameViewController.h"
+#import "SearchGameViewController.h"
 
 @interface NetworkViewController ()
-
+@property (nonatomic) HostGameViewController *hostGameView;
+@property (nonatomic) SearchGameViewController *searchGameView;
 @end
 
 @implementation NetworkViewController
@@ -61,10 +64,10 @@
 - (void)nameButtonPressed:(id)sender {
     if(sender == hostGameButton) {
         self.hostGameView = [[HostGameViewController alloc] init];
-        [self presentViewController:self.hostGameView animated:YES completion:nil];
+        [self presentViewController:self.hostGameView animated:NO completion:nil];
     } else if (sender == searchGameButton) {
         self.searchGameView = [[SearchGameViewController alloc] init];
-        [self presentViewController:self.searchGameView animated:YES completion:nil];
+        [self presentViewController:self.searchGameView animated:NO completion:nil];
     }
 }
 

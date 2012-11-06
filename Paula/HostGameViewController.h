@@ -7,15 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@protocol GameCommunicationDelegate <NSObject>
-@required
-- (void) send:(uint8_t)message;
-- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
-- (void) allNotesOff;
-- (void) presentGame;
-@end
+#import "NetworkViewController.h"
 
 @interface HostGameViewController : UIViewController <GameCommunicationDelegate>
+
+@property (nonatomic) UIButton* startButton;
+
+- (void) insertPlayer:(NSMutableArray*)names;
 
 @end
