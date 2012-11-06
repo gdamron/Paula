@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Metronome.h"
-#import "ToneGenerator.h"
+//#import "ToneGenerator.h"
 
 @interface Paula : NSObject
 

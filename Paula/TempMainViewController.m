@@ -9,7 +9,7 @@
 #import "TempMainViewController.h"
 
 @interface TempMainViewController ()
-@property (strong) ToneGenerator *tone;
+@property (strong) ToneGenerator *toneGenerator;
 @end
 
 
@@ -23,6 +23,7 @@
 @synthesize eugeneViewController;
 @synthesize singlePlayerViewController;
 @synthesize networkViewController;
+//@synthesize toneGenerator;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -47,6 +48,8 @@
         [self.view addSubview:toEugene];
         [self.view addSubview:toSinglePlayer];
         [self.view addSubview:toMultiPlayer];
+        
+        //toneGenerator = [[ToneGenerator alloc] init];
     }
     return self;
 }
@@ -72,6 +75,7 @@
         [self presentViewController:eugeneViewController animated:YES completion:nil];
     } else if (sender==toSinglePlayer) {
         singlePlayerViewController = [[SinglePlayerViewController alloc] init];
+        //[singlePlayerViewController setToneGen:toneGenerator];
         [self presentViewController:singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];

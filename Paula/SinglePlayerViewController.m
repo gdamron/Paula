@@ -273,6 +273,7 @@
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
+    [toneGen stop];
     [metronome turnOff];
 }
 
@@ -292,6 +293,7 @@
 - (void)gameLostButtonPressed {
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
+    //[toneGen stop];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
