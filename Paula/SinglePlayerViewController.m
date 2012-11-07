@@ -168,7 +168,6 @@
 }
 
 - (void)setupGame {
-    //Game *g = [[Game alloc] init];
     Layer *newLayer = [[Layer alloc] init];
     if (game.mode==SINGLE_PLAYER) {
         newLayer.notes = [[NSArray alloc] initWithArray:[paula generateRandomLayer]];
@@ -180,8 +179,6 @@
     [newSection addLayer:newLayer];
     
     [game.level.song addSection:newSection];
-    
-    //return g;
 }
 
 - (void)turnBackOverToPaula {
@@ -206,6 +203,9 @@
     } else if (continueCondition==2) {
         //NSLog(@"game over");
         [self gameLost];
+    } else if (continueCondition==3) {
+        // you won!
+        [self gameWon];
     }
 }
 
@@ -217,26 +217,20 @@
     int index = [currentLayer.currentNote intValue];
     // get the index in the layer of the note stop at for this round
     int stopNote = [currentLayer.currentStopIndex intValue];
-    //NSLog(@"%d %d %d", index, stopNote, currentLayer.notes.count);
-    if (index < currentLayer.notes.count) {
-        if (index >= stopNote) {
-            index = 0;
-            [metronome turnOff];
-            game.isPaulasTurn = NO;
-            currentLayer.currentStopIndex = [NSNumber numberWithInt:stopNote+1];
-        } else {
-            NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
-            if (i > 0) {
-                [self noteOnWithNumber:i sendMessage:NO];
-                [game.currentRound addObject:[NSNumber numberWithInt:i]];
-            }
-        }
-        currentLayer.currentNote = [NSNumber numberWithInt:index];
-    } else {
-        // round over
-        [self allNotesOff];
+    
+    if (index >= stopNote) {
+        index = 0;
         [metronome turnOff];
+        game.isPaulasTurn = NO;
+        currentLayer.currentStopIndex = [NSNumber numberWithInt:stopNote+1];
+    } else {
+        NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
+        if (i > 0) {
+            [self noteOnWithNumber:i sendMessage:NO];
+            [game.currentRound addObject:[NSNumber numberWithInt:i]];
+        }
     }
+    currentLayer.currentNote = [NSNumber numberWithInt:index];
 }
 
 - (void)playerClickListen:(id)sender {
@@ -250,6 +244,8 @@
 }
 
 - (void)gameLost {
+    [self allNotesOff];
+    [self.metronome turnOff];
     mistakesLeftDisplay.text = @"mistakes: 0";
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
     [gameOver gameLost];
@@ -259,6 +255,9 @@
 }
 
 - (void)gameWon {
+    [self allNotesOff];
+    [self.metronome turnOff];
+    //game.level.song.currentSection = [NSNumber numberWithInt:[game.level.song.currentSection intValue]+1];
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
     [gameOver gameWon:[game.score intValue]];
     [self.view addSubview:gameOver.label];
@@ -308,7 +307,8 @@
 - (void)gameWonButtonPressed {
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
-    [self playCountdownAndStartGame];
+    //[self playCountdownAndStartGame];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /////////////////// VIEW SETUP ////////////

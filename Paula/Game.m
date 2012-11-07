@@ -30,6 +30,7 @@
 
 // returns 0 = continue, 1 = paula's turn, or 2 = game over
 - (int)addNoteAndCompare:(int)tile {
+    NSLog(@"0");
     int retval = 0;
     [player.currentInput addObject:[NSNumber numberWithInt:tile]];
     BOOL mistakes = [self checkMistakesInInput];
@@ -41,11 +42,30 @@
         [player.currentInput removeAllObjects];
         if (mistakes)
             player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + 1)];
+        NSLog(@"1");
         retval = 1;
     }
     
-    if ([player.mistakesMade intValue] > [player.mistakesAllowed intValue])
+    // this is a problem -- number of notes in layer and number of notes stored in round
+    // may not match because 0's (rests) are not stored
+    Section *currentSection = self.level.song.sections[[self.level.song.currentSection intValue]];
+    Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
+    int numNotesInLayer = 0;
+    
+    for (int i = 0; i < currentLayer.notes.count; i++) {
+        if ([currentLayer.notes[i] intValue]!=0)
+            numNotesInLayer++;
+        NSLog(@"%d %d", numNotesInLayer, currentRound.count);
+    }
+    
+    
+    if ([player.mistakesMade intValue] > [player.mistakesAllowed intValue]) {
+        NSLog(@"2");
         retval = 2;
+    } else if (currentRound.count == numNotesInLayer) {
+        NSLog(@"3");
+        retval = 3;
+    }
     
     //NSLog(@"mistakes = @d, allowed = %d, retval = %d", retval);
     return retval;
@@ -60,8 +80,8 @@
         if (playerInput!=paulaInput) mistakes=YES;
         else score = [NSNumber numberWithInt:[score intValue]+1];
     }
-    NSLog(@"%@ || %@", player.currentInput, currentRound);
-    NSLog(@"input size: %d round size %d mistakes %d", player.currentInput.count, currentRound.count, mistakes);
+    //NSLog(@"%@ || %@", player.currentInput, currentRound);
+    //NSLog(@"input size: %d round size %d mistakes %d", player.currentInput.count, currentRound.count, mistakes);
     return mistakes;
 }
 

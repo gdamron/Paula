@@ -111,7 +111,8 @@
 - (void)gameWon:(int)totalScore {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
-    [button setTitle:@"Play Again!" forState:UIControlStateNormal];
+    //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
+    [button setTitle:@"Quit (for now)" forState:UIControlStateNormal];
 }
 
 - (void)gameLost {
