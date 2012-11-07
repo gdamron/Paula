@@ -399,7 +399,7 @@
     mistakesLeftDisplay = [[UILabel alloc] initWithFrame:CGRectMake(width-74, height-18, 72, 16)];
     mistakesLeftDisplay.backgroundColor = [UIColor clearColor];
     mistakesLeftDisplay.textColor = [UIColor cyanColor];
-    mistakesLeftDisplay.text = @"mistakes: 3";
+    mistakesLeftDisplay.text = @"mistakes: 5";
     mistakesLeftDisplay.textAlignment = NSTextAlignmentRight;
     mistakesLeftDisplay.font = [UIFont systemFontOfSize:14];
     

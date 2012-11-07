@@ -32,14 +32,15 @@
 - (int)addNoteAndCompare:(int)tile {
     int retval = 0;
     [player.currentInput addObject:[NSNumber numberWithInt:tile]];
-    int mistakes = [self checkMistakesInInput];
-    player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + mistakes)];
-    if (mistakes==0) {
+    BOOL mistakes = [self checkMistakesInInput];
+    if (!mistakes) {
         score = [NSNumber numberWithInt:[score intValue]+5];
     }
     
     if (player.currentInput.count==currentRound.count) {
         [player.currentInput removeAllObjects];
+        if (mistakes)
+            player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + 1)];
         retval = 1;
     }
     
@@ -50,13 +51,13 @@
     return retval;
 }
 
-- (int)checkMistakesInInput {
-    int mistakes = 0;
+- (BOOL)checkMistakesInInput {
+    BOOL mistakes = NO;
     for (int i = 0; i < player.currentInput.count; i++) {
         int playerInput = [player.currentInput[i] intValue];
         int paulaInput = [currentRound[i] intValue];
         NSLog(@"player: %d paula: %d count: %d", playerInput, paulaInput, player.currentInput.count);
-        if (playerInput!=paulaInput) mistakes++;
+        if (playerInput!=paulaInput) mistakes=YES;
         else score = [NSNumber numberWithInt:[score intValue]+1];
     }
     NSLog(@"%@ || %@", player.currentInput, currentRound);
@@ -76,7 +77,7 @@
     if (self) {
         currentInput = [[NSMutableArray alloc] init];
         score = [NSNumber numberWithDouble:0.0];
-        mistakesAllowed = [NSNumber numberWithInt:3];
+        mistakesAllowed = [NSNumber numberWithInt:5];
         mistakesMade = [NSNumber numberWithInt:0];
     }
     return self;
