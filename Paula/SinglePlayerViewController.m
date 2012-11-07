@@ -12,7 +12,7 @@
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 2.0
 
-#define TEMP_BPM 80.0
+#define TEMP_BPM 100.0
 #define TEMP_DUR 10.0
 #define TEMP_LAYERS 1
 #define TEMP_SECTIONS 1
