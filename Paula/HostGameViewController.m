@@ -78,6 +78,9 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.singlePlayerController = [[SinglePlayerViewController alloc] init];
+    // later, we'll need to have a more complicated control structure
+    // but for now, assuming MULTI_BASIC multiplayer mode
+    self.singlePlayerController.game.mode = MULTI_BASIC;
     [self.singlePlayerController setController:self];
     self.server = [[GameServer alloc] init];
     self.socketDelegate = [[SocketDelegate alloc] init];
@@ -111,6 +114,7 @@
 
 - (void) presentGame {
     [self presentViewController:self.singlePlayerController animated:YES completion:nil];
+    [self.singlePlayerController playCountdownAndStartGame];
 }
 
 - (void) backButtonPressed {

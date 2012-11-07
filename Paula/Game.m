@@ -10,7 +10,7 @@
 
 @implementation Game
 
-@synthesize date, score, level, player, currentRound, isPaulasTurn;
+@synthesize date, score, level, player, currentRound, isPaulasTurn, mode;
 
 - (id)init
 {
@@ -23,6 +23,7 @@
         player = [[Player alloc] init];
         isPaulasTurn = YES;
         currentRound = [[NSMutableArray alloc] init];
+        mode = SINGLE_PLAYER;
     }
     return self;
 }

@@ -91,6 +91,7 @@ enum gameModes {
 @property (strong, nonatomic) NSDate *date;
 @property (strong, nonatomic) NSMutableArray *currentRound;
 @property (assign, nonatomic) BOOL isPaulasTurn;
+@property (assign, nonatomic) enum gameModes mode;
 
 - (int)addNoteAndCompare:(int)tile;
 

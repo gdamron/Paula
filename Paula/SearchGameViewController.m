@@ -52,12 +52,16 @@
 
 - (void) startGame {
     self.singlePlayerController = [[SinglePlayerViewController alloc] init];
+    // later, we'll need to have a more complicated control structure
+    // but for now, assuming MULTI_BASIC multiplayer mode
+    self.singlePlayerController.game.mode = MULTI_BASIC;
     [self.singlePlayerController setController:self];
     self.client = [[GameClient alloc] init];
     self.socketDelegate = [[SocketDelegate alloc] init];
     [self.client setDelegate:self.socketDelegate];
     [self.client setGameController:self];
     [self.socketDelegate setController:self];
+    [self.singlePlayerController playCountdownAndStartGame];
 }
 
 - (void) insertGameService:(NSMutableArray *)services {

@@ -75,6 +75,7 @@
         [self presentViewController:eugeneViewController animated:YES completion:nil];
     } else if (sender==toSinglePlayer) {
         singlePlayerViewController = [[SinglePlayerViewController alloc] init];
+        [singlePlayerViewController playCountdownAndStartGame];
         //[singlePlayerViewController setToneGen:toneGenerator];
         [self presentViewController:singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toMultiPlayer) {

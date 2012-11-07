@@ -12,7 +12,7 @@
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 2.0
 
-#define TEMP_BPM 100.0
+#define TEMP_BPM 80.0
 #define TEMP_DUR 10.0
 #define TEMP_LAYERS 1
 #define TEMP_SECTIONS 1
@@ -21,7 +21,7 @@
     // These are all temporary
     NSArray *scale;
     // used for keeping track of time while a melody plays
-    int melIndex;
+    // int melIndex;
     double totalDur;
     //Metronome *met;
     NSArray *melNotes;
@@ -162,21 +162,26 @@
 - (void)startGame {
     paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
     toneGen = [[ToneGenerator alloc] init];
-    game = [self setupGame];
+    [self setupGame];
     [toneGen start];
     [metronome turnOnWithNotification:@"paulaClick"];
 }
 
-- (Game *)setupGame {
-    Game *g = [[Game alloc] init];
+- (void)setupGame {
+    //Game *g = [[Game alloc] init];
     Layer *newLayer = [[Layer alloc] init];
-    newLayer.notes = [[NSArray alloc] initWithArray:[paula generateRandomLayer]];
+    if (game.mode==SINGLE_PLAYER) {
+        newLayer.notes = [[NSArray alloc] initWithArray:[paula generateRandomLayer]];
+    } else if (game.mode==MULTI_BASIC) {
+        [self setTempMultiPlayerMelody];
+        newLayer.notes = [[NSArray alloc] initWithArray:melNotes];
+    }
     Section *newSection = [[Section alloc] init];
     [newSection addLayer:newLayer];
     
-    [g.level.song addSection:newSection];
+    [game.level.song addSection:newSection];
     
-    return g;
+    //return g;
 }
 
 - (void)turnBackOverToPaula {
@@ -261,21 +266,24 @@
     [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
+- (void)setTempMultiPlayerMelody {
+    melNotes = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:2],
+                [NSNumber numberWithInt:3],
+                [NSNumber numberWithInt:0],
+                [NSNumber numberWithInt:4],
+                [NSNumber numberWithInt:3],
+                [NSNumber numberWithInt:2],
+                [NSNumber numberWithInt:1],
+                [NSNumber numberWithInt:5],
+                [NSNumber numberWithInt:5],
+                [NSNumber numberWithInt:4],
+                [NSNumber numberWithInt:0],
+                [NSNumber numberWithInt:6],
+                [NSNumber numberWithInt:8],
+                [NSNumber numberWithInt:7], nil];
+}
+
 /////////////////// NAVIGATION ////////////
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
-    
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    [toneGen stop];
-    [metronome turnOff];
-}
 
 - (void)didReceiveMemoryWarning
 {
@@ -286,7 +294,7 @@
 // Back to the main view controller
 - (void) backButtonPressed {
     //[toneGen stop];
-    melIndex = 0;
+    // melIndex = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -305,21 +313,35 @@
 
 /////////////////// VIEW SETUP ////////////
 
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
+    
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [toneGen stop];
+    [metronome turnOff];
+}
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        melIndex = 0;
+        // melIndex = 0;
         totalDur = 0.0;
         self.view.backgroundColor = [UIColor blackColor];
         scale = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:0],
                  [NSNumber numberWithInt:2],
                  [NSNumber numberWithInt:5],
                  [NSNumber numberWithInt:7],
-                 [NSNumber numberWithInt:8],
                  [NSNumber numberWithInt:9],
                  [NSNumber numberWithInt:12],
-                 [NSNumber numberWithInt:14], nil];
+                 [NSNumber numberWithInt:14],
+                 [NSNumber numberWithInt:17], nil];
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
@@ -339,7 +361,8 @@
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:backButton];
-        [self playCountdownAndStartGame];
+        game = [[Game alloc] init];
+        //[self playCountdownAndStartGame];
         
     }
     return self;

@@ -37,8 +37,9 @@
 
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;
-- (void)noteOn:(id)sender;
-- (void)noteOff:(id)sender;
+- (void) noteOn:(id)sender;
+- (void) noteOff:(id)sender;
 - (void) allNotesOff;
+- (void)playCountdownAndStartGame;
 
 @end
