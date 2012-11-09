@@ -61,7 +61,6 @@
     [self.client setDelegate:self.socketDelegate];
     [self.client setGameController:self];
     [self.socketDelegate setController:self];
-    [self.singlePlayerController playCountdownAndStartGame];
 }
 
 - (void) insertGameService:(NSMutableArray *)services {
@@ -99,6 +98,7 @@
 }
 
 - (void) presentGame {
+    [self.singlePlayerController playCountdownAndStartGame];
     [self presentViewController:self.singlePlayerController animated:YES completion:nil];
 }
 
