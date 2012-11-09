@@ -18,6 +18,7 @@
 - (void) closeStream;
 - (void) resolveInstance:(NSNetService *)service;
 - (void) didResolveInstance:(NSNetService *)netService;
+- (void) send:(const uint8_t)message;
 @end
 
 NSString * const GameServerErrorDomain;
@@ -43,5 +44,4 @@ typedef enum {
 - (BOOL) stopServer;
 - (BOOL) enableBonjour:(NSString*)domain appProtocol:(NSString*)appProtocol name:(NSString*)name;
 - (void) disableBonjour;
-- (id) getSocketDelegate;
 @end

@@ -140,11 +140,11 @@
                         
                         if(self.controller) {
                             if(note == 0) {
-                                    [self.controller allNotesOff];
+//                                    [self.controller allNotesOff];
                             } else if (note == 9) {
                                 [self.controller presentGame];
                             } else {
-                                [self.controller noteOnWithNumber:note sendMessage:NO];
+//                                [self.controller noteOnWithNumber:note sendMessage:NO];
                             }
                         }
                         
@@ -153,6 +153,12 @@
                     }
                 }
             }
+            break;
+        }
+        case NSStreamEventNone: {
+            break;
+        }
+        case NSStreamEventHasSpaceAvailable: {
             break;
         }
         case NSStreamEventErrorOccurred: {

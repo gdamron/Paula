@@ -61,6 +61,12 @@
 //    [self.delegate resolveInstance:service];
 }
 
+- (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing {
+    [self.services removeObject:netService];
+    [self.serviceNames removeObject:netService.name];
+    [self.gameController insertGameService:self.serviceNames];
+}
+
 - (void) connectToService:(NSUInteger*)idx {
     NSNetService *service = [self.services objectAtIndex:*idx];
     [self.delegate resolveInstance:service];

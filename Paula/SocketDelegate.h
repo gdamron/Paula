@@ -15,8 +15,4 @@
 
 @property(assign) id<GameCommunicationDelegate> controller;
 
-- (void) didResolveInstance:(NSNetService *)netService;
-- (void) resolveInstance:(NSNetService *)netService;
-- (void) send:(const uint8_t)message;
-
 @end

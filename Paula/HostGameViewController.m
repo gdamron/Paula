@@ -118,6 +118,7 @@
 }
 
 - (void) backButtonPressed {
+    [self.server disableBonjour];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
