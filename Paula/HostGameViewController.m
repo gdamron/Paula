@@ -8,18 +8,18 @@
 
 #import "HostGameViewController.h"
 #import "NetworkTableViewController.h"
-#import "GameServer.h"
-#import "SocketDelegate.h"
+#import "SinglePlayerViewController.h"
+#import "GK_GameServer.h"
 
 @interface HostGameViewController ()
 @property SinglePlayerViewController* singlePlayerController;
-@property (nonatomic) GameServer *server;
-@property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) NetworkTableViewController *ntvc;
 @end
 
-@implementation HostGameViewController
+@implementation HostGameViewController {
+    GK_GameServer *_gameServer;
+}
 
 @synthesize startButton;
 
@@ -66,64 +66,29 @@
     return self;
 }
 
-- (void) startGame {
-    if(self.socketDelegate != nil) {
-        [self.socketDelegate send:'9'];
-        [self presentGame];
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    if (_gameServer == nil) {
+        _gameServer = [[GK_GameServer alloc] init];
+        [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
+        [_gameServer setDelegate:self];
     }
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	// Do any additional setup after loading the view.
-    self.singlePlayerController = [[SinglePlayerViewController alloc] init];
-    // later, we'll need to have a more complicated control structure
-    // but for now, assuming MULTI_BASIC multiplayer mode
-    self.singlePlayerController.game.mode = MULTI_BASIC;
-    [self.singlePlayerController setController:self];
-    self.server = [[GameServer alloc] init];
-    self.socketDelegate = [[SocketDelegate alloc] init];
-    [self.server setDelegate:self.socketDelegate];
-    [self.server setGameController:self];
-    [self.socketDelegate setController:self];
-}
-
-- (void) insertPlayer:(NSMutableArray *)names {
-    NSLog(@"number of players added : %d", names.count);
-    [self.ntvc reloadTableData:names];
-}
-
-- (void)didReceiveMemoryWarning
-{
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void) send:(const uint8_t)message {
-    [self.socketDelegate send:message];
-}
-
-- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    [self.singlePlayerController noteOnWithNumber:num sendMessage:send];
-}
-
-- (void) allNotesOff {
-    [self.singlePlayerController allNotesOff];
-}
-
-- (void) presentGame {
-    [self presentViewController:self.singlePlayerController animated:YES completion:nil];
-    [self.singlePlayerController playCountdownAndStartGame];
-}
-
 - (void) backButtonPressed {
-    [self.server disableBonjour];
+//    [self.server disableBonjour];
+    [_gameServer close];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void) selectedRowAtIndexPath:(NSUInteger*)idx {
-    //not implemented
+#pragma mark - GK_GameCommDelegate
+- (void) updateUI:(NSMutableArray *)data {
+    [self.ntvc reloadTableData:data];
 }
 
 @end

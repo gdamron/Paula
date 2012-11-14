@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ToneGenerator.h"
 #import "PaulaUtilities.m"
-#import "HostGameViewController.h"
+#import "NetworkViewController.h"
 #import "Metronome.h"
 #import "Paula.h"
 #import "Game.h"
@@ -18,7 +18,7 @@
 
 @interface SinglePlayerViewController : UIViewController
 
-@property(assign) id<GameCommunicationDelegate> controller;
+//@property(assign) id<GameCommunicationDelegate> controller;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *sineButton1;
 @property (strong, nonatomic) UIButton *sineButton2;

@@ -7,10 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NetworkViewController.h"
+#import "GK_GameComm.h"
 
-@interface SearchGameViewController : UIViewController <GameCommunicationDelegate>
-
-- (void) insertGameService:(NSMutableArray*)services;
+@interface SearchGameViewController : UIViewController <GK_GameCommDelegate>
 
 @end

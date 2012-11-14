@@ -7,12 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NetworkViewController.h"
+#import "GK_GameComm.h"
 
-@interface HostGameViewController : UIViewController <GameCommunicationDelegate>
+@interface HostGameViewController : UIViewController <GK_GameCommDelegate>
 
 @property (nonatomic) UIButton* startButton;
-
-- (void) insertPlayer:(NSMutableArray*)names;
 
 @end

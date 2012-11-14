@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-@interface GK_GameComm : NSObject
+@protocol GK_GameCommDelegate <NSObject>
+
+@required
+- (void) updateUI:(NSMutableArray *)data;
 
 @end
