@@ -8,12 +8,15 @@
 
 #import <Foundation/Foundation.h>
 #import "NetworkViewController.h"
+#import "GK_GameComm.h"
 
 @interface NetworkTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 
-@property (assign) id<GameCommunicationDelegate> communicationDelegate;
+@property (nonatomic, assign) id<GK_GameCommDelegate> commDelegate;
+@property (nonatomic, assign) id<GK_GameDataDelegate> dataDelegate;
+@property (nonatomic) BOOL respondToSelection;
 
 - (id) initWithTitle:(NSString*)title selectable:(BOOL)select;
-- (void) reloadTableData:(NSMutableArray*)data;
+- (void) reloadTableData;
 
 @end

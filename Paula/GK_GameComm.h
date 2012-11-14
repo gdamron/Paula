@@ -12,5 +12,13 @@
 
 @required
 - (void) updateUI:(NSMutableArray *)data;
+- (void) connectToServer:(NSInteger)idx;
+
+@end
+
+@protocol GK_GameDataDelegate <NSObject>
+
+@required
+- (NSMutableArray *) getInternalData;
 
 @end

@@ -11,15 +11,6 @@
 
 @class NetworkViewController;
 
-@protocol GameCommunicationDelegate <NSObject>
-@required
-- (void) send:(uint8_t)message;
-- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
-- (void) allNotesOff;
-- (void) presentGame;
-- (void) selectedRowAtIndexPath:(NSUInteger*)idx;
-@end
-
 @interface NetworkViewController : UIViewController
 
 @property (strong, nonatomic) UIButton *backButton;

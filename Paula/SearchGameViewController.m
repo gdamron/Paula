@@ -22,8 +22,7 @@
     GK_GameClient *_gameClient;
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         // Custom initialization
@@ -46,7 +45,15 @@
         [self.view addSubview:self.backButton];
         [self.view addSubview:self.ntvc.view];
         
-//        [self.ntvc setCommunicationDelegate:self];
+        if (_gameClient == nil) {
+            _gameClient = [[GK_GameClient alloc] init];
+            [_gameClient startSearchServerForSessionID:SESSION_ID];
+            [_gameClient setDelegate:self];
+            
+            NSLog(@"setting client delegates");
+            [self.ntvc setCommDelegate:self];
+            [self.ntvc setDataDelegate:_gameClient];
+        }
     }
     return self;
 }
@@ -55,11 +62,6 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    if (_gameClient == nil) {
-        _gameClient = [[GK_GameClient alloc] init];
-        [_gameClient startSearchServerForSessionID:SESSION_ID];
-        [_gameClient setDelegate:self];
-    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -74,8 +76,12 @@
 
 #pragma mark - GK_GameCommDelegate
 - (void) updateUI:(NSMutableArray *)data {
-    [self.ntvc reloadTableData:data];
+    [self.ntvc reloadTableData];
 }
 
+- (void) connectToServer:(NSInteger)idx {
+    NSLog(@"connecting to server at idx : %d", idx);
+    [_gameClient connectToServerWithIdx:idx];
+}
 
 @end

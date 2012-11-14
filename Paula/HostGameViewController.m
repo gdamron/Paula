@@ -50,7 +50,6 @@
         [self.view addSubview:self.backButton];
         [self.view addSubview:self.ntvc.view];
         
-        [self.ntvc setCommunicationDelegate:self];
         self.startButton = [[UIButton alloc] initWithFrame:CGRectMake(width/2 - 40, height - 100, 80, 30)];
         
         self.startButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
@@ -62,17 +61,22 @@
         [self.startButton addTarget:self action:@selector(startGame) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:self.startButton];
+        
+        if (_gameServer == nil) {
+            _gameServer = [[GK_GameServer alloc] init];
+            [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
+            [_gameServer setDelegate:self];
+            
+            [self.ntvc setCommDelegate:self];
+            [self.ntvc setDataDelegate:_gameServer];
+        }
     }
     return self;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    if (_gameServer == nil) {
-        _gameServer = [[GK_GameServer alloc] init];
-        [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
-        [_gameServer setDelegate:self];
-    }
+    // Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning {
@@ -86,9 +90,17 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (void) startGame {
+    [_gameServer startGame];
+}
+
 #pragma mark - GK_GameCommDelegate
 - (void) updateUI:(NSMutableArray *)data {
-    [self.ntvc reloadTableData:data];
+    [self.ntvc reloadTableData];
+}
+
+- (void) connectToServer:(NSInteger)idx {
+    
 }
 
 @end

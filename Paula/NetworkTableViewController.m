@@ -10,13 +10,13 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface NetworkTableViewController ()
-@property (strong, nonatomic) NSMutableArray* internalData;
-@property (nonatomic) BOOL respondToSelection;
+    
 @end
 
 @implementation NetworkTableViewController
 
-@synthesize communicationDelegate=_communicationDelegate;
+@synthesize commDelegate=_commDelegate;
+@synthesize dataDelegate=_dataDelegate;
 
 - (id) initWithTitle:(NSString *)title selectable:(BOOL)select {
     self = [super initWithStyle:UITableViewStylePlain];
@@ -40,7 +40,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return [self.internalData count];
+	return [[_dataDelegate getInternalData] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -53,7 +53,7 @@
     
     cell.textLabel.font = [[[UIFont alloc] init] fontWithSize:14];
     cell.textLabel.textAlignment = UITextAlignmentCenter;
-    NSString *service = [self.internalData objectAtIndex:indexPath.row];
+    NSString *service = [[_dataDelegate getInternalData] objectAtIndex:indexPath.row];
     cell.textLabel.text = service;
     
     cell.accessoryType = UITableViewCellAccessoryNone;
@@ -63,15 +63,12 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if(self.respondToSelection) {
-        NSUInteger uint = (NSUInteger)indexPath.row;
-        [self.communicationDelegate selectedRowAtIndexPath:&uint];
+        NSInteger uint = indexPath.row;
+        [_commDelegate connectToServer:uint];
     }
 }
 
-- (void) reloadTableData:(NSMutableArray *)data {
-    self.internalData = nil;
-    self.internalData = data;
-    
+- (void) reloadTableData {
     [self.tableView reloadData];
 }
 
