@@ -35,7 +35,7 @@
 
 @implementation SinglePlayerViewController
 
-@synthesize controller=_controller;
+//@synthesize controller=_controller;
 @synthesize backButton;
 @synthesize sineButton1;
 @synthesize sineButton2;
@@ -90,7 +90,7 @@
                 case 7: c = '7'; break;
                 case 8: c = '8'; break;
         }
-        [self.controller send:c];
+//        [self.controller send:c];
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
     
@@ -118,7 +118,7 @@
         sineButton8.alpha = OFFALPHA;
     }
     if(send) {
-        [self.controller send:'0'];
+//        [self.controller send:'0'];
     }
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
 }
@@ -126,13 +126,13 @@
 // wrapper for noteOnWithNumber, used by UIButtons
 - (void)noteOn:(id)sender {
     UIButton *button = (UIButton *)sender;
-    [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:YES];
+    [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
 }
 
 // wrapper for noteOffWithNumber, used by UIButtons
 - (void)noteOff:(id)sender {
     UIButton *button = (UIButton *)sender;
-    [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:YES];
+    [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
 }
 
 // Stops all tones currently playing.  Bonjour currently uses this

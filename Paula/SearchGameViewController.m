@@ -6,20 +6,21 @@
 //  Copyright (c) 2012 inomadmusic.com. All rights reserved.
 //
 #import "SearchGameViewController.h"
-#import "GameClient.h"
-#import "SocketDelegate.h"
 #import "NetworkTableViewController.h"
+#import "SinglePlayerViewController.h"
+#import "GK_GameServer.h"
+#import "GK_GameClient.h"
 
 @interface SearchGameViewController ()
 @property SinglePlayerViewController* singlePlayerController;
-@property (nonatomic) GameClient *client;
-@property (nonatomic) SocketDelegate *socketDelegate;
 @property (strong, nonatomic) UIButton* startButton;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) NetworkTableViewController *ntvc;
 @end
 
-@implementation SearchGameViewController
+@implementation SearchGameViewController {
+    GK_GameClient *_gameClient;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -45,38 +46,20 @@
         [self.view addSubview:self.backButton];
         [self.view addSubview:self.ntvc.view];
         
-        [self.ntvc setCommunicationDelegate:self];
+//        [self.ntvc setCommunicationDelegate:self];
     }
     return self;
-}
-
-- (void) startGame {
-    self.singlePlayerController = [[SinglePlayerViewController alloc] init];
-    // later, we'll need to have a more complicated control structure
-    // but for now, assuming MULTI_BASIC multiplayer mode
-    self.singlePlayerController.game.mode = MULTI_BASIC;
-    [self.singlePlayerController setController:self];
-    self.client = [[GameClient alloc] init];
-    self.socketDelegate = [[SocketDelegate alloc] init];
-    [self.client setDelegate:self.socketDelegate];
-    [self.client setGameController:self];
-    [self.socketDelegate setController:self];
-}
-
-- (void) insertGameService:(NSMutableArray *)services {
-    NSLog(@"number of host found: %d", services.count);
-    [self.ntvc reloadTableData:services];
-}
-
-- (void) selectedRowAtIndexPath:(NSUInteger*)idx {
-    [self.client connectToService:idx];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    [self startGame];
+    if (_gameClient == nil) {
+        _gameClient = [[GK_GameClient alloc] init];
+        [_gameClient startSearchServerForSessionID:SESSION_ID];
+        [_gameClient setDelegate:self];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -85,16 +68,8 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void) send:(const uint8_t)message {
-    [self.socketDelegate send:message];
-}
-
-- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    [self.singlePlayerController noteOnWithNumber:num sendMessage:send];
-}
-
-- (void) allNotesOff {
-    [self.singlePlayerController allNotesOff];
+- (void) backButtonPressed {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void) presentGame {
@@ -102,8 +77,5 @@
     [self.singlePlayerController playCountdownAndStartGame];
 }
 
-- (void) backButtonPressed {
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
 
 @end
