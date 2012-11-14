@@ -87,6 +87,7 @@
 }
 
 - (BOOL) setupIP6:(NSError *)error {
+    NSLog(@"setting up IP v.6");
     struct sockaddr_in6 address6;
     memset(&address6, 0, sizeof(address6));
     address6.sin6_len = sizeof(address6);
@@ -106,10 +107,14 @@
     memcpy(&address6, [addr bytes], [addr length]);
     self.port = ntohs(address6.sin6_port);
     
+//    NSLog(@"Address: %@", address6.sin6_addr);
+    NSLog(@"Port: %d", self.port);
+    
     return YES;
 }
 
 - (BOOL) setupIP4:(NSError *)error {
+    NSLog(@"setting up IP v.4");    
     struct sockaddr_in address4;
     memset(&address4, 0, sizeof(address4));
     address4.sin_len = sizeof(address4);
