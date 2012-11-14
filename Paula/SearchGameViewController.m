@@ -98,8 +98,8 @@
 }
 
 - (void) presentGame {
-    [self.singlePlayerController playCountdownAndStartGame];
     [self presentViewController:self.singlePlayerController animated:YES completion:nil];
+    [self.singlePlayerController playCountdownAndStartGame];
 }
 
 - (void) backButtonPressed {
