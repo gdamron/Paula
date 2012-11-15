@@ -12,7 +12,7 @@
 
 #define SESSION_ID @"Paula"
 
-@interface GK_GameServer : NSObject <GKSessionDelegate>
+@interface GK_GameServer : NSObject <GKSessionDelegate, GK_GameDataDelegate>
 
 @property (nonatomic, assign) id<GK_GameCommDelegate> delegate;
 @property (nonatomic) int maxPlayers;
@@ -21,5 +21,6 @@
 
 - (void) startAcceptConnectionForSessionID:(NSString *)sessionID;
 - (void) close;
+- (void) startGame;
 
 @end
