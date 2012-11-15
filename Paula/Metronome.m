@@ -9,6 +9,8 @@
 #import "Metronome.h"
 #import <AudioToolbox/AudioToolbox.h>
 
+#pragma mark - Metronome Class
+#pragma mark - Private Interface
 @interface Metronome ()
 
 @property (strong, nonatomic) NSDate *startTime;
@@ -19,6 +21,7 @@
 
 @end
 
+#pragma mark - Implementation
 @implementation Metronome
 
 @synthesize bpm;
@@ -76,6 +79,11 @@
     return self;
 }
 
+//
+//  turnOn
+//
+//  Turn on with last used tempo.
+//
 - (void)turnOn {
     assert(bpm>0);
     isOn = YES;
@@ -89,12 +97,22 @@
                                             repeats:YES];
 }
 
+//
+//  turnOnWithBPM
+//
+//  Turn on with new tempo.
+//
 - (void)turnOnWithBPM:(double)tempo {
     bpm = tempo;
     beatDuration = 60.0/bpm/beatResolution;
     [self turnOn];
 }
 
+//
+//  turnOnWithBPM:AndResolution
+//
+//  Turn on with new tempo and specify how to divide the beat.
+//
 - (void)turnOnWithBPM:(double)tempo AndResolution:(int)res {
     bpm = tempo;
     beatResolution = res;
@@ -102,16 +120,32 @@
     [self turnOn];
 }
 
+//
+//  turnOnWithNotification
+//
+//  Define a new notification for the metronome to send and turn on.
+//
 - (void)turnOnWithNotification:(NSString *)notice {
     notification = [NSString stringWithString:notice];
     [self turnOn];
 }
 
+//
+//  turnOff
+//
+//  no surprises here
+//
 - (void)turnOff {
     isOn = NO;
     [timer invalidate];
 }
 
+//
+//  click
+//
+//  Advance the beat.  If click sound is turned on, play it.  Send any appropriate
+//  notification as well.
+//
 - (void)click {
     beatCount++;
     currentBeat = elapsedTime;
@@ -125,16 +159,27 @@
     [[NSNotificationCenter defaultCenter] postNotification:notice];
 }
 
+//
+//  setBPM
+//
+//  Set new tempo.
+//
 - (void)setBpm:(double)tempo {
     bpm = tempo;
     beatDuration = 60.0/bpm;
 }
 
+//
+//  setBeatResolution
+//
+//  Define how beat is to be divided.
+//
 - (void)setBeatResolution:(NSInteger)res {
     beatResolution = res;
     beatDuration = 60.0/bpm/beatResolution;
 }
 
+// not useful now, but can send custom data the the target
 - (NSDictionary *)userInfo {
     return @{@"startTime" : startTime};
 }

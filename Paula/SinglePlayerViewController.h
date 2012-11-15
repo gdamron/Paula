@@ -11,10 +11,10 @@
 #import "PaulaUtilities.m"
 #import "NetworkViewController.h"
 #import "Metronome.h"
-#import "Paula.h"
 #import "Game.h"
 
 //#import "ToneGenerator2.h"
+#pragma mark - SinglePlayerViewController Public Interface
 
 @interface SinglePlayerViewController : UIViewController
 
@@ -31,15 +31,15 @@
 @property (strong, nonatomic) UILabel *scoreDisplay;
 @property (strong, nonatomic) UILabel *mistakesLeftDisplay;
 @property (strong) Metronome *metronome;
-@property (strong) Paula *paula;
 @property (strong) Game *game;
 @property (strong) ToneGenerator *toneGen;
 
+#pragma mark - SinglePlayerViewController Public Methods
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOn:(id)sender;
 - (void) noteOff:(id)sender;
 - (void) allNotesOff;
-- (void)playCountdownAndStartGame;
+- (void) playCountdownAndStartGame;
 
 @end

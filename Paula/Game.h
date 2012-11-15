@@ -7,72 +7,59 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Paula.h"
 
 enum gameModes {
     SINGLE_PLAYER = 0,
     MULTI_BASIC = 1,
     MULTI_CHALLENGE = 2,
     MULTI_COOP = 3,
-    MULTI_RACE = 4,
-    CREATE = 5
+    MULTI_RACE = 4
     };
 
-@interface Instrument : NSObject
+@class Player;
+@class Level;
+@class Section;
+@class Layer;
+@class Instrument;
+@class Note;
 
-@property (strong, nonatomic) NSNumber *waveform;
-@property (strong, nonatomic) NSNumber *lowPitch;
-@property (strong, nonatomic) NSNumber *highPitch;
+#pragma mark - Game Class -
+//
+//  Class: Game
+//
+//  The highes level of the model.  Holds level, player, and
+//  an instances of paula
+//
+@interface Game : NSObject
 
-@end
-
-@interface Note : NSObject
-
-@property (strong, nonatomic) NSNumber *degree;
-@property (strong, nonatomic) NSNumber *duration;
-
-
-@end
-
-@interface Layer : NSObject
-
-@property (strong, nonatomic) NSArray *notes;
-@property (strong, nonatomic) Instrument *instrument;
-@property (strong, nonatomic) NSArray *scale;
-@property (strong, nonatomic) NSNumber *currentNote;
-@property (strong, nonatomic) NSNumber *currentStopIndex;
-
-@end
-
-@interface Section : NSObject
-
-@property (strong, nonatomic) NSArray *layers;
-@property (strong, nonatomic) NSArray *order;
-@property (strong, nonatomic) NSNumber *currentLayer;
-
-- (void)addLayer:(Layer *)layer;
-
-@end
-
-@interface Song : NSObject
-
-@property (strong, nonatomic) NSNumber *tempo;
-@property (strong, nonatomic) NSArray *sections;
-@property (strong, nonatomic) NSArray *order;
-@property (strong, nonatomic) NSNumber *currentSection;
-
-- (void)addSection:(Section *)section;
-
-@end
-
-@interface Level : NSObject
-
-@property (strong, nonatomic) Song *song;
+@property (strong, nonatomic) Level *level;
+@property (strong, nonatomic) Player *player;
+@property (strong, nonatomic) Paula *paula;
 @property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSDate *date;
+@property (assign, nonatomic) enum gameModes mode;
 
+#pragma mark - Public Methods
+- (id)initWithGameMode:(enum gameModes)m;
+- (void)addPlayerInput:(int)tile;
+- (void)addPaulaInput:(int)tile;
+- (int)rewardOrPenalize:(BOOL)mistakesWereMade;
+- (void)makePlayersTurn;
+- (void)makePaulasTurn;
+- (BOOL)isPaulasTurn;
+- (void)newRound;
+- (NSArray *)currentRound;
 
 @end
 
+#pragma mark - Player Class -
+//
+//  Class: Player
+//
+//  Represents the player's current actions.  Holds
+//  total score for the game, mistakes, and input
+//
 @interface Player : NSObject
 
 @property (strong, nonatomic) NSNumber *score;
@@ -83,16 +70,84 @@ enum gameModes {
 
 @end
 
-@interface Game : NSObject
+#pragma mark - Level Class -
+//
+//  Class: Level
+//
+//  Describes the structure of the current level of the game
+//
+@interface Level : NSObject
 
-@property (strong, nonatomic) Level *level;
-@property (strong, nonatomic) Player *player;
 @property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSDate *date;
-@property (strong, nonatomic) NSMutableArray *currentRound;
-@property (assign, nonatomic) BOOL isPaulasTurn;
-@property (assign, nonatomic) enum gameModes mode;
+@property (strong, nonatomic) NSNumber *tempo;
+@property (strong, nonatomic) NSArray *sections;
+@property (strong, nonatomic) NSArray *order;
+@property (strong, nonatomic) NSNumber *currentSection;
 
-- (int)addNoteAndCompare:(int)tile;
+#pragma mark - Public Methods
+- (void)addSection:(Section *)section;
+
+
+@end
+
+#pragma mark - Section Class -
+//
+//  Class: Section
+//
+//  A collection of layers
+//
+@interface Section : NSObject
+
+@property (strong, nonatomic) NSArray *layers;
+@property (strong, nonatomic) NSArray *order;
+@property (strong, nonatomic) NSNumber *currentLayer;
+
+#pragma mark - Public Methods
+- (void)addLayer:(Layer *)layer;
+
+@end
+
+#pragma mark - Layer Class -
+//
+//  Class: Layer
+//
+//  A melody, current position in the melody, and description of sound type
+//
+@interface Layer : NSObject
+
+@property (strong, nonatomic) NSArray *notes;
+@property (strong, nonatomic) Instrument *instrument;
+@property (strong, nonatomic) NSArray *scale;
+@property (strong, nonatomic) NSNumber *currentNote;
+@property (strong, nonatomic) NSNumber *currentStopIndex;
+
+@end
+
+#pragma mark - Instrument Class -
+//
+//  Class: Instrument
+//
+//  A description of a sound type and its range
+//
+@interface Instrument : NSObject
+
+@property (strong, nonatomic) NSNumber *waveform;
+@property (strong, nonatomic) NSNumber *lowPitch;
+@property (strong, nonatomic) NSNumber *highPitch;
+
+@end
+
+#pragma mark - Note Class -
+//
+//  Class: Note
+//
+//  A scale degree and a duration
+//
+@interface Note : NSObject
+
+@property (strong, nonatomic) NSNumber *degree;
+@property (strong, nonatomic) NSNumber *duration;
+
 
 @end

@@ -21,6 +21,7 @@
 - (NSArray *)generateRandomLayerWithDuration:(double)dur AndTempo:(double)bpm;
 - (NSArray *)generateRandomLayer;
 - (id)initWithDuration:(double)dur Tempo:(double)tempo NumberOfLayers:(int)layers AndSections:(int)sections;
+- (BOOL)checkMistakesInInput:(NSArray *)playerInputArray VsCurrentLayer:(NSArray *)paulaInputArray;
 
 
 @end

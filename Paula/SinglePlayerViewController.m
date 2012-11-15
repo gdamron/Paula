@@ -17,6 +17,7 @@
 #define TEMP_LAYERS 1
 #define TEMP_SECTIONS 1
 
+#pragma mark - SinglePlayerViewController private interface
 @interface SinglePlayerViewController () {
     // These are all temporary
     NSArray *scale;
@@ -33,6 +34,7 @@
 @property (strong, nonatomic) GameOver *gameOver;
 @end
 
+#pragma mark - SinglePlayerViewController inplementation
 @implementation SinglePlayerViewController
 
 //@synthesize controller=_controller;
@@ -50,13 +52,19 @@
 @synthesize toneGen;
 @synthesize isMultiPlayerMode;
 @synthesize metronome;
-@synthesize paula;
 @synthesize game;
 @synthesize gameOver;
 
 
 //////////////////  NOTE ON AND OFF /////////////
+#pragma mark - Note on and Off Methods
 
+//
+//  noteOnWithNumber
+//
+//  take tile number and whether or not to send over network as input and
+//  add a tone to the stack
+//
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
     int s = 1;
     
@@ -94,11 +102,18 @@
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
     
-    if (!game.isPaulasTurn) {
-        [self checkContinueConditions:num];
+    if (![game isPaulasTurn] ) {
+        [game addPlayerInput:num];
+        [self checkContinueConditions];
     }
 }
 
+//
+//  noteOffWithNumber
+//
+//  take tile number and whether or not to send over network as input and
+//  remove a tone from the stack
+//
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
     if (num==1) {
         sineButton1.alpha = OFFALPHA;
@@ -123,19 +138,31 @@
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
 }
 
-// wrapper for noteOnWithNumber, used by UIButtons
+//
+//  noteOn
+//
+//  wrapper for noteOnWithNumber, used by UIButtons
+//
 - (void)noteOn:(id)sender {
     UIButton *button = (UIButton *)sender;
     [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
 }
 
-// wrapper for noteOffWithNumber, used by UIButtons
+//
+//  noteOff
+//
+//  wrapper for noteOffWithNumber, used by UIButtons
+//
 - (void)noteOff:(id)sender {
     UIButton *button = (UIButton *)sender;
     [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
 }
 
-// Stops all tones currently playing.  Bonjour currently uses this
+//
+//  allNotesOff
+//
+//  Stops all tones currently playing.  Bonjour currently uses this
+//
 - (void)allNotesOff {
     sineButton1.alpha = OFFALPHA;
     sineButton2.alpha = OFFALPHA;
@@ -149,7 +176,13 @@
 }
 
 //////////////// GAME MECHANICS ///////////////
+#pragma mark - Game Mechanics
 
+//
+//  playCountdownAndStartGame
+//
+//  Show countdown in tempo and then start game
+//
 - (void)playCountdownAndStartGame {
     [NSTimer scheduledTimerWithTimeInterval:(3.25*(60.0/TEMP_BPM)) target:self selector:@selector(startGame) userInfo:nil repeats:NO];
     Countdown *countdown = [[Countdown alloc] initWithWidth:self.view.frame.size.width AndHeight:self.view.frame.size.height];
@@ -159,18 +192,28 @@
     [countdown countdownWithTempo:TEMP_BPM];
 }
 
+//
+//  startGame
+//
+//  Instantiate Paula, turn on Tone Generator, turn on metronome
+//
 - (void)startGame {
-    paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
+    game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
     toneGen = [[ToneGenerator alloc] init];
     [self setupGame];
     [toneGen start];
     [metronome turnOnWithNotification:@"paulaClick"];
 }
 
+//
+//  setupGame
+//
+//  configure game's initial settings, depending on the current mode
+//
 - (void)setupGame {
     Layer *newLayer = [[Layer alloc] init];
     if (game.mode==SINGLE_PLAYER) {
-        newLayer.notes = [[NSArray alloc] initWithArray:[paula generateRandomLayer]];
+        newLayer.notes = [[NSArray alloc] initWithArray:[game.paula generateRandomLayer]];
     } else if (game.mode==MULTI_BASIC) {
         [self setTempMultiPlayerMelody];
         newLayer.notes = [[NSArray alloc] initWithArray:melNotes];
@@ -178,40 +221,55 @@
     Section *newSection = [[Section alloc] init];
     [newSection addLayer:newLayer];
     
-    [game.level.song addSection:newSection];
+    [game.level addSection:newSection];
 }
 
+//
+//  turnBackOverToPaula
+//
+//  restart metronome, set to be paula's turn
+//
 - (void)turnBackOverToPaula {
-    [game.currentRound removeAllObjects];
+    [game newRound];
     [metronome turnOnWithNotification:@"paulaClick"];
 }
 
-- (void)checkContinueConditions:(int)num {
-    int continueCondition = [game addNoteAndCompare:num];
+//
+//  checkContinueConditions
+//
+//  determines whether it is player's turn, paula's turn, game has been won, etc
+//
+- (void)checkContinueConditions {
+    BOOL mistakesWereMade = [game.paula checkMistakesInInput:[NSArray arrayWithArray: game.player.currentInput]
+                                              VsCurrentLayer:[game currentRound]];
+    int continueCondition = [game rewardOrPenalize:mistakesWereMade];
     if (continueCondition==0) {
-        //NSLog(@"continuing");
         [self updatePlayerDisplayInfo];
     } else if (continueCondition==1) {
-        //NSLog(@"paula's turn");
-        game.isPaulasTurn = YES;
-        [game.currentRound removeAllObjects];
+        [game makePaulasTurn];
+        [game newRound];
         [NSTimer scheduledTimerWithTimeInterval:metronome.beatDuration
                                          target:self selector:@selector(turnBackOverToPaula)
                                        userInfo:nil
                                         repeats:NO];
         [self updatePlayerDisplayInfo];
     } else if (continueCondition==2) {
-        //NSLog(@"game over");
         [self gameLost];
     } else if (continueCondition==3) {
-        // you won!
         [self gameWon];
     }
 }
 
+//  paulaCLickListen
+//
+//  Listens for the metronome's "paulaClick" notification.  Plays the next note in
+//  the round.
+//
+//  This is OK for now, but it will have to be revised when multiple layers and
+//  and variable note durations are possible
 - (void)paulaClickListen:(id)sender {
     [self allNotesOff];
-    Section *currentSection = game.level.song.sections[0];
+    Section *currentSection = game.level.sections[0];
     Layer *currentLayer = currentSection.layers[0];
     // get the index in the layer of the current note
     int index = [currentLayer.currentNote intValue];
@@ -221,28 +279,44 @@
     if (index >= stopNote) {
         index = 0;
         [metronome turnOff];
-        game.isPaulasTurn = NO;
+        [game makePlayersTurn];
         currentLayer.currentStopIndex = [NSNumber numberWithInt:stopNote+1];
     } else {
         NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
         if (i > 0) {
             [self noteOnWithNumber:i sendMessage:NO];
-            [game.currentRound addObject:[NSNumber numberWithInt:i]];
+            [game addPaulaInput:i];
         }
     }
     currentLayer.currentNote = [NSNumber numberWithInt:index];
 }
 
+//
+//  playerClickListen
+//
+//  respond to "playerClick" message sent by metronome
+//
 - (void)playerClickListen:(id)sender {
     [self allNotesOff];
     NSLog(@"click!");
 }
 
+//
+//  updatPlayerDisplayInfo
+//
+//  update view to show accurate score and number of mistakes left
+//
 - (void)updatePlayerDisplayInfo {
     scoreDisplay.text = [NSString stringWithFormat: @"score: %d", [game.score intValue]];
     mistakesLeftDisplay.text = [NSString stringWithFormat: @"mistakes: %d", ([game.player.mistakesAllowed intValue] - [game.player.mistakesMade intValue])];
 }
 
+
+//
+//  gameLost
+//
+//  if player makes too many mistakes, stop all notes and show gameOver view
+//
 - (void)gameLost {
     [self allNotesOff];
     [self.metronome turnOff];
@@ -254,6 +328,11 @@
     [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
+//
+//  gameWon
+//
+//  for now, this means a layer was cirrectly input without making too many mistakes
+//
 - (void)gameWon {
     [self allNotesOff];
     [self.metronome turnOff];
@@ -265,6 +344,11 @@
     [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
+//
+//  setTempMultiPlayerMelody
+//
+//  Until we can send arrays between devices, this is the melody for multiplayer mode
+//
 - (void)setTempMultiPlayerMelody {
     melNotes = [[NSArray alloc] initWithObjects:[NSNumber numberWithInt:2],
                 [NSNumber numberWithInt:3],
@@ -283,6 +367,7 @@
 }
 
 /////////////////// NAVIGATION ////////////
+#pragma mark - Navigation
 
 - (void)didReceiveMemoryWarning
 {
@@ -297,6 +382,7 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+// For now, this just goes back to the main view controller
 - (void)gameLostButtonPressed {
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
@@ -304,6 +390,7 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+// For now, this just goes back to the main view controller
 - (void)gameWonButtonPressed {
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
@@ -312,6 +399,7 @@
 }
 
 /////////////////// VIEW SETUP ////////////
+#pragma mark - Initialize and Setup
 
 - (void)viewDidLoad
 {
@@ -367,8 +455,11 @@
     }
     return self;
 }
-
-// The individual tiles
+//
+//  setupButton
+//
+//  setup the individual tiles
+//
 - (UIButton *)setupButton:(UIButton *)sender OnScreenWithX:(int)x YOffset:(int)y andNumber:(int)num {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
@@ -385,6 +476,11 @@
     return sender;
 }
 
+//
+//  setupPlayerDisplayInfo
+//
+//  setup the status bar at the bottom
+//
 - (void)setupPlayerDisplayInfo {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;

@@ -8,10 +8,13 @@
 
 #import "Countdown.h"
 
+#pragma mark - Countdown Class
+#pragma mark - Private Interface
 @interface Countdown ()
 
 @end
 
+#pragma mark - Implementation
 @implementation Countdown
 
 @synthesize label,step,duration;
@@ -33,6 +36,11 @@
     return self;
 }
 
+//
+//  countdownWithTempo
+//
+//  start the contdown, intializing it with a tempo
+//
 - (void) countdownWithTempo:(double)bpm {
     
     duration = [NSNumber numberWithDouble:60.0/bpm];
@@ -44,6 +52,11 @@
     
 }
 
+//
+//  performCountdown
+//
+//  continue the countdown started in countdownWithTempo
+//
 - (void)performCountdown:(NSTimer*)timer {
     step = [NSNumber numberWithInt:[step intValue]-1];
     
@@ -69,12 +82,15 @@
 
 @end
 
+#pragma mark - GameOver Class
+#pragma mark - Private Interface
 @interface GameOver () {
     BOOL won;
 }
 
 @end
 
+#pragma mark - Implementation
 @implementation GameOver
 
 @synthesize button,label;
@@ -108,6 +124,12 @@
     return self;
 }
 
+//
+//  gameWon
+//
+//  Congratulate and show score
+//  Currently, the only option is to quit
+//
 - (void)gameWon:(int)totalScore {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
@@ -115,6 +137,12 @@
     [button setTitle:@"Quit (for now)" forState:UIControlStateNormal];
 }
 
+//
+//  gameLost
+//
+//  Chastize for losing
+//  Currently, the only option is to quit
+//
 - (void)gameLost {
     won = NO;
     label.text = @"You Didn't keep up with Paula";

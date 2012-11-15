@@ -79,4 +79,15 @@
     layerDuration = beatDuration * beatsPerLayer;
 }
 
+- (BOOL)checkMistakesInInput:(NSArray *)playerInputArray VsCurrentLayer:(NSArray *)paulaInputArray {
+    BOOL mistakes = NO;
+    for (int i = 0; i < playerInputArray.count; i++) {
+        int playerInput = [playerInputArray[i] intValue];
+        int paulaInput = [paulaInputArray[i] intValue];
+        NSLog(@"player: %d paula: %d count: %d", playerInput, paulaInput, playerInputArray.count);
+        if (playerInput!=paulaInput) mistakes=YES;
+    }
+    return mistakes;
+}
+
 @end
