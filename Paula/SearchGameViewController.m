@@ -74,9 +74,9 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void) presentGame {
-    [self presentViewController:self.singlePlayerController animated:YES completion:nil];
-    [self.singlePlayerController playCountdownAndStartGame];
+#pragma mark - GK_GameCommDelegate
+- (void) updateUI:(NSMutableArray *)data {
+    [self.ntvc reloadTableData];
 }
 
 - (void) connectToServer:(NSInteger)idx {
