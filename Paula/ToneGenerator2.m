@@ -100,16 +100,6 @@ static void CheckError(OSStatus error, const char *operation) {
         
         CheckError( AudioQueueNewOutput(&_streamFormat, MyAQOutputCallback, (__bridge void *) self, NULL, kCFRunLoopCommonModes, 0, &audioQueue), "Couldn't create the output AudioQueue");
         
-        // create and enqueue buffers
-        AudioQueueBufferRef buffers[BUFFER_COUNT];
-        bufferSize = BUFFER_DURATION * self.streamFormat.mSampleRate * self.streamFormat.mBytesPerFrame;
-        NSLog(@"bufferSize is %ld", bufferSize);
-        
-        for (int i = 0; i < BUFFER_COUNT; i++) {
-            CheckError(AudioQueueAllocateBuffer(audioQueue, bufferSize, &buffers[i]), "Couldn't allocate AudioQueue buffer");
-            CheckError([self fillBuffer:buffers[i]], "Couldn't fill buffer (priming)");
-            CheckError(AudioQueueEnqueueBuffer(audioQueue, buffers[i], 0, NULL), "Couldn't enqueue buffer (priming)");
-        }
         //CheckError(AudioQueueStart(audioQueue, NULL), "Couldn't start the AudioQueue");
         //isOn = YES;
     }
@@ -213,11 +203,32 @@ void MyInterruptionListener (void *inUserData, UInt32 inInterruptionState) {
 
 - (void)start {
     NSLog(@"Starting audio engine");
+    // create and enqueue buffers
+    AudioQueueBufferRef buffers[BUFFER_COUNT];
+    bufferSize = BUFFER_DURATION * self.streamFormat.mSampleRate * self.streamFormat.mBytesPerFrame;
+    NSLog(@"bufferSize is %ld", bufferSize);
+    
+    for (int i = 0; i < BUFFER_COUNT; i++) {
+        CheckError(AudioQueueAllocateBuffer(audioQueue, bufferSize, &buffers[i]), "Couldn't allocate AudioQueue buffer");
+        CheckError([self fillBuffer:buffers[i]], "Couldn't fill buffer (priming)");
+        CheckError(AudioQueueEnqueueBuffer(audioQueue, buffers[i], 0, NULL), "Couldn't enqueue buffer (priming)");
+    }
     CheckError(AudioQueueStart(audioQueue, NULL), "Couldn't start the AudioQueue");
 }
 
 - (void)stop {
+    CheckError(AudioQueueDispose(audioQueue, NO), "Couldn't stop the AudioQueue");
+    //CheckError(AudioQueueReset(audioQueue), "Couldn't flush the AudioQueue buffers");
+    
+    
+}
+
+- (void)pause {
     CheckError(AudioQueueStop(audioQueue, NO), "Couldn't stop the AudioQueue");
+}
+
+- (void)resume {
+    CheckError(AudioQueueStart(audioQueue, NULL), "Couldn't restart the AudioQueue");
 }
 
 @end

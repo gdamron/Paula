@@ -675,6 +675,7 @@ void MoAudio::stop()
     // stop audio unit
     err = AudioOutputUnitStop( m_au );
 
+
     // flag
     m_isRunning = false;
 }

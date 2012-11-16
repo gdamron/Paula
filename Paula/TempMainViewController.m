@@ -9,7 +9,7 @@
 #import "TempMainViewController.h"
 
 @interface TempMainViewController ()
-@property (strong) ToneGenerator *toneGenerator;
+//@property (strong) ToneGenerator *toneGenerator;
 @end
 
 

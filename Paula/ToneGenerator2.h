@@ -19,13 +19,14 @@
 @property (assign, nonatomic) UInt32 bufferSize;
 @property (assign, nonatomic) double startingFrameCount;
 
-- (OSStatus) fillBuffer: (AudioQueueBufferRef) buffer;
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
 - (void)noteOff:(double)freq;
 - (void)noteOff;
 - (void)noteOn;
 - (void)start;
 - (void)stop;
+- (void)pause;
+- (void)resume;
 
 @end
 
