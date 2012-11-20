@@ -134,7 +134,7 @@
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
-    [button setTitle:@"Quit (for now)" forState:UIControlStateNormal];
+    [button setTitle:@"Play Again!" forState:UIControlStateNormal];
 }
 
 //
@@ -146,7 +146,7 @@
 - (void)gameLost {
     won = NO;
     label.text = @"You Didn't keep up with Paula";
-    [button setTitle:@"Quit (for now)" forState:UIControlStateNormal];
+    [button setTitle:@"Play Again!" forState:UIControlStateNormal];
 }
 
 /*- (void)gameOverButtonPressed {

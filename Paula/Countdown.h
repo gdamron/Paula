@@ -15,7 +15,7 @@
 //  This should be rebuilt to extend UIView, not NSObject
 //
 #pragma mark - Countdown Class -
-@interface Countdown : NSObject
+@interface Countdown : UIView
 
 @property (strong,nonatomic) UILabel *label;
 @property (strong,nonatomic) NSNumber *step;
@@ -34,7 +34,7 @@
 //  This should be rebuilt to extend UIView, not NSObject
 //
 #pragma mark - GameOver Class -
-@interface GameOver : NSObject
+@interface GameOver : UIView
 
 @property (strong,nonatomic) UILabel *label;
 @property (strong,nonatomic) UIButton *button;

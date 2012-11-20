@@ -318,7 +318,7 @@
 //  if player makes too many mistakes, stop all notes and show gameOver view
 //
 - (void)gameLost {
-    [self allNotesOff];
+    //[self allNotesOff];
     [self.metronome turnOff];
     mistakesLeftDisplay.text = @"mistakes: 0";
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
@@ -334,7 +334,7 @@
 //  for now, this means a layer was cirrectly input without making too many mistakes
 //
 - (void)gameWon {
-    [self allNotesOff];
+    //[self allNotesOff];
     [self.metronome turnOff];
     //game.level.song.currentSection = [NSNumber numberWithInt:[game.level.song.currentSection intValue]+1];
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
@@ -377,25 +377,29 @@
 
 // Back to the main view controller
 - (void) backButtonPressed {
-    //[toneGen stop];
+    [toneGen stop];
     // melIndex = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 // For now, this just goes back to the main view controller
 - (void)gameLostButtonPressed {
+    [toneGen stop];
+    [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
-    //[toneGen stop];
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self playCountdownAndStartGame];
+    //[self dismissViewControllerAnimated:YES completion:nil];
 }
 
 // For now, this just goes back to the main view controller
 - (void)gameWonButtonPressed {
+    [toneGen stop];
+    [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
-    //[self playCountdownAndStartGame];
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [self playCountdownAndStartGame];
+    //[self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /////////////////// VIEW SETUP ////////////
