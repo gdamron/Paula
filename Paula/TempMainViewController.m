@@ -7,9 +7,13 @@
 //
 
 #import "TempMainViewController.h"
+#import "SinglePlayerViewController.h"
 
 @interface TempMainViewController ()
 //@property (strong) ToneGenerator *toneGenerator;
+@property (nonatomic) SinglePlayerViewController *singlePlayerViewController;
+@property (nonatomic) NetworkViewController *networkViewController;
+
 @end
 
 
@@ -21,8 +25,8 @@
 @synthesize toMultiPlayer;
 @synthesize enyuViewController;
 @synthesize eugeneViewController;
-@synthesize singlePlayerViewController;
 @synthesize networkViewController;
+@synthesize scoreViewController;
 //@synthesize toneGenerator;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -71,16 +75,36 @@
         enyuViewController = [[EnyuViewController alloc] init];
         [self presentViewController:enyuViewController animated:YES completion:nil];
     } else if (sender==toEugene) {
-        eugeneViewController = [[EugeneViewController alloc] init];
-        [self presentViewController:eugeneViewController animated:YES completion:nil];
+        scoreViewController = [[ScoreViewController alloc] initWithData:nil];
+        [self presentViewController:scoreViewController animated:YES completion:nil];
     } else if (sender==toSinglePlayer) {
-        singlePlayerViewController = [[SinglePlayerViewController alloc] init];
-        [singlePlayerViewController playCountdownAndStartGame];
+        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:SINGLE_PLAYER];
+        [self.singlePlayerViewController setDelegate:self];
+        [self.singlePlayerViewController playCountdownAndStartGame];
         //[singlePlayerViewController setToneGen:toneGenerator];
-        [self presentViewController:singlePlayerViewController animated:YES completion:nil];
+        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];
+        [networkViewController setDelegate:self];
         [self presentViewController:networkViewController animated:NO completion:nil];
+    }
+}
+
+#pragma mark - MainViewDelegate
+- (void) showScoreView:(NSMutableArray *)data {
+    scoreViewController = [[ScoreViewController alloc] initWithData:data];
+    [self presentViewController:scoreViewController animated:YES completion:nil];
+}
+
+- (void) showPlayView {
+    if(self.singlePlayerViewController != nil) {
+        [self.singlePlayerViewController playCountdownAndStartGame];
+        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
+    } else {
+        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:MULTI_PLAYER_COMPETE];
+        [self.singlePlayerViewController setDelegate:self];
+        [self.singlePlayerViewController playCountdownAndStartGame];
+        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     }
 }
 

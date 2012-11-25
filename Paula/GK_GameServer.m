@@ -30,14 +30,21 @@
 }
 
 -(void) close {
+    [_session disconnectFromAllPeers];
     [_session setAvailable:NO];
+    [_session setDelegate:nil];
+    _connectedPlayerNames = nil;
+    _connectedPlayers = nil;
+    _session = nil;
 }
 
 -(void) startGame {
     NSLog(@"starting game....");
     NSError *error;
-    char d = '9';
-    NSData *data = [[NSData alloc] initWithBytes:&d length:1];
+    
+    NSString *string = @"START";
+    const char *cString = [string UTF8String];
+    NSData *data = [[NSData alloc] initWithBytes:cString length:strlen(cString) + 1];
     [_session sendDataToAllPeers:data withDataMode:GKSendDataReliable error:&error];
 }
 
@@ -81,26 +88,26 @@
 - (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID
 {
 	NSLog(@"MatchmakingServer: connection request from peer %@", peerID);
-    NSError *error;
-    if([session acceptConnectionFromPeer:peerID error:&error]) {
-        NSLog(@"peer %@ connected", peerID);
+    if([_connectedPlayers count] < self.maxPlayers) {
+        NSError *error;
+        if([session acceptConnectionFromPeer:peerID error:&error]) {
+            NSLog(@"peer %@ connected", peerID);
+        } else {
+            NSLog(@"error accepting connection from %@", peerID);
+        }
     } else {
-        NSLog(@"error accepting connection from %@", peerID);
+        [session denyConnectionFromPeer:peerID];
     }
 }
 
-- (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error {
 	NSLog(@"MatchmakingServer: connection with peer %@ failed %@", peerID, error);
-#endif
 }
 
-- (void)session:(GKSession *)session didFailWithError:(NSError *)error
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session didFailWithError:(NSError *)error {
 	NSLog(@"MatchmakingServer: session failed %@", error);
-#endif
+    [self close];
+    [self.delegate disAndReturn:YES error:NO_NETWORK];
 }
 
 @end

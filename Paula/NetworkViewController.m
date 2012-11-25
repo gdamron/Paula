@@ -19,6 +19,7 @@
 
 @synthesize backButton, hostGameButton, searchGameButton;
 @synthesize hostGameView, searchGameView;
+@synthesize delegate=_delegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -64,11 +65,19 @@
 - (void)nameButtonPressed:(id)sender {
     if(sender == hostGameButton) {
         self.hostGameView = [[HostGameViewController alloc] init];
+        [self.hostGameView setNetworkViewDelegate:self];
         [self presentViewController:self.hostGameView animated:NO completion:nil];
     } else if (sender == searchGameButton) {
         self.searchGameView = [[SearchGameViewController alloc] init];
+        [self.searchGameView setNetworkViewDelegate:self];
         [self presentViewController:self.searchGameView animated:NO completion:nil];
     }
+}
+
+- (void) showGameView {
+    [self dismissViewControllerAnimated:NO completion:^{
+        [self.delegate showPlayView];
+    }];
 }
 
 @end

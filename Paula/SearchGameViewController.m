@@ -12,7 +12,6 @@
 #import "GK_GameClient.h"
 
 @interface SearchGameViewController ()
-@property SinglePlayerViewController* singlePlayerController;
 @property (strong, nonatomic) UIButton* startButton;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) NetworkTableViewController *ntvc;
@@ -21,6 +20,8 @@
 @implementation SearchGameViewController {
     GK_GameClient *_gameClient;
 }
+
+@synthesize networkViewDelegate=_networkViewDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nil bundle:nil];
@@ -82,6 +83,26 @@
 - (void) connectToServer:(NSInteger)idx {
     NSLog(@"connecting to server at idx : %d", idx);
     [_gameClient connectToServerWithIdx:idx];
+}
+
+- (void) disAndReturn:(BOOL)ret error:(enum CommErrorType)error {
+    NSString *errorTitle = nil;
+    NSString *errorMsg = nil;
+    switch(error) {
+        case SERVER_DOWN: errorTitle = @"Server Down"; errorMsg = @"Server You're Connected To has Gone away!"; break;
+        case SERVER_FULL: errorTitle = @"Server Full"; errorMsg = @"Server is Full!"; break;
+        case NO_NETWORK: errorTitle = @"No Network"; errorMsg = @"Please check your network setting!";
+    }
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"NetworkError" message:errorMsg
+            delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"Button: OK") otherButtonTitles:nil];
+    [alert show];
+    [self dismissViewControllerAnimated:NO completion:nil];
+}
+
+- (void) startGame {
+    [self dismissViewControllerAnimated:NO completion:^{
+        [self.networkViewDelegate showGameView];
+    }];
 }
 
 @end

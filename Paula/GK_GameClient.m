@@ -25,6 +25,8 @@
 	_session = [[GKSession alloc] initWithSessionID:sessionID displayName:nil sessionMode:GKSessionModeClient];
 	_session.delegate = self;
 	_session.available = YES;
+    
+    [_session setDataReceiveHandler:self withContext:nil];
 }
 
 - (void)connectToServerWithIdx:(NSInteger)idx {
@@ -80,23 +82,23 @@
 	_session = nil;
     
 	_availableServers = nil;
-    
-//	[self.delegate matchmakingClient:self didDisconnectFromServer:_serverPeerID];
 	_serverId = nil;
+    
+    [self.delegate disAndReturn:YES error:SERVER_DOWN];
 }
 
-- (void)receiveData:(NSData *)data fromPeer:(NSString *)peerID inSession:(GKSession *)session context:(void *)context
-{
-#ifdef DEBUG
+- (void)receiveData:(NSData *)data fromPeer:(NSString *)peerID inSession:(GKSession *)session context:(void *)context {
 	NSLog(@"Game: receive data from peer: %@, data: %@, length: %d", peerID, data, [data length]);
-#endif
+    
+    NSString *test = [NSString stringWithUTF8String:data.bytes];
+    
+    if([test isEqualToString:@"START"]) {
+        [self.delegate startGame];
+    }
 }
 
-- (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {
 	NSLog(@"MatchmakingClient: connection request from peer %@", peerID);
-#endif
 }
 
 - (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error {
@@ -104,10 +106,9 @@
     [self disconnectFromServer];
 }
 
-- (void)session:(GKSession *)session didFailWithError:(NSError *)error
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session didFailWithError:(NSError *)error {
 	NSLog(@"MatchmakingClient: session failed %@", error);
-#endif
+    [self.delegate disAndReturn:YES error:NO_NETWORK];
 }
+
 @end

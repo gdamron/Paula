@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ToneGenerator.h"
 #import "PaulaUtilities.m"
+#import "TempMainViewController.h"
 #import "NetworkViewController.h"
 #import "Metronome.h"
 #import "Game.h"
@@ -17,6 +18,8 @@
 #pragma mark - SinglePlayerViewController Public Interface
 
 @interface SinglePlayerViewController : UIViewController
+
+@property (nonatomic, assign) id<MainViewDelegate> delegate;
 
 //@property(assign) id<GameCommunicationDelegate> controller;
 @property (strong, nonatomic) UIButton *backButton;
@@ -41,5 +44,7 @@
 - (void) noteOff:(id)sender;
 - (void) allNotesOff;
 - (void) playCountdownAndStartGame;
+
+- (id) initWithGameMode:(enum GameModes)mode;
 
 @end
