@@ -13,6 +13,9 @@
 @interface NetworkViewController ()
 @property (nonatomic) HostGameViewController *hostGameView;
 @property (nonatomic) SearchGameViewController *searchGameView;
+
+@property (nonatomic) BOOL isServer;
+
 @end
 
 @implementation NetworkViewController
@@ -63,11 +66,38 @@
 
 - (void)nameButtonPressed:(id)sender {
     if(sender == hostGameButton) {
+        self.isServer = YES;
         self.hostGameView = [[HostGameViewController alloc] init];
+        [self.hostGameView setNetworkViewDelegate:self];
         [self presentViewController:self.hostGameView animated:NO completion:nil];
     } else if (sender == searchGameButton) {
+        self.isServer = NO;
         self.searchGameView = [[SearchGameViewController alloc] init];
+        [self.searchGameView setNetworkViewDelegate:self];
         [self presentViewController:self.searchGameView animated:NO completion:nil];
+    }
+}
+
+- (void) showPlayView {
+    SinglePlayerViewController *singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:MULTI_PLAYER_COMPETE];
+    [singlePlayerViewController setDelegate:self];
+    [singlePlayerViewController playCountdownAndStartGame];
+    [self presentViewController:singlePlayerViewController animated:YES completion:nil];
+}
+
+- (void) showScoreView:(NSMutableArray *)data {
+    [self dismissViewControllerAnimated:NO completion:^{
+        ScoreViewController *scoreViewController = [[ScoreViewController alloc] initWithData:data];
+        [self presentViewController:scoreViewController animated:YES completion:nil];
+    }];
+}
+
+- (void) sendScore:(Player *)player {
+    NSLog(@"SENDING SCORE CALLED");
+    if(self.isServer) {
+        [self.hostGameView sendScore:player];
+    } else {
+        [self.searchGameView sendScore:player];
     }
 }
 

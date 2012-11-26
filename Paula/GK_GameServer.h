@@ -9,12 +9,16 @@
 #import <Foundation/Foundation.h>
 #import <GameKit/GameKit.h>
 #import "GK_GameComm.h"
+#import "Game.h"
+#import "GK_GamePacket.h"
+#import "GK_GameDataHandler.h"
 
 #define SESSION_ID @"Paula"
 
 @interface GK_GameServer : NSObject <GKSessionDelegate, GK_GameDataDelegate>
 
 @property (nonatomic, assign) id<GK_GameCommDelegate> delegate;
+@property (nonatomic, strong) GK_GameDataHandler *dataHandler;
 @property (nonatomic) int maxPlayers;
 @property (nonatomic, strong, readonly) NSArray *connectedPlayers;
 @property (nonatomic, strong, readonly) GKSession *session;

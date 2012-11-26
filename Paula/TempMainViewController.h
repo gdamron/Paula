@@ -9,11 +9,17 @@
 #import <UIKit/UIKit.h>
 #import "EnyuViewController.h"
 #import "EugeneViewController.h"
-#import "SinglePlayerViewController.h"
-#import "NetworkViewController.h"
+#import "ScoreViewController.h"
 #import "PaulaUtilities.m"
 
-@interface TempMainViewController : UIViewController
+@protocol MainViewDelegate <NSObject>
+@required
+- (void) showScoreView:(NSMutableArray *)data;
+- (void) showPlayView;
+- (void) sendScore:(Player *)player;
+@end
+
+@interface TempMainViewController : UIViewController <MainViewDelegate>
 
 @property (strong, nonatomic) UIButton *toEnyu;
 @property (strong, nonatomic) UIButton *toEugene;
@@ -21,7 +27,6 @@
 @property (strong, nonatomic) UIButton *toMultiPlayer;
 @property (strong, nonatomic) EnyuViewController *enyuViewController;
 @property (strong, nonatomic) EugeneViewController *eugeneViewController;
-@property (strong, nonatomic) SinglePlayerViewController *singlePlayerViewController;
-@property (strong, nonatomic) NetworkViewController *networkViewController;
+@property (strong, nonatomic) ScoreViewController *scoreViewController;
 
 @end

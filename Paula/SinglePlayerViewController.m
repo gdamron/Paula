@@ -54,7 +54,7 @@
 @synthesize metronome;
 @synthesize game;
 @synthesize gameOver;
-
+@synthesize delegate=_delegate;
 
 //////////////////  NOTE ON AND OFF /////////////
 #pragma mark - Note on and Off Methods
@@ -214,7 +214,7 @@
     Layer *newLayer = [[Layer alloc] init];
     if (game.mode==SINGLE_PLAYER) {
         newLayer.notes = [[NSArray alloc] initWithArray:[game.paula generateRandomLayer]];
-    } else if (game.mode==MULTI_BASIC) {
+    } else if (game.mode==MULTI_PLAYER_COMPETE) {
         [self setTempMultiPlayerMelody];
         newLayer.notes = [[NSArray alloc] initWithArray:melNotes];
     }
@@ -307,7 +307,7 @@
 //  update view to show accurate score and number of mistakes left
 //
 - (void)updatePlayerDisplayInfo {
-    scoreDisplay.text = [NSString stringWithFormat: @"score: %d", [game.score intValue]];
+    scoreDisplay.text = [NSString stringWithFormat: @"score: %d", [game.player.score intValue]];
     mistakesLeftDisplay.text = [NSString stringWithFormat: @"mistakes: %d", ([game.player.mistakesAllowed intValue] - [game.player.mistakesMade intValue])];
 }
 
@@ -321,11 +321,14 @@
     //[self allNotesOff];
     [self.metronome turnOff];
     mistakesLeftDisplay.text = @"mistakes: 0";
+    BOOL multi = (game.mode != SINGLE_PLAYER)?YES:NO;
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
-    [gameOver gameLost];
+    [gameOver gameLost:multi];
     [self.view addSubview:gameOver.label];
     [self.view addSubview:gameOver.button];
-    [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [_delegate sendScore:game.player];
+    if(!multi)
+        [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
 //
@@ -337,11 +340,14 @@
     //[self allNotesOff];
     [self.metronome turnOff];
     //game.level.song.currentSection = [NSNumber numberWithInt:[game.level.song.currentSection intValue]+1];
+    BOOL multi = (game.mode != SINGLE_PLAYER)?YES:NO;
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
-    [gameOver gameWon:[game.score intValue]];
+    [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi];
     [self.view addSubview:gameOver.label];
     [self.view addSubview:gameOver.button];
-    [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [_delegate sendScore:game.player];
+    if(!multi)
+        [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
 //
@@ -388,8 +394,17 @@
     [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
-    [self playCountdownAndStartGame];
-    //[self dismissViewControllerAnimated:YES completion:nil];
+//    [self playCountdownAndStartGame];
+    
+    //show score view
+    [self dismissViewControllerAnimated:YES completion:^{
+        if(game.mode != SINGLE_PLAYER)
+            [_delegate sendScore:game.player];
+        else {
+            game.player.name = @"Me";
+            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
+        }
+    }];
 }
 
 // For now, this just goes back to the main view controller
@@ -398,8 +413,17 @@
     [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
-    [self playCountdownAndStartGame];
-    //[self dismissViewControllerAnimated:YES completion:nil];
+//    [self playCountdownAndStartGame];
+    
+    //show score view
+    [self dismissViewControllerAnimated:YES completion:^{
+        if(game.mode != SINGLE_PLAYER)
+            [_delegate sendScore:game.player];
+        else {
+            game.player.name = @"Me";
+            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
+        }
+    }];
 }
 
 /////////////////// VIEW SETUP ////////////
@@ -417,6 +441,18 @@
 - (void)viewDidDisappear:(BOOL)animated {
     [toneGen stop];
     [metronome turnOff];
+}
+
+- (id)initWithGameMode:(enum GameModes)mode {
+    self = [self initWithNibName:nil bundle:nil];
+    
+    if(self) {
+        if(game) {
+            game.mode = mode;
+        }
+    }
+    
+    return self;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil

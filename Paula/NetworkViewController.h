@@ -8,13 +8,17 @@
 
 #import <UIKit/UIKit.h>
 #import "PaulaUtilities.m"
+#import "TempMainViewController.h"
+#import "SinglePlayerViewController.h"
 
 @class NetworkViewController;
 
-@interface NetworkViewController : UIViewController
+@interface NetworkViewController : UIViewController <MainViewDelegate>
 
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *hostGameButton;
 @property (strong, nonatomic) UIButton *searchGameButton;
+
+-(void) showGameView;
 
 @end

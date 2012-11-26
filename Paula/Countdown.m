@@ -94,6 +94,7 @@
 @implementation GameOver
 
 @synthesize button,label;
+@synthesize isMultiPlayer;
 
 - (id)initWithWidth:(double)width AndHeight:(double)height {
     if (self=[super init]) {
@@ -130,11 +131,15 @@
 //  Congratulate and show score
 //  Currently, the only option is to quit
 //
-- (void)gameWon:(int)totalScore {
+- (void)gameWon:(int)totalScore isMultiplayer:(BOOL)multiPlayer {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
-    [button setTitle:@"Play Again!" forState:UIControlStateNormal];
+    NSString *title = @"View Score";
+    if(multiPlayer) {
+        title = @"Waiting...";
+    }
+    [button setTitle:title forState:UIControlStateNormal];
 }
 
 //
@@ -143,10 +148,14 @@
 //  Chastize for losing
 //  Currently, the only option is to quit
 //
-- (void)gameLost {
+- (void)gameLost:(BOOL)isMulti {
     won = NO;
     label.text = @"You Didn't keep up with Paula";
-    [button setTitle:@"Play Again!" forState:UIControlStateNormal];
+    NSString *title = @"View Score";
+    if(isMulti) {
+        title = @"Waiting...";
+    }
+    [button setTitle:title forState:UIControlStateNormal];
 }
 
 /*- (void)gameOverButtonPressed {

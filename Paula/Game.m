@@ -21,13 +21,12 @@
 #pragma mark - Implementation
 @implementation Game
 
-@synthesize date, score, level, player, paula, currentRound, isPaulasTurn, mode;
+@synthesize date, level, player, paula, currentRound, isPaulasTurn, mode;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        score = [NSNumber numberWithDouble:0.0];
         date = [NSDate date];
         level = [[Level alloc] init];
         level.date = self.date;
@@ -39,7 +38,7 @@
     return self;
 }
 
-- (id)initWithGameMode:(enum gameModes)m {
+- (id)initWithGameMode:(enum GameModes)m {
     self = [self init];
     mode = m;
     return self;
@@ -84,7 +83,7 @@
 - (int)rewardOrPenalize:(BOOL)mistakesWereMade {
     int retval = 0;
     if (!mistakesWereMade) {
-        score = [NSNumber numberWithInt:[score intValue]+5];
+        player.score = [NSNumber numberWithInt:[player.score intValue]+5];
     }
     
     if (player.currentInput.count==currentRound.count) {
@@ -135,7 +134,7 @@
     if (self) {
         currentInput = [[NSMutableArray alloc] init];
         score = [NSNumber numberWithDouble:0.0];
-        mistakesAllowed = [NSNumber numberWithInt:5];
+        mistakesAllowed = [NSNumber numberWithInt:1];
         mistakesMade = [NSNumber numberWithInt:0];
     }
     return self;

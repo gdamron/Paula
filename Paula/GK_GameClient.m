@@ -13,18 +13,33 @@
     NSMutableArray *_availableServerNames;
     
     NSString *_serverId;
+    
+    GK_GamePacket *packet;
 }
 
 @synthesize session = _session;
 @synthesize delegate = _delegate;
 
+-(id) init {
+    self = [super init];
+    if(self) {
+        _availableServers = [NSMutableArray arrayWithCapacity:10];
+        _availableServerNames = [NSMutableArray arrayWithCapacity:10];
+        self.dataHandler = [[GK_GameDataHandler alloc] init];
+        
+        packet = [[GK_GamePacket alloc] initWithPacketType:GAME_START];
+    }
+    return self;
+}
+
 - (void)startSearchServerForSessionID:(NSString *)sessionID {
-	_availableServers = [NSMutableArray arrayWithCapacity:10];
-    _availableServerNames = [NSMutableArray arrayWithCapacity:10];
-    
 	_session = [[GKSession alloc] initWithSessionID:sessionID displayName:nil sessionMode:GKSessionModeClient];
 	_session.delegate = self;
 	_session.available = YES;
+    
+    [self.dataHandler setUidelegate:_delegate];
+    [self.dataHandler setDatadelegate:self];
+    [_session setDataReceiveHandler:self.dataHandler withContext:nil];
 }
 
 - (void)connectToServerWithIdx:(NSInteger)idx {
@@ -36,6 +51,10 @@
 #pragma mark - GK_GameDataDelegate
 - (NSMutableArray *) getInternalData {
     return _availableServerNames;
+}
+
+- (void) receiveScores:(NSMutableArray *)players {
+    [_delegate showScore:players];
 }
 
 #pragma mark - GKSessionDelegate
@@ -80,23 +99,13 @@
 	_session = nil;
     
 	_availableServers = nil;
-    
-//	[self.delegate matchmakingClient:self didDisconnectFromServer:_serverPeerID];
 	_serverId = nil;
+    
+    [self.delegate disAndReturn:YES error:SERVER_DOWN];
 }
 
-- (void)receiveData:(NSData *)data fromPeer:(NSString *)peerID inSession:(GKSession *)session context:(void *)context
-{
-#ifdef DEBUG
-	NSLog(@"Game: receive data from peer: %@, data: %@, length: %d", peerID, data, [data length]);
-#endif
-}
-
-- (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {
 	NSLog(@"MatchmakingClient: connection request from peer %@", peerID);
-#endif
 }
 
 - (void)session:(GKSession *)session connectionWithPeerFailed:(NSString *)peerID withError:(NSError *)error {
@@ -104,10 +113,21 @@
     [self disconnectFromServer];
 }
 
-- (void)session:(GKSession *)session didFailWithError:(NSError *)error
-{
-#ifdef DEBUG
+- (void)session:(GKSession *)session didFailWithError:(NSError *)error {
 	NSLog(@"MatchmakingClient: session failed %@", error);
-#endif
+    [self.delegate disAndReturn:YES error:NO_NETWORK];
 }
+
+- (void) sendScore:(NSNumber *)score mistakes:(NSNumber *)mistakes {
+    [packet setPacketType:GAME_SCORE_TO_SERVER];
+    NSMutableData *data = [packet data];
+    [data rw_appendInt16:[score shortValue]];
+    [data rw_appendInt16:[mistakes shortValue]];
+    NSError *error;
+    
+    if(![_session sendData:data toPeers:[NSArray arrayWithObject:_serverId] withDataMode:GKSendDataReliable error:&error]) {
+        NSLog(@"error sending data %@", error);
+    }
+}
+
 @end

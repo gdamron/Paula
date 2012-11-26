@@ -9,13 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "Paula.h"
 
-enum gameModes {
+enum GameModes {
     SINGLE_PLAYER = 0,
-    MULTI_BASIC = 1,
-    MULTI_CHALLENGE = 2,
-    MULTI_COOP = 3,
-    MULTI_RACE = 4
-    };
+    MULTI_PLAYER_COMPETE = 1,
+    MULTI_PLAYER_MIMIC = 2,
+};
 
 @class Player;
 @class Level;
@@ -36,12 +34,11 @@ enum gameModes {
 @property (strong, nonatomic) Level *level;
 @property (strong, nonatomic) Player *player;
 @property (strong, nonatomic) Paula *paula;
-@property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSDate *date;
-@property (assign, nonatomic) enum gameModes mode;
+@property (assign, nonatomic) enum GameModes mode;
 
 #pragma mark - Public Methods
-- (id)initWithGameMode:(enum gameModes)m;
+- (id)initWithGameMode:(enum GameModes)m;
 - (void)addPlayerInput:(int)tile;
 - (void)addPaulaInput:(int)tile;
 - (int)rewardOrPenalize:(BOOL)mistakesWereMade;
@@ -62,6 +59,7 @@ enum gameModes {
 //
 @interface Player : NSObject
 
+@property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) NSNumber *score;
 @property (strong, nonatomic) NSNumber *mistakesMade;
 @property (strong, nonatomic) NSNumber *mistakesAllowed;

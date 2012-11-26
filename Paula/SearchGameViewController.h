@@ -8,7 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "GK_GameComm.h"
+#import "NetworkViewController.h"
 
 @interface SearchGameViewController : UIViewController <GK_GameCommDelegate>
+
+@property (nonatomic, assign) NetworkViewController *networkViewDelegate;
+
+-(void) sendScore:(Player *)player;
 
 @end

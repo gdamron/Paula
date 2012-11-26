@@ -7,10 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "NetworkViewController.h"
 #import "GK_GameComm.h"
 
 @interface HostGameViewController : UIViewController <GK_GameCommDelegate>
 
 @property (nonatomic) UIButton* startButton;
+
+@property (nonatomic, assign) NetworkViewController *networkViewDelegate;
+
+-(void) sendScore:(Player *)player;
 
 @end
