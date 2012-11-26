@@ -1,9 +1,9 @@
 //
-//  ToneGenerator.h
-//  Paula
+// ToneGenerator.h
+// Paula
 //
-//  Created by Grant Damron on 10/11/12.
-//  Copyright (c) 2012 Grant Damron. All rights reserved.
+// Created by Grant Damron on 10/11/12.
+// Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -21,13 +21,3 @@
 - (void)stop;
 
 @end
-
-/*@interface Tone : NSObject
-
-@property (assign, nonatomic) double frequency;
-@property (assign, nonatomic) double phase;
-@property (assign, nonatomic) double j;
-@property (assign, nonatomic) double cycleLength;
-@property (assign, nonatomic) double sample;
-
-@end*/

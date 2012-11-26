@@ -1,9 +1,9 @@
 //
-//  ToneGenerator.m
-//  Paula
+// ToneGenerator.m
+// Paula
 //
-//  Created by Grant Damron on 10/11/12.
-//  Copyright (c) 2012 Grant Damron. All rights reserved.
+// Created by Grant Damron on 10/11/12.
+// Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
 #import "ToneGenerator.h"
@@ -12,7 +12,7 @@
 #define SRATE 44100
 #define FRAMESIZE 128
 #define NUMCHANNELS 2
-#define BUFFER_COUNT    3
+#define BUFFER_COUNT 3
 #define BUFFER_DURATION 0.5
 
 bool g_on = false;
@@ -140,13 +140,3 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
         if (phase > 1.0f) phase -= 1.0f;
     }
 }
-
-/*@implementation Tone
-
-@synthesize frequency;
-@synthesize phase;
-@synthesize j;
-@synthesize cycleLength;
-@synthesize sample;
-
-@end*/
