@@ -9,8 +9,9 @@
 #import <Foundation/Foundation.h>
 
 typedef enum {
-    GAME_START = 0,
-    GAME_SCORE = 1
+    GAME_START = 0x01,
+    GAME_SCORE_TO_SERVER = 0x02,
+    GAME_SCORE_TO_CLIENT = 0x03
 }
 CommPacketType;
 
@@ -19,8 +20,7 @@ CommPacketType;
 @property (nonatomic, assign) CommPacketType *packetType;
 
 -(id)initWithPacketType:(CommPacketType*)type;
--(id)initWithPacketData:(NSData *)data;
 //this should append a header info to the packet
--(NSData *) data;
+-(NSMutableData *) data;
 
 @end

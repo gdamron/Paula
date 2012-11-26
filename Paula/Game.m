@@ -134,7 +134,7 @@
     if (self) {
         currentInput = [[NSMutableArray alloc] init];
         score = [NSNumber numberWithDouble:0.0];
-        mistakesAllowed = [NSNumber numberWithInt:5];
+        mistakesAllowed = [NSNumber numberWithInt:1];
         mistakesMade = [NSNumber numberWithInt:0];
     }
     return self;

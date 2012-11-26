@@ -85,7 +85,6 @@
         [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];
-        [networkViewController setDelegate:self];
         [self presentViewController:networkViewController animated:NO completion:nil];
     }
 }
@@ -106,6 +105,10 @@
         [self.singlePlayerViewController playCountdownAndStartGame];
         [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     }
+}
+
+- (void) sendScore:(Player *)player {
+    //does nothing
 }
 
 @end

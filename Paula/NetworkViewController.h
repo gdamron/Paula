@@ -9,12 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "PaulaUtilities.m"
 #import "TempMainViewController.h"
+#import "SinglePlayerViewController.h"
 
 @class NetworkViewController;
 
-@interface NetworkViewController : UIViewController
-
-@property (nonatomic, assign) id<MainViewDelegate> delegate;
+@interface NetworkViewController : UIViewController <MainViewDelegate>
 
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) UIButton *hostGameButton;

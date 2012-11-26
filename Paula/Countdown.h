@@ -38,10 +38,11 @@
 
 @property (strong,nonatomic) UILabel *label;
 @property (strong,nonatomic) UIButton *button;
+@property (nonatomic) BOOL isMultiPlayer;
 
 #pragma mark - Public Methods
 - (id)initWithWidth:(double)width AndHeight:(double)height;
-- (void)gameWon:(int)totalScore;
-- (void)gameLost;
+- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti;
+- (void)gameLost:(BOOL)isMulti;
 
 @end

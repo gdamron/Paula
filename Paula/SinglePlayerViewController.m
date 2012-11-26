@@ -321,11 +321,14 @@
     //[self allNotesOff];
     [self.metronome turnOff];
     mistakesLeftDisplay.text = @"mistakes: 0";
+    BOOL multi = (game.mode != SINGLE_PLAYER)?YES:NO;
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
-    [gameOver gameLost];
+    [gameOver gameLost:multi];
     [self.view addSubview:gameOver.label];
     [self.view addSubview:gameOver.button];
-    [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [_delegate sendScore:game.player];
+    if(!multi)
+        [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
 //
@@ -337,11 +340,14 @@
     //[self allNotesOff];
     [self.metronome turnOff];
     //game.level.song.currentSection = [NSNumber numberWithInt:[game.level.song.currentSection intValue]+1];
+    BOOL multi = (game.mode != SINGLE_PLAYER)?YES:NO;
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
-    [gameOver gameWon:[game.player.score intValue]];
+    [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi];
     [self.view addSubview:gameOver.label];
     [self.view addSubview:gameOver.button];
-    [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+    [_delegate sendScore:game.player];
+    if(!multi)
+        [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
 }
 
 //
@@ -391,12 +397,13 @@
 //    [self playCountdownAndStartGame];
     
     //show score view
-    NSMutableArray *data = [[NSMutableArray alloc] initWithCapacity:1];
-    game.player.name = @"Me";
-    [data addObject:game.player];
-    
     [self dismissViewControllerAnimated:YES completion:^{
-       [_delegate showScoreView:data]; 
+        if(game.mode != SINGLE_PLAYER)
+            [_delegate sendScore:game.player];
+        else {
+            game.player.name = @"Me";
+            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
+        }
     }];
 }
 
@@ -409,12 +416,13 @@
 //    [self playCountdownAndStartGame];
     
     //show score view
-    NSMutableArray *data = [[NSMutableArray alloc] initWithCapacity:1];
-    game.player.name = @"Me";
-    [data addObject:game.player];
-    
     [self dismissViewControllerAnimated:YES completion:^{
-        [_delegate showScoreView:data];
+        if(game.mode != SINGLE_PLAYER)
+            [_delegate sendScore:game.player];
+        else {
+            game.player.name = @"Me";
+            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
+        }
     }];
 }
 

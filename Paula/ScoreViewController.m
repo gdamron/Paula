@@ -13,6 +13,7 @@
 @property NSInteger screenHeight;
 @property NSInteger screenWidth;
 @property NSInteger rowHeight;
+@property UIButton *startButton;
 @end
 
 @implementation ScoreViewController
@@ -55,8 +56,24 @@
         [self.view addSubview:nameColumn];
         [self.view addSubview:mistakeColumn];
         [self.view addSubview:scoreColumn];
+        
+        self.startButton = [[UIButton alloc] initWithFrame:CGRectMake(self.screenWidth/2 - 40, self.screenHeight - 100, 80, 30)];
+        
+        self.startButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                                           green:(arc4random()%1000+1)/1000.0
+                                                            blue:(arc4random()%1000+1)/1000.0
+                                                           alpha:1.0];
+        [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [self.startButton setTitle:@"Okay" forState:UIControlStateNormal];
+        [self.startButton addTarget:self action:@selector(endGame) forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.view addSubview:self.startButton];
     }
     return self;
+}
+
+- (void)endGame {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (id)initWithData:(NSMutableArray *)data {

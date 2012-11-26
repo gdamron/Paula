@@ -23,11 +23,9 @@
     return self;
 }
 
--(NSData *) data {
+-(NSMutableData *) data {
     NSMutableData *data = [[NSMutableData alloc] initWithCapacity:100];
     
-    [data rw_appendInt32:'PAUL'];
-	[data rw_appendInt32:0];
 	[data rw_appendInt16:(short)self.packetType];
     
     return data;

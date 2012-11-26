@@ -48,8 +48,8 @@
         
         if (_gameClient == nil) {
             _gameClient = [[GK_GameClient alloc] init];
-            [_gameClient startSearchServerForSessionID:SESSION_ID];
             [_gameClient setDelegate:self];
+            [_gameClient startSearchServerForSessionID:SESSION_ID];
             
             NSLog(@"setting client delegates");
             [self.ntvc setCommDelegate:self];
@@ -101,8 +101,16 @@
 
 - (void) startGame {
     [self dismissViewControllerAnimated:NO completion:^{
-        [self.networkViewDelegate showGameView];
+        [self.networkViewDelegate showPlayView];
     }];
+}
+
+- (void) sendScore:(Player *)player {
+    [_gameClient sendScore:player.score mistakes:player.mistakesMade];
+}
+
+- (void) showScore:(NSMutableArray *)data {
+    [self.networkViewDelegate showScoreView:data];
 }
 
 @end

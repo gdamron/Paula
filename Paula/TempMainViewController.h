@@ -16,6 +16,7 @@
 @required
 - (void) showScoreView:(NSMutableArray *)data;
 - (void) showPlayView;
+- (void) sendScore:(Player *)player;
 @end
 
 @interface TempMainViewController : UIViewController <MainViewDelegate>

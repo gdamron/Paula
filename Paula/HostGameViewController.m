@@ -64,8 +64,8 @@
         
         if (_gameServer == nil) {
             _gameServer = [[GK_GameServer alloc] init];
-            [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
             [_gameServer setDelegate:self];
+            [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
             
             [self.ntvc setCommDelegate:self];
             [self.ntvc setDataDelegate:_gameServer];
@@ -90,14 +90,13 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+#pragma mark - GK_GameCommDelegate
 - (void) startGame {
     [_gameServer startGame];
     [self dismissViewControllerAnimated:NO completion:^{
-        [self.networkViewDelegate showGameView];
+        [self.networkViewDelegate showPlayView];
     }];
 }
-
-#pragma mark - GK_GameCommDelegate
 - (void) updateUI:(NSMutableArray *)data {
     [self.ntvc reloadTableData];
 }
@@ -118,6 +117,14 @@
                                                    delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", @"Button: OK") otherButtonTitles:nil];
     [alert show];
     [self dismissViewControllerAnimated:NO completion:nil];
+}
+
+- (void) sendScore:(Player *)player {
+    [_gameServer trackScores:nil score:player.score mistakes:player.mistakesMade];
+}
+
+- (void) showScore:(NSMutableArray *)data {
+    [self.networkViewDelegate showScoreView:data];
 }
 
 @end

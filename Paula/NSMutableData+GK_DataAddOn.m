@@ -51,7 +51,11 @@
 }
 
 - (void)rw_appendString:(NSString *)string {
-	const char *cString = [string UTF8String];
+    NSMutableString *mstring = [NSMutableString stringWithString:string];
+    if([string length] % 2 == 0) {
+        [mstring appendString:@" "];
+    }
+	const char *cString = [mstring UTF8String];
 	[self appendBytes:cString length:strlen(cString) + 1];
 }
 
