@@ -13,47 +13,55 @@
 
 @interface Game ()
 
-@property (assign, nonatomic) BOOL isPaulasTurn;
+@property (assign, nonatomic) BOOL paulasTurn;
 @property (strong, nonatomic) NSMutableArray *currentRound;
+@property (assign, nonatomic) double tempo;
 
 @end
 
 #pragma mark - Implementation
 @implementation Game
 
-@synthesize date, level, player, paula, currentRound, isPaulasTurn, mode;
+@synthesize date, level, player, paula, currentRound, paulasTurn, mode, tempo;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        date = [NSDate date];
-        level = [[Level alloc] init];
-        level.date = self.date;
-        player = [[Player alloc] init];
-        isPaulasTurn = YES;
-        currentRound = [[NSMutableArray alloc] init];
-        mode = SINGLE_PLAYER;
+        self.tempo = 80;
+        self.date = [NSDate date];
+        self.level = [[Level alloc] initWithTempo:self.tempo];
+        self.level.date = self.date;
+        self.player = [[Player alloc] init];
+        self.paulasTurn = YES;
+        self.currentRound = [[NSMutableArray alloc] init];
+        self.mode = SINGLE_PLAYER;
     }
     return self;
 }
 
 - (id)initWithGameMode:(enum GameModes)m {
     self = [self init];
-    mode = m;
+    self.mode = m;
+    return self;
+}
+
+- (id)initWithTempo:(double)t AndGameMode:(enum GameModes)m {
+    self = [self initWithGameMode:m];
+    self.tempo = t;
     return self;
 }
 
 - (void)makePaulasTurn {
-    isPaulasTurn = YES;
+    self.paulasTurn = YES;
 }
 
 - (void)makePlayersTurn {
-    isPaulasTurn = NO;
+    self.paulasTurn = NO;
 }
 
 - (BOOL)isPaulasTurn {
-    return isPaulasTurn;
+    return self.paulasTurn;
 }
 
 - (void)newRound {
@@ -83,13 +91,13 @@
 - (int)rewardOrPenalize:(BOOL)mistakesWereMade {
     int retval = 0;
     if (!mistakesWereMade) {
-        player.score = [NSNumber numberWithInt:[player.score intValue]+5];
+        self.player.score = [NSNumber numberWithInt:[player.score intValue]+5];
     }
     
     if (player.currentInput.count==currentRound.count) {
         [player.currentInput removeAllObjects];
         if (mistakesWereMade)
-            player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + 1)];
+            self.player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + 1)];
         NSLog(@"Paula's Turn");
         retval = 1;
     }
@@ -107,10 +115,10 @@
     }
     
     
-    if ([player.mistakesMade intValue] > [player.mistakesAllowed intValue]) {
+    if ([self.player.mistakesMade intValue] > [self.player.mistakesAllowed intValue]) {
         NSLog(@"Game Over");
         retval = 2;
-    } else if (currentRound.count == numNotesInLayer) {
+    } else if (self.currentRound.count == numNotesInLayer) {
         NSLog(@"Game Over");
         retval = 3;
     }
@@ -118,6 +126,27 @@
         NSLog(@"Player's Turn");
     
     return retval;
+}
+
+//
+//  generateNewLevel
+//
+//  Creates a 15 second level with 1 section and 3 layers at 80 bpm
+//
+- (void)generateSimpleLevel {
+    self.tempo = 80.0;
+    Section *section = [[Section alloc] init];
+    for (int i = 0; i < 3; i++) {
+        Layer *layer = [[Layer alloc] init];
+        layer.instrument.lowPitch = [NSNumber numberWithInt: i * 24 + 32];
+        // square wave
+        layer.instrument.waveform = [NSNumber numberWithInt:1];
+        layer.notes = [paula generateRandomLayerWithDuration:15.0 AndTempo:80.0];
+        [section addLayer:layer];
+    }
+    
+    [self.level addSection:section];
+
 }
 
 @end
@@ -132,10 +161,10 @@
 {
     self = [super init];
     if (self) {
-        currentInput = [[NSMutableArray alloc] init];
-        score = [NSNumber numberWithDouble:0.0];
-        mistakesAllowed = [NSNumber numberWithInt:1];
-        mistakesMade = [NSNumber numberWithInt:0];
+        self.currentInput = [[NSMutableArray alloc] init];
+        self.score = [NSNumber numberWithDouble:0.0];
+        self.mistakesAllowed = [NSNumber numberWithInt:1];
+        self.mistakesMade = [NSNumber numberWithInt:0];
     }
     return self;
 }
@@ -148,7 +177,7 @@
 - (void)addNote:(Note *)note {
     NSMutableArray *temp = [[NSMutableArray alloc] initWithArray:currentInput];
     [temp addObject:note];
-    currentInput = [NSArray arrayWithArray:temp];
+    self.currentInput = [NSArray arrayWithArray:temp];
 }
 
 @end
@@ -157,15 +186,25 @@
 #pragma mark - Implementation
 @implementation Level
 
-@synthesize score, date, tempo, order, sections;
+@synthesize score, date, tempo, order, sections, currentSection;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        score = [NSNumber numberWithDouble:0.0];
-        date = [NSDate date];
+        self.score = [NSNumber numberWithDouble:0.0];
+        // default tempo is 80 bpm
+        self.tempo = [NSNumber numberWithDouble:80.0];
+        self.date = [NSDate date];
+        self.sections = [[NSArray alloc] init];
+        self.currentSection = [NSNumber numberWithInt:0];
     }
+    return self;
+}
+
+- (id)initWithTempo:(double)t {
+    self = [self init];
+    tempo = [NSNumber numberWithDouble:t];
     return self;
 }
 
@@ -177,11 +216,11 @@
 - (void) addSection:(Section *)section {
     NSMutableArray *temp = [[NSMutableArray alloc] initWithArray:sections];
     [temp addObject:section];
-    sections = [NSArray arrayWithArray:temp];
+    self.sections = [NSArray arrayWithArray:temp];
     
     NSMutableArray *temp2 = [[NSMutableArray alloc] initWithArray:order];
     [temp2 addObject:[NSNumber numberWithInt:temp2.count-1]];
-    order = [NSArray arrayWithArray:temp2];
+    self.order = [NSArray arrayWithArray:temp2];
 }
 
 @end
@@ -190,21 +229,31 @@
 #pragma mark - Implementation
 @implementation Section
 
-@synthesize layers, order;
+@synthesize layers, order, currentLayer;
+
+- (id)init {
+    if (self = [super init]) {
+        self.layers = [[NSArray alloc] init];
+        self.order = [[NSArray alloc] init];
+        self.currentLayer = [NSNumber numberWithInt:0];
+    }
+    
+    return self;
+}
 
 //
 //  addLayer
 //
-//  add layer to end of layers arrat
+//  add layer to end of layers array
 //
 - (void) addLayer:(Layer *)layer {
     NSMutableArray *temp = [[NSMutableArray alloc] initWithArray:layers];
     [temp addObject:layer];
-    layers = [NSArray arrayWithArray:temp];
+    self.layers = [NSArray arrayWithArray:temp];
     
     NSMutableArray *temp2 = [[NSMutableArray alloc] initWithArray:order];
     [temp2 addObject:[NSNumber numberWithInt:temp2.count-1]];
-    order = [NSArray arrayWithArray:temp2];
+    self.order = [NSArray arrayWithArray:temp2];
 }
 
 @end
@@ -213,17 +262,18 @@
 #pragma mark - Implementation
 @implementation Layer
 
-@synthesize notes, instrument, scale, currentNote, currentStopIndex;
+@synthesize notes, instrument, scale, currentNote, currentStopIndex, beatResolution;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        notes = [[NSArray alloc] init];
-        instrument = [[Instrument alloc] init];
-        scale = [[NSArray alloc] init];
-        currentNote = [NSNumber numberWithInt:0];
-        currentStopIndex = [NSNumber numberWithInt:1];
+        self.notes = [[NSArray alloc] init];
+        self.instrument = [[Instrument alloc] init];
+        self.scale = [[NSArray alloc] init];
+        self.currentNote = [NSNumber numberWithInt:0];
+        self.currentStopIndex = [NSNumber numberWithInt:1];
+        self.beatResolution = [NSNumber numberWithInt:1];
     }
     return self;
 }

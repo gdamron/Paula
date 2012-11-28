@@ -59,7 +59,7 @@
 
 // pi
 #define ONE_PI (3.14159265358979323846)
-#define TWO_PI (2.0 * ONE_PI)
+//#define TWO_PI (2.0 * ONE_PI)
 #define SQRT2  (1.41421356237309504880)
 #define PI_OVER_180 (ONE_PI / 180.0)
 

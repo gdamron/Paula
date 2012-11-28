@@ -17,7 +17,8 @@ static UIButton* setupMenuButton(UIButton* sender, NSInteger idx, NSString* name
                                               blue:(arc4random()%1000+1)/1000.0
                                              alpha:1.0];
     [sender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    sender.frame = CGRectMake(width/2 - 75, (height/8) * idx + 80, 155, 35);
+    sender.titleLabel.font = [UIFont boldSystemFontOfSize:32];
+    sender.frame = CGRectMake(0, (height/7) * idx + 60, width, 60);
     [sender setTitle:name forState:UIControlStateNormal];
 
     return sender;
@@ -26,7 +27,7 @@ static UIButton* setupMenuButton(UIButton* sender, NSInteger idx, NSString* name
 static UIImageView* setupLogo(CGFloat width, CGFloat height) {
     UIImage *logo = [UIImage imageNamed:@"logo.gif"];
     UIImageView *logoView = [[UIImageView alloc] initWithImage:logo];
-    logoView.frame = CGRectMake(width/2-86, height/2-155, 172, 49);
+    logoView.frame = CGRectMake(width/2-172, 15, 344, 98);
     
     return logoView;
 }

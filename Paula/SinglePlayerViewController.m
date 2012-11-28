@@ -66,46 +66,7 @@
 //  add a tone to the stack
 //
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    int s = 1;
-    
-    if (num==1) {
-        sineButton1.alpha = 1.0;
-    } else if (num==2) {
-        sineButton2.alpha = 1.0;
-    } else if (num==3) {
-        sineButton3.alpha = 1.0;
-    } else if (num==4) {
-        sineButton4.alpha = 1.0;
-    } else if (num==5) {
-        sineButton5.alpha = 1.0;
-    } else if (num==6) {
-        sineButton6.alpha = 1.0;
-    } else if (num==7) {
-        sineButton7.alpha = 1.0;
-    } else if (num==8) {
-        sineButton8.alpha = 1.0;
-    }
-    
-    if(send) {
-        uint8_t c = 0;
-        switch (num) {
-                case 1: c = '1'; break;
-                case 2: c = '2'; break;
-                case 3: c = '3'; break;
-                case 4: c = '4'; break;
-                case 5: c = '5'; break;
-                case 6: c = '6'; break;
-                case 7: c = '7'; break;
-                case 8: c = '8'; break;
-        }
-//        [self.controller send:c];
-    }
-    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
-    
-    if (![game isPaulasTurn] ) {
-        [game addPlayerInput:num];
-        [self checkContinueConditions];
-    }
+    [self noteOnWithNumber:num sendMessage:send AndSoundType:1];
 }
 
 //
@@ -136,6 +97,52 @@
 //        [self.controller send:'0'];
     }
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))];
+}
+
+- (void)noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
+    if (num==1) {
+        sineButton1.alpha = 1.0;
+    } else if (num==2) {
+        sineButton2.alpha = 1.0;
+    } else if (num==3) {
+        sineButton3.alpha = 1.0;
+    } else if (num==4) {
+        sineButton4.alpha = 1.0;
+    } else if (num==5) {
+        sineButton5.alpha = 1.0;
+    } else if (num==6) {
+        sineButton6.alpha = 1.0;
+    } else if (num==7) {
+        sineButton7.alpha = 1.0;
+    } else if (num==8) {
+        sineButton8.alpha = 1.0;
+    }
+    
+    if(send) {
+        uint8_t c = 0;
+        switch (num) {
+            case 1: c = '1'; break;
+            case 2: c = '2'; break;
+            case 3: c = '3'; break;
+            case 4: c = '4'; break;
+            case 5: c = '5'; break;
+            case 6: c = '6'; break;
+            case 7: c = '7'; break;
+            case 8: c = '8'; break;
+        }
+        //        [self.controller send:c];
+    }
+    [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
+    
+    if (![game isPaulasTurn] ) {
+        [game addPlayerInput:num];
+        [self checkContinueConditions];
+    }
+}
+
+- (void)noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
+    // placeholder
+    [self allNotesOff];
 }
 
 //
@@ -199,7 +206,7 @@
 //
 - (void)startGame {
     game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-    toneGen = [[ToneGenerator alloc] init];
+    toneGen = [[ToneGenerator3 alloc] init];
     [self setupGame];
     [toneGen start];
     [metronome turnOnWithNotification:@"paulaClick"];
@@ -211,17 +218,18 @@
 //  configure game's initial settings, depending on the current mode
 //
 - (void)setupGame {
-    Layer *newLayer = [[Layer alloc] init];
+    
     if (game.mode==SINGLE_PLAYER) {
-        newLayer.notes = [[NSArray alloc] initWithArray:[game.paula generateRandomLayer]];
+        [game generateSimpleLevel];
     } else if (game.mode==MULTI_PLAYER_COMPETE) {
+        Layer *newLayer = [[Layer alloc] init];
         [self setTempMultiPlayerMelody];
         newLayer.notes = [[NSArray alloc] initWithArray:melNotes];
+        Section *newSection = [[Section alloc] init];
+        [newSection addLayer:newLayer];
+        [game.level addSection:newSection];
     }
-    Section *newSection = [[Section alloc] init];
-    [newSection addLayer:newLayer];
     
-    [game.level addSection:newSection];
 }
 
 //
@@ -269,8 +277,8 @@
 //  and variable note durations are possible
 - (void)paulaClickListen:(id)sender {
     [self allNotesOff];
-    Section *currentSection = game.level.sections[0];
-    Layer *currentLayer = currentSection.layers[0];
+    Section *currentSection = game.level.sections[[game.level.currentSection intValue]];
+    Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
     // get the index in the layer of the current note
     int index = [currentLayer.currentNote intValue];
     // get the index in the layer of the note stop at for this round
@@ -282,11 +290,20 @@
         [game makePlayersTurn];
         currentLayer.currentStopIndex = [NSNumber numberWithInt:stopNote+1];
     } else {
-        NSInteger i = [[currentLayer.notes objectAtIndex:index++] integerValue];
-        if (i > 0) {
-            [self noteOnWithNumber:i sendMessage:NO];
+        NSInteger i = [[currentLayer.notes objectAtIndex:index] integerValue];
+        if (i > 0)
             [game addPaulaInput:i];
+        
+        for (int j = 0; j < [currentSection.currentLayer intValue]+1; j++) {
+            Layer *layer = currentSection.layers[j];
+            int note = [layer.notes[index] intValue];
+            NSLog(@"%d", note);
+            // not very safe
+            if (note > 0)
+                [self noteOnWithNumber:note sendMessage:NO AndSoundType:j];
         }
+            //[self noteOnWithNumber:i sendMessage:NO];
+        index++;
     }
     currentLayer.currentNote = [NSNumber numberWithInt:index];
 }
@@ -377,6 +394,7 @@
 
 - (void)didReceiveMemoryWarning
 {
+    NSLog(@"DAMNIT!");
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
@@ -431,6 +449,7 @@
 
 - (void)viewDidLoad
 {
+    game = [[Game alloc] init];
     [super viewDidLoad];
 	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
@@ -449,6 +468,11 @@
     if(self) {
         if(game) {
             game.mode = mode;
+        }
+        
+        if (game.mode == JUST_PlAY) {
+            toneGen = [[ToneGenerator3 alloc] init];
+            [toneGen start];
         }
     }
     
@@ -489,7 +513,6 @@
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:backButton];
-        game = [[Game alloc] init];
         //[self playCountdownAndStartGame];
         
     }

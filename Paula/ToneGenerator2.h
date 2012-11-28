@@ -5,7 +5,7 @@
 //  Created by Grant Damron on 10/30/12.
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
-
+/*
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 
@@ -39,4 +39,4 @@
 @property (assign, nonatomic) double sample;
 @property (assign, nonatomic) double gain;
 
-@end
+@end*/

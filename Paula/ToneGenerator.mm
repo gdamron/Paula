@@ -5,7 +5,7 @@
 // Created by Grant Damron on 10/11/12.
 // Copyright (c) 2012 Grant Damron. All rights reserved.
 //
-
+/*
 #import "ToneGenerator.h"
 #import "mo_audio.h"
 
@@ -139,4 +139,4 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
         phase += frequency/((double)SRATE);
         if (phase > 1.0f) phase -= 1.0f;
     }
-}
+}*/

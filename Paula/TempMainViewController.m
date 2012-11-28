@@ -10,7 +10,6 @@
 #import "SinglePlayerViewController.h"
 
 @interface TempMainViewController ()
-//@property (strong) ToneGenerator *toneGenerator;
 @property (nonatomic) SinglePlayerViewController *singlePlayerViewController;
 @property (nonatomic) NetworkViewController *networkViewController;
 
@@ -27,7 +26,6 @@
 @synthesize eugeneViewController;
 @synthesize networkViewController;
 @synthesize scoreViewController;
-//@synthesize toneGenerator;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -36,15 +34,15 @@
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
-        [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
+        [self.view setBackgroundColor:[UIColor colorWithRed:0.13 green:0.13 blue:0.13 alpha:1.0]];
         
         toSinglePlayer = setupMenuButton(toSinglePlayer, 1, @"Single Player", width, height);
         [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         toMultiPlayer = setupMenuButton(toMultiPlayer, 2, @"Multi-Player", width, height);
         [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEnyu = setupMenuButton(toEnyu, 3, @"Enyu", width, height);
+        toEnyu = setupMenuButton(toEnyu, 3, @"Just Play", width, height);
         [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = setupMenuButton(toEugene, 4, @"Eugene", width, height);
+        toEugene = setupMenuButton(toEugene, 4, @"Scoreboard", width, height);
         [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];
@@ -72,8 +70,9 @@
 
 - (void)nameButtonPressed:(id)sender {
     if (sender==toEnyu) {
-        enyuViewController = [[EnyuViewController alloc] init];
-        [self presentViewController:enyuViewController animated:YES completion:nil];
+        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:JUST_PlAY];
+        [self.singlePlayerViewController setDelegate:self];
+        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toEugene) {
         scoreViewController = [[ScoreViewController alloc] initWithData:nil];
         [self presentViewController:scoreViewController animated:YES completion:nil];
@@ -81,7 +80,6 @@
         self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:SINGLE_PLAYER];
         [self.singlePlayerViewController setDelegate:self];
         [self.singlePlayerViewController playCountdownAndStartGame];
-        //[singlePlayerViewController setToneGen:toneGenerator];
         [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];

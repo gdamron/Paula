@@ -16,7 +16,7 @@
  */
 
 
-#import "ToneGenerator.h"
+#import "ToneGenerator3.h"
 #include "mo_audio.h"
 #include "SineWave.h"
 #include "Blit.h"
@@ -47,7 +47,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 
 
-@interface ToneGenerator()
+@interface ToneGenerator3()
 
 @property NSMutableArray *freqs;
 @property NSMutableArray *tones;
@@ -55,7 +55,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 @end
 
-@implementation ToneGenerator
+@implementation ToneGenerator3
 
 @synthesize isOn;
 @synthesize globalGain;
@@ -66,6 +66,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (id)init {
     if (self = [super init]) {
+        Stk::setRawwavePath("rawwaves");
         freqs = [[NSMutableArray alloc] init];
         tones = [[NSMutableArray alloc] init];
         sine = new SineWave();
@@ -74,6 +75,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
         moog = new Moog();
         noise = new Noise();
         blit = new Blit();
+        
     }
     return self;
 }

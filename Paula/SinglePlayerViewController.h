@@ -7,14 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ToneGenerator.h"
+#import "ToneGenerator3.h"
 #import "PaulaUtilities.m"
 #import "TempMainViewController.h"
 #import "NetworkViewController.h"
 #import "Metronome.h"
 #import "Game.h"
 
-//#import "ToneGenerator2.h"
 #pragma mark - SinglePlayerViewController Public Interface
 
 @interface SinglePlayerViewController : UIViewController
@@ -35,11 +34,13 @@
 @property (strong, nonatomic) UILabel *mistakesLeftDisplay;
 @property (strong) Metronome *metronome;
 @property (strong) Game *game;
-@property (strong) ToneGenerator *toneGen;
+@property (strong) ToneGenerator3 *toneGen;
 
 #pragma mark - SinglePlayerViewController Public Methods
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send;
+- (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s;
+- (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s;
 - (void) noteOn:(id)sender;
 - (void) noteOff:(id)sender;
 - (void) allNotesOff;

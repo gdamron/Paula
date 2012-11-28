@@ -17,7 +17,7 @@ enum waveforms {
     blit_wave = 5
 };
 
-@interface ToneGenerator : NSObject
+@interface ToneGenerator3 : NSObject
 
 @property (assign, nonatomic) BOOL isOn;
 @property (assign, nonatomic) int waveForm;
@@ -30,7 +30,7 @@ enum waveforms {
 - (void)noteOff;
 - (void)start;
 - (void)stop;
-- (void)newInstrument:(int)s;
+//- (void)newInstrument:(int)s;
 
 @end
 

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "sqlite3.h"
+#import <sqlite3.h>
 #import "Game.h"
 
 @interface PaulaDatabase : NSObject{
