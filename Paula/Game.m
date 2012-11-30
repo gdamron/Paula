@@ -8,6 +8,13 @@
 
 #import "Game.h"
 
+#define DEFAULT_PLAYER_MISTAKES_ALLOWED 5
+#define DEFAULT_GAME_TEMPO 80
+
+#define TEMP_GAME_DUR 5.0
+#define TEMP_GAME_LAYERS 3
+#define TEMP_GAME_SECTIONS 1
+
 #pragma mark - Game Class -
 #pragma mark Private Interface
 
@@ -28,7 +35,7 @@
 {
     self = [super init];
     if (self) {
-        self.tempo = 80;
+        self.tempo = DEFAULT_GAME_TEMPO;
         self.date = [NSDate date];
         self.level = [[Level alloc] initWithTempo:self.tempo];
         self.level.date = self.date;
@@ -94,7 +101,31 @@
         self.player.score = [NSNumber numberWithInt:[player.score intValue]+5];
     }
     
-    if (player.currentInput.count==currentRound.count) {
+    // this is a problem -- number of notes in layer and number of notes stored in round
+    // may not match because 0's (rests) are not stored
+    Section *currentSection = self.level.sections[[self.level.currentSection intValue]];
+    Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
+    int numNotesInLayer = 0;
+    int numSections = level.sections.count;
+    int numLayersInSection = currentSection.layers.count;
+    
+    for (int i = 0; i < currentLayer.notes.count; i++) {
+        if ([currentLayer.notes[i] intValue]!=0)
+            numNotesInLayer++;
+    }
+    if (player.currentInput.count == numNotesInLayer
+        && [level.currentSection intValue] == numSections-1
+        && [currentSection.currentLayer intValue] == numLayersInSection-1) {
+        
+        [player.currentInput removeAllObjects];
+        NSLog(@"Game Won");
+        retval = 3;
+    
+    }   else if (player.currentInput.count == numNotesInLayer) {
+        [player.currentInput removeAllObjects];
+        NSLog(@"Layer Complete");
+        retval = 4;
+    } else if (player.currentInput.count==currentRound.count) {
         [player.currentInput removeAllObjects];
         if (mistakesWereMade)
             self.player.mistakesMade = [NSNumber numberWithInt:([player.mistakesMade intValue] + 1)];
@@ -102,26 +133,11 @@
         retval = 1;
     }
     
-    // this is a problem -- number of notes in layer and number of notes stored in round
-    // may not match because 0's (rests) are not stored
-    Section *currentSection = self.level.sections[[self.level.currentSection intValue]];
-    Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
-    int numNotesInLayer = 0;
-    
-    for (int i = 0; i < currentLayer.notes.count; i++) {
-        if ([currentLayer.notes[i] intValue]!=0)
-            numNotesInLayer++;
-        NSLog(@"%d %d", numNotesInLayer, currentRound.count);
-    }
-    
-    
     if ([self.player.mistakesMade intValue] > [self.player.mistakesAllowed intValue]) {
         NSLog(@"Game Over");
         retval = 2;
-    } else if (self.currentRound.count == numNotesInLayer) {
-        NSLog(@"Game Over");
-        retval = 3;
     }
+    
     if (retval==0)
         NSLog(@"Player's Turn");
     
@@ -129,19 +145,19 @@
 }
 
 //
-//  generateNewLevel
+//  generateSimpleLevel
 //
 //  Creates a 15 second level with 1 section and 3 layers at 80 bpm
 //
 - (void)generateSimpleLevel {
-    self.tempo = 80.0;
+    self.tempo = DEFAULT_GAME_TEMPO;
     Section *section = [[Section alloc] init];
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < TEMP_GAME_LAYERS; i++) {
         Layer *layer = [[Layer alloc] init];
         layer.instrument.lowPitch = [NSNumber numberWithInt: i * 24 + 32];
         // square wave
         layer.instrument.waveform = [NSNumber numberWithInt:1];
-        layer.notes = [paula generateRandomLayerWithDuration:15.0 AndTempo:80.0];
+        layer.notes = [paula generateRandomLayerWithDuration:TEMP_GAME_DUR AndTempo:DEFAULT_GAME_TEMPO];
         [section addLayer:layer];
     }
     
@@ -163,7 +179,7 @@
     if (self) {
         self.currentInput = [[NSMutableArray alloc] init];
         self.score = [NSNumber numberWithDouble:0.0];
-        self.mistakesAllowed = [NSNumber numberWithInt:1];
+        self.mistakesAllowed = [NSNumber numberWithInt:DEFAULT_PLAYER_MISTAKES_ALLOWED];
         self.mistakesMade = [NSNumber numberWithInt:0];
     }
     return self;
@@ -194,7 +210,7 @@
     if (self) {
         self.score = [NSNumber numberWithDouble:0.0];
         // default tempo is 80 bpm
-        self.tempo = [NSNumber numberWithDouble:80.0];
+        self.tempo = [NSNumber numberWithDouble:DEFAULT_GAME_TEMPO];
         self.date = [NSDate date];
         self.sections = [[NSArray alloc] init];
         self.currentSection = [NSNumber numberWithInt:0];

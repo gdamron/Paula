@@ -24,7 +24,7 @@ enum waveforms {
 @property (assign, nonatomic) double globalGain;
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
-- (void)noteOff:(double)freq andSoundType:(int)s;
+- (void)noteOff:(double)freq withSoundType:(int)s;
 - (void)noteOff:(double)freq;
 - (void)noteOffWithsoundType:(int)s;
 - (void)noteOff;

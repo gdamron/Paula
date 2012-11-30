@@ -131,12 +131,27 @@
 //  Congratulate and show score
 //  Currently, the only option is to quit
 //
-- (void)gameWon:(int)totalScore isMultiplayer:(BOOL)multiPlayer {
+- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
     NSString *title = @"View Score";
-    if(multiPlayer) {
+    if(isMulti) {
+        title = @"Waiting...";
+    }
+    [button setTitle:title forState:UIControlStateNormal];
+}
+
+//
+//  layerComplete
+//
+//  Congratulate, show score, and get ready to move on
+//
+- (void)layerComplete:(int)totalScore isMultiPlayer:(BOOL)isMulti {
+    won = NO;
+    label.text = [NSString stringWithFormat:@"Layer Complete.\nScore: %d", totalScore];
+    NSString *title = @"Continue";
+    if(isMulti) {
         title = @"Waiting...";
     }
     [button setTitle:title forState:UIControlStateNormal];

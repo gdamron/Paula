@@ -30,6 +30,7 @@
 #define NUMCHANNELS 2
 #define BUFFER_COUNT    3
 #define BUFFER_DURATION 0.5
+#define NUM_INSTRUMENTS 6
 
 using namespace stk;
 
@@ -42,7 +43,7 @@ Noise *noise;
 Blit *blit;
 
 bool g_on = false;
-bool instrumentFlags[6];
+bool instrumentFlags[NUM_INSTRUMENTS];
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 
@@ -68,7 +69,11 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
     if (self = [super init]) {
         Stk::setRawwavePath("rawwaves");
         freqs = [[NSMutableArray alloc] init];
+        // using this for polyphony so I don't have to mess with
+        // previous functionality
         tones = [[NSMutableArray alloc] init];
+        for (int i = 0; i < NUM_INSTRUMENTS; i++)
+            [tones addObject:[[NSMutableArray alloc] init]];
         sine = new SineWave();
         square = new BlitSquare();
         saw = new BlitSaw();
@@ -96,43 +101,33 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
     tone.amplitude = g;
     tone.instrument = (enum waveforms) s;
     
-    switch (tone.instrument) {
-        case sine_wave:
-            instrumentFlags[0] = YES;
-            sine->setFrequency(tone.frequency);
-            break;
-            
-        case square_wave:
-            instrumentFlags[1] = YES;
-            square->setFrequency(tone.frequency);
-            break;
-            
-        case saw_wave:
-            instrumentFlags[2] = YES;
-            saw->setFrequency(tone.frequency);
-            break;
-            
-        case moog_wave:
-            instrumentFlags[3] = YES;
-            moog->noteOn(tone.frequency, tone.amplitude);
-            break;
-            
-        case noise_wave:
-            instrumentFlags[4] = YES;
-            break;
-            
-        case blit_wave:
-            instrumentFlags[5] = YES;
-            blit->setFrequency(tone.frequency);
-            break;
-        default:
-            break;
-    }
+    [tones[s] addObject:[NSNumber numberWithDouble:tone.frequency]];
+    instrumentFlags[s] = YES;
+    [self setFrequencyForInstrument:tone];
 }
 
-- (void)noteOff:(double)freq andSoundType:(int)s {
-    // not sure this will ever be used
-    instrumentFlags[s] = NO;
+- (void)noteOff:(double)freq withSoundType:(int)s {
+    // first remove the note from its instrument's stack
+    [tones[s] removeObject:[NSNumber numberWithDouble:freq ]];
+    
+    // check to see if we need to turn the instrument (or
+    // all instruments) off
+    if (!tones[s]) {
+        instrumentFlags[s] = NO;
+        BOOL everythingIsOff = YES;
+        for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+            if (instrumentFlags[i]==YES)
+                everythingIsOff = NO;
+        }
+        if (everythingIsOff)
+            g_on = NO;
+    // set new frequency for instrument as appropriate
+    } else {
+        Tone *tone = [[Tone alloc] init];
+        tone.frequency = [[tones[s] lastObject] doubleValue];
+        tone.instrument = (enum waveforms) s;
+        [self setFrequencyForInstrument:tone];
+    }
 }
 
 - (void)noteOffWithsoundType:(int)s {
@@ -140,9 +135,9 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void)noteOff:(double) freq {
-    [freqs removeObject:[NSNumber numberWithDouble:freq]];
+    [tones[2] removeObject:[NSNumber numberWithDouble:freq]];
     if (freqs.count>0) {
-        //frequency = [[freqs lastObject] doubleValue];
+        square->setFrequency([[freqs lastObject] doubleValue]);
     } else {
         g_on = NO;
         NSLog(@"Note off");
@@ -151,8 +146,42 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (void)noteOff {
     g_on = NO;
-    [freqs removeAllObjects];
+    for (int i = 0; i < tones.count; i++) {
+        if (tones[i]) 
+            [tones[i] removeAllObjects];
+        instrumentFlags[i] = NO;
+    }
     NSLog(@"All notes off");
+}
+
+- (void)setFrequencyForInstrument:(Tone *)tone {
+    switch (tone.instrument) {
+        case sine_wave:
+            sine->setFrequency(tone.frequency);
+            break;
+            
+        case square_wave:
+            square->setFrequency(tone.frequency);
+            break;
+            
+        case saw_wave:
+            saw->setFrequency(tone.frequency);
+            break;
+            
+        case moog_wave:
+            moog->noteOn(tone.frequency, tone.amplitude);
+            break;
+            
+        case noise_wave:
+            // nothing to do here
+            break;
+            
+        case blit_wave:
+            blit->setFrequency(tone.frequency);
+            break;
+        default:
+            break;
+    }
 }
 
 - (void) start {
@@ -166,6 +195,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void)stop {
+    g_on = NO;
     MoAudio::stop();
     //MoAudio::shutdown();
 }
