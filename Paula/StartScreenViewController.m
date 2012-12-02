@@ -18,8 +18,6 @@
 
 @implementation StartScreenViewController
 
-@synthesize toEnyu;
-@synthesize toEugene;
 @synthesize toSinglePlayer;
 @synthesize toMultiPlayer;
 @synthesize networkViewController;
@@ -38,14 +36,8 @@
         [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         toMultiPlayer = setupMenuButtonWithImage(toMultiPlayer, 2, [UIImage imageNamed:@"multi-player.gif"], width, height);
         [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEnyu = setupMenuButtonWithImage(toEnyu, 3, [UIImage imageNamed:@"just-play.gif"], width, height);
-        [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = setupMenuButtonWithImage(toEugene, 4, [UIImage imageNamed:@"scoreboard.gif"], width, height);
-        [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];
-        [self.view addSubview:toEnyu];
-        [self.view addSubview:toEugene];
         [self.view addSubview:toSinglePlayer];
         [self.view addSubview:toMultiPlayer];
         
@@ -67,14 +59,7 @@
 }
 
 - (void)nameButtonPressed:(id)sender {
-    if (sender==toEnyu) {
-        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:JUST_PlAY];
-        [self.singlePlayerViewController setDelegate:self];
-        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
-    } else if (sender==toEugene) {
-        scoreViewController = [[ScoreViewController alloc] initWithData:nil];
-        [self presentViewController:scoreViewController animated:YES completion:nil];
-    } else if (sender==toSinglePlayer) {
+    if (sender==toSinglePlayer) {
         self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:SINGLE_PLAYER];
         [self.singlePlayerViewController setDelegate:self];
         [self.singlePlayerViewController playCountdownAndStartGame];
