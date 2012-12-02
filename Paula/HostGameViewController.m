@@ -22,6 +22,7 @@
 
 @synthesize startButton;
 @synthesize networkViewDelegate=_networkViewDelegate;
+@synthesize mode=_mode;
 
 //@synthesize singlePlayerController, server, socketDelegate;
 

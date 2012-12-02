@@ -13,8 +13,8 @@
 @interface HostGameViewController : UIViewController <GK_GameCommDelegate>
 
 @property (nonatomic) UIButton* startButton;
-
 @property (nonatomic, assign) NetworkViewController *networkViewDelegate;
+@property (nonatomic, assign) enum GameModes mode;
 
 -(void) sendScore:(Player *)player;
 

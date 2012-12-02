@@ -10,6 +10,7 @@
 #import "PaulaUtilities.m"
 #import "StartScreenViewController.h"
 #import "SinglePlayerViewController.h"
+#import "Game.h"
 
 @class NetworkViewController;
 
@@ -19,6 +20,6 @@
 @property (strong, nonatomic) UIButton *hostGameButton;
 @property (strong, nonatomic) UIButton *searchGameButton;
 
--(void) showGameView;
+- (void) setGameOption:(enum GameModes) mode;
 
 @end
