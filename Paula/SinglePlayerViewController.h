@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ToneGenerator3.h"
+#import "ToneGenerator.h"
 #import "PaulaUtilities.m"
-#import "TempMainViewController.h"
+#import "StartScreenViewController.h"
 #import "NetworkViewController.h"
 #import "Metronome.h"
 #import "Game.h"
@@ -34,7 +34,7 @@
 @property (strong, nonatomic) UILabel *mistakesLeftDisplay;
 @property (strong) Metronome *metronome;
 @property (strong) Game *game;
-@property (strong) ToneGenerator3 *toneGen;
+@property (strong) ToneGenerator *toneGen;
 
 #pragma mark - SinglePlayerViewController Public Methods
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send;

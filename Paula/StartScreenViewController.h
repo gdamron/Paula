@@ -7,8 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "EnyuViewController.h"
-#import "EugeneViewController.h"
 #import "ScoreViewController.h"
 #import "PaulaUtilities.m"
 
@@ -19,14 +17,12 @@
 - (void) sendScore:(Player *)player;
 @end
 
-@interface TempMainViewController : UIViewController <MainViewDelegate>
+@interface StartScreenViewController : UIViewController <MainViewDelegate>
 
 @property (strong, nonatomic) UIButton *toEnyu;
 @property (strong, nonatomic) UIButton *toEugene;
 @property (strong, nonatomic) UIButton *toSinglePlayer;
 @property (strong, nonatomic) UIButton *toMultiPlayer;
-@property (strong, nonatomic) EnyuViewController *enyuViewController;
-@property (strong, nonatomic) EugeneViewController *eugeneViewController;
 @property (strong, nonatomic) ScoreViewController *scoreViewController;
 
 @end

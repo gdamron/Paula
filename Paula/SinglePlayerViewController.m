@@ -250,7 +250,7 @@
 //
 - (void)startGame {
     game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-    toneGen = [[ToneGenerator3 alloc] init];
+    toneGen = [[ToneGenerator alloc] init];
     [self setupGame];
     [toneGen start];
     Section *section = game.level.sections[[game.level.currentSection intValue]];
@@ -588,7 +588,7 @@
         }
         
         if (game.mode == JUST_PlAY) {
-            toneGen = [[ToneGenerator3 alloc] init];
+            toneGen = [[ToneGenerator alloc] init];
             [toneGen start];
         }
     }

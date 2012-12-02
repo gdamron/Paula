@@ -1,29 +1,27 @@
 //
-//  TempMainViewController.m
+//  StartScreenViewController.m
 //  Paula
 //
 //  Created by Grant Damron on 10/10/12.
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
-#import "TempMainViewController.h"
+#import "StartScreenViewController.h"
 #import "SinglePlayerViewController.h"
 
-@interface TempMainViewController ()
+@interface StartScreenViewController ()
 @property (nonatomic) SinglePlayerViewController *singlePlayerViewController;
 @property (nonatomic) NetworkViewController *networkViewController;
 
 @end
 
 
-@implementation TempMainViewController
+@implementation StartScreenViewController
 
 @synthesize toEnyu;
 @synthesize toEugene;
 @synthesize toSinglePlayer;
 @synthesize toMultiPlayer;
-@synthesize enyuViewController;
-@synthesize eugeneViewController;
 @synthesize networkViewController;
 @synthesize scoreViewController;
 

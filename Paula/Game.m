@@ -10,10 +10,9 @@
 
 #define DEFAULT_PLAYER_MISTAKES_ALLOWED 5
 #define DEFAULT_GAME_TEMPO 80
-
-#define TEMP_GAME_DUR 5.0
-#define TEMP_GAME_LAYERS 3
-#define TEMP_GAME_SECTIONS 1
+#define DEFAULT_GAME_DUR 10.0
+#define DEFAULT_GAME_LAYERS 3
+#define DEFAULT_GAME_SECTIONS 1
 
 #pragma mark - Game Class -
 #pragma mark Private Interface
@@ -152,12 +151,12 @@
 - (void)generateSimpleLevel {
     self.tempo = DEFAULT_GAME_TEMPO;
     Section *section = [[Section alloc] init];
-    for (int i = 0; i < TEMP_GAME_LAYERS; i++) {
+    for (int i = 0; i < DEFAULT_GAME_LAYERS; i++) {
         Layer *layer = [[Layer alloc] init];
         layer.instrument.lowPitch = [NSNumber numberWithInt: i * 24 + 32];
         // square wave
         layer.instrument.waveform = [NSNumber numberWithInt:1];
-        layer.notes = [paula generateRandomLayerWithDuration:TEMP_GAME_DUR AndTempo:DEFAULT_GAME_TEMPO];
+        layer.notes = [paula generateRandomLayerWithDuration:DEFAULT_GAME_DUR AndTempo:DEFAULT_GAME_TEMPO];
         [section addLayer:layer];
     }
     
