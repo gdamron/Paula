@@ -19,12 +19,8 @@
 
 @implementation TempMainViewController
 
-@synthesize toEnyu;
-@synthesize toEugene;
 @synthesize toSinglePlayer;
 @synthesize toMultiPlayer;
-@synthesize enyuViewController;
-@synthesize eugeneViewController;
 @synthesize networkViewController;
 @synthesize scoreViewController;
 //@synthesize toneGenerator;
@@ -42,14 +38,8 @@
         [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         toMultiPlayer = setupMenuButton(toMultiPlayer, 2, @"Multi-Player", width, height);
         [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEnyu = setupMenuButton(toEnyu, 3, @"Enyu", width, height);
-        [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = setupMenuButton(toEugene, 4, @"Eugene", width, height);
-        [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];
-        [self.view addSubview:toEnyu];
-        [self.view addSubview:toEugene];
         [self.view addSubview:toSinglePlayer];
         [self.view addSubview:toMultiPlayer];
         
@@ -71,13 +61,7 @@
 }
 
 - (void)nameButtonPressed:(id)sender {
-    if (sender==toEnyu) {
-        enyuViewController = [[EnyuViewController alloc] init];
-        [self presentViewController:enyuViewController animated:YES completion:nil];
-    } else if (sender==toEugene) {
-        scoreViewController = [[ScoreViewController alloc] initWithData:nil];
-        [self presentViewController:scoreViewController animated:YES completion:nil];
-    } else if (sender==toSinglePlayer) {
+    if (sender==toSinglePlayer) {
         self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:SINGLE_PLAYER];
         [self.singlePlayerViewController setDelegate:self];
         [self.singlePlayerViewController playCountdownAndStartGame];
