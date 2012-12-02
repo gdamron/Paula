@@ -157,6 +157,29 @@
 }
 
 //
+//  gameWon
+//
+//  Congratulate and show score
+//  Currently, the only option is to quit
+//
+- (void)levelPlayedBack:(int)totalScore isMultiPlayer:(BOOL)isMulti {
+    won = YES;
+    label.text = [NSString stringWithFormat:@"Now What?\nScore: %d", totalScore];
+    //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
+    NSString *title = @"Score";
+    if(isMulti) {
+        title = @"Waiting...";
+    } else {
+        
+        CGRect bFrame = [button frame];
+        bFrame.size.width = bFrame.size.width/2 - 2;
+        [button setFrame:bFrame];
+        
+    }
+    [button setTitle:title forState:UIControlStateNormal];
+}
+
+//
 //  layerComplete
 //
 //  Congratulate, show score, and get ready to move on

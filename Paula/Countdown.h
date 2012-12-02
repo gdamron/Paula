@@ -45,6 +45,7 @@
 - (id)initWithWidth:(double)width AndHeight:(double)height;
 - (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti;
 - (void)layerComplete:(int)totalScore isMultiPlayer:(BOOL)isMulti;
+- (void)levelPlayedBack:(int)totalScore isMultiPlayer:(BOOL)isMulti;
 - (void)gameLost:(BOOL)isMulti;
 
 @end

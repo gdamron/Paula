@@ -19,6 +19,8 @@
 
 @interface StartScreenViewController : UIViewController <MainViewDelegate>
 
+@property (strong, nonatomic) UIButton *toEnyu;
+@property (strong, nonatomic) UIButton *toEugene;
 @property (strong, nonatomic) UIButton *toSinglePlayer;
 @property (strong, nonatomic) UIButton *toMultiPlayer;
 @property (strong, nonatomic) ScoreViewController *scoreViewController;

@@ -12,6 +12,7 @@
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 2.0
 
+// these don't do anything
 #define TEMP_BPM 100.0
 #define TEMP_DUR 10.0
 #define TEMP_LAYERS 3
@@ -65,8 +66,11 @@
 //  add a tone to the stack
 //
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    Section *section = game.level.sections[[game.level.currentSection intValue]];
-    int s = [section.currentLayer intValue];
+    int s = 1;
+    if (game.mode != JUST_PlAY) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
     [self noteOnWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -77,8 +81,11 @@
 //  remove a tone from the stack
 //
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    Section *section = game.level.sections[[game.level.currentSection intValue]];
-    int s = [section.currentLayer intValue];
+    int s = 1;
+    if (game.mode != JUST_PlAY) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
     [self noteOffWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -123,7 +130,7 @@
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
     
-    if (![game isPaulasTurn] ) 
+    if (![game isPaulasTurn])
         [game addPlayerInput:num];
 }
 
@@ -357,6 +364,7 @@
     } else if (continueCondition==2) {
         [self gameLost];
     } else if (continueCondition==3) {
+        [game makePaulasTurn];
         [self gameWon];
     } else if (continueCondition==4) {
         [game makePaulasTurn];
@@ -432,20 +440,21 @@
     Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
     // get the index in the layer of the current note
     int index = [currentLayer.currentNote intValue];
+    //NSLog(@"note index: %d", index);
     // get the index in the layer of the note stop at for this round
-    int noteCount = currentLayer.notes.count-1;
+    int noteCount = currentLayer.notes.count;
     
     if (index >= noteCount) {
         index = 0;
         [metronome turnOff];
-        NSLog(@"Metronome Off");
+        [self playbackFinished];
     } else {
         for (int j = 0; j < [currentSection.currentLayer intValue]+1; j++) {
             Layer *layer = currentSection.layers[j];
             int note = [layer.notes[index] intValue];
             // not very safe
             if (note > 0) {
-                [self noteOnNoLightWithNumber:note sendMessage:NO AndSoundType:j];
+                [self noteOnWithNumber:note sendMessage:NO AndSoundType:j];
             }
         }
         index++;
@@ -494,9 +503,15 @@
 //  for now, this means a layer was correctly input without making too many mistakes
 //
 - (void)gameWon {
-    [toneGen noteOff];
+    //[toneGen noteOff];
     [game newRound];
     [self processGameStatus:2];
+}
+
+- (void)playbackFinished {
+    //[toneGen noteOff];
+    [game newRound];
+    [self processGameStatus:3];
 }
 
 //
@@ -525,6 +540,14 @@
             break;
         case 2:
             [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi];
+            if (!multi) {
+                [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [gameOver.listenButton addTarget:self action:@selector(listenButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [self.view addSubview:gameOver.listenButton];
+            }
+            break;
+        case 3:
+            [gameOver levelPlayedBack:[game.player.score intValue] isMultiPlayer:multi];
             if (!multi) {
                 [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
                 [gameOver.listenButton addTarget:self action:@selector(listenButtonPressed) forControlEvents:UIControlEventTouchUpInside];
@@ -575,15 +598,16 @@
     game.level.currentSection = 0;
     for (int i = 0; i < game.level.sections.count; i++) {
         Section *section = game.level.sections[i];
-        section.currentLayer = 0;
+        section.currentLayer = [NSNumber numberWithInt:section.layers.count-1];
         for (int j = 0; j < section.layers.count; j++) {
             Layer *layer = section.layers[j];
             layer.currentNote = 0;
-            layer.currentStopIndex = [NSNumber numberWithInt:layer.notes.count-1 ];
+            layer.currentStopIndex = [NSNumber numberWithInt:layer.notes.count-1];
         }
     }
     [metronome turnOnWithNotification:@"listenClick"];
 }
+
 /////////////////// NAVIGATION ////////////
 #pragma mark - Navigation
 

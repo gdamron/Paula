@@ -109,7 +109,6 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 - (void)noteOff:(double)freq withSoundType:(int)s {
     // first remove the note from its instrument's stack
     [tones[s] removeObject:[NSNumber numberWithDouble:freq ]];
-    
     // check to see if we need to turn the instrument (or
     // all instruments) off
     if (!tones[s]) {
@@ -140,7 +139,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
         square->setFrequency([[freqs lastObject] doubleValue]);
     } else {
         g_on = NO;
-        NSLog(@"Note off");
+        //NSLog(@"Note off");
     }
 }
 
@@ -151,7 +150,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             [tones[i] removeAllObjects];
         instrumentFlags[i] = NO;
     }
-    NSLog(@"All notes off");
+    //NSLog(@"All notes off");
 }
 
 - (void)setFrequencyForInstrument:(Tone *)tone {
