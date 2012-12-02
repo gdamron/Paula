@@ -9,11 +9,13 @@
 #import "NetworkViewController.h"
 #import "HostGameViewController.h"
 #import "SearchGameViewController.h"
+#import "MultiPlayerOptionViewController.h"
 
 @interface NetworkViewController ()
 @property (nonatomic) HostGameViewController *hostGameView;
 @property (nonatomic) SearchGameViewController *searchGameView;
-
+@property (nonatomic) MultiPlayerOptionViewController *optionController;
+@property (nonatomic) enum GameModes mode;
 @property (nonatomic) BOOL isServer;
 
 @end
@@ -60,6 +62,13 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)setGameOption:(enum GameModes)mode {
+    self.mode = mode;
+    self.hostGameView = [[HostGameViewController alloc] init];
+    [self.hostGameView setNetworkViewDelegate:self];
+    [self presentViewController:self.hostGameView animated:NO completion:nil];
+}
+
 - (void) backButtonPressed {
     [self dismissViewControllerAnimated:NO completion:nil];
 }
@@ -67,9 +76,9 @@
 - (void)nameButtonPressed:(id)sender {
     if(sender == hostGameButton) {
         self.isServer = YES;
-        self.hostGameView = [[HostGameViewController alloc] init];
-        [self.hostGameView setNetworkViewDelegate:self];
-        [self presentViewController:self.hostGameView animated:NO completion:nil];
+        self.optionController = [[MultiPlayerOptionViewController alloc] init];
+        [self.optionController setNetworkController:self];
+        [self presentViewController:self.optionController animated:YES completion:nil];
     } else if (sender == searchGameButton) {
         self.isServer = NO;
         self.searchGameView = [[SearchGameViewController alloc] init];

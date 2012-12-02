@@ -6,28 +6,53 @@
 //  Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
+
+/*
+ 
+ TODO:
+ - Allow game to add multiple insances of the same instrument type
+ - Figure out how to identify instruments (possible note id)
+ - Similarly, figure out how to link tones with instruments
+ */
+
+
 #import "ToneGenerator.h"
-#import "mo_audio.h"
+#include "mo_audio.h"
+#include "SineWave.h"
+#include "Blit.h"
+#include "BlitSaw.h"
+#include "BlitSquare.h"
+#include "Moog.h"
+#include "Noise.h"
 
 #define SRATE 44100
 #define FRAMESIZE 128
 #define NUMCHANNELS 2
 #define BUFFER_COUNT    3
 #define BUFFER_DURATION 0.5
+#define NUM_INSTRUMENTS 6
+
+using namespace stk;
+
+// the instruments we'll use for synthesis
+SineWave *sine;
+BlitSquare *square;
+BlitSaw * saw;
+Moog *moog;
+Noise *noise;
+Blit *blit;
 
 bool g_on = false;
-double frequency = 0.0;
-double gain = 0.0;
-int sound_type = 0;
+bool instrumentFlags[NUM_INSTRUMENTS];
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
-void sineCallback(Float32 *buffer, UInt32 framesize, void *userData);
-void squareCallback(Float32 *buffer, UInt32 framesize, void *userData);
-void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 
-@interface ToneGenerator() {
-    NSMutableArray *freqs;
-}
+
+@interface ToneGenerator()
+
+@property NSMutableArray *freqs;
+@property NSMutableArray *tones;
+@property NSMutableArray *instruments;
 
 @end
 
@@ -36,28 +61,83 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 @synthesize isOn;
 @synthesize globalGain;
 @synthesize waveForm;
+@synthesize freqs;
+@synthesize tones;
+@synthesize instruments;
 
 - (id)init {
     if (self = [super init]) {
+        Stk::setRawwavePath("rawwaves");
         freqs = [[NSMutableArray alloc] init];
+        // using this for polyphony so I don't have to mess with
+        // previous functionality
+        tones = [[NSMutableArray alloc] init];
+        for (int i = 0; i < NUM_INSTRUMENTS; i++)
+            [tones addObject:[[NSMutableArray alloc] init]];
+        sine = new SineWave();
+        square = new BlitSquare();
+        saw = new BlitSaw();
+        moog = new Moog();
+        noise = new Noise();
+        blit = new Blit();
+        
     }
     return self;
 }
 
-- (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s{
-    [freqs addObject:[NSNumber numberWithDouble:freq]];
-    frequency = freq;
-    gain = g;
-    sound_type = s;
+- (void)dealloc {
+    delete sine;
+    delete square;
+    delete saw;
+    delete moog;
+    delete noise;
+    delete blit;
+}
+
+- (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s {
     g_on = YES;
+    Tone *tone = [[Tone alloc] init];
+    tone.frequency = freq;
+    tone.amplitude = g;
+    tone.instrument = (enum waveforms) s;
     
-    NSLog(@"Note on: %f", frequency);
+    [tones[s] addObject:[NSNumber numberWithDouble:tone.frequency]];
+    instrumentFlags[s] = YES;
+    [self setFrequencyForInstrument:tone];
+}
+
+- (void)noteOff:(double)freq withSoundType:(int)s {
+    // first remove the note from its instrument's stack
+    [tones[s] removeObject:[NSNumber numberWithDouble:freq ]];
+    
+    // check to see if we need to turn the instrument (or
+    // all instruments) off
+    if (!tones[s]) {
+        instrumentFlags[s] = NO;
+        BOOL everythingIsOff = YES;
+        for (int i = 0; i < NUM_INSTRUMENTS; i++) {
+            if (instrumentFlags[i]==YES)
+                everythingIsOff = NO;
+        }
+        if (everythingIsOff)
+            g_on = NO;
+    // set new frequency for instrument as appropriate
+    } else {
+        Tone *tone = [[Tone alloc] init];
+        tone.frequency = [[tones[s] lastObject] doubleValue];
+        tone.instrument = (enum waveforms) s;
+        [self setFrequencyForInstrument:tone];
+    }
+}
+
+- (void)noteOffWithsoundType:(int)s {
+    instrumentFlags[s] = NO;
 }
 
 - (void)noteOff:(double) freq {
-    [freqs removeObject:[NSNumber numberWithDouble:freq]];
+    [tones[2] removeObject:[NSNumber numberWithDouble:freq]];
     if (freqs.count>0) {
-        frequency = [[freqs lastObject] doubleValue];
+        square->setFrequency([[freqs lastObject] doubleValue]);
     } else {
         g_on = NO;
         NSLog(@"Note off");
@@ -66,8 +146,42 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (void)noteOff {
     g_on = NO;
-    [freqs removeAllObjects];
-    NSLog(@"Note off");
+    for (int i = 0; i < tones.count; i++) {
+        if (tones[i]) 
+            [tones[i] removeAllObjects];
+        instrumentFlags[i] = NO;
+    }
+    NSLog(@"All notes off");
+}
+
+- (void)setFrequencyForInstrument:(Tone *)tone {
+    switch (tone.instrument) {
+        case sine_wave:
+            sine->setFrequency(tone.frequency);
+            break;
+            
+        case square_wave:
+            square->setFrequency(tone.frequency);
+            break;
+            
+        case saw_wave:
+            saw->setFrequency(tone.frequency);
+            break;
+            
+        case moog_wave:
+            moog->noteOn(tone.frequency, tone.amplitude);
+            break;
+            
+        case noise_wave:
+            // nothing to do here
+            break;
+            
+        case blit_wave:
+            blit->setFrequency(tone.frequency);
+            break;
+        default:
+            break;
+    }
 }
 
 - (void) start {
@@ -80,12 +194,12 @@ void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData);
     }
 }
 
-- (void) stop {
+- (void)stop {
+    g_on = NO;
     MoAudio::stop();
     //MoAudio::shutdown();
 }
 
-@end
 
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
@@ -94,59 +208,56 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
             buffer[2*i] = buffer[2*i+1] = 0.0;
         }
     } else {
-        switch (sound_type) {
-            case 0:
-                sineCallback(buffer, framesize, userData);
-                break;
-            case 1:
-                squareCallback(buffer, framesize, userData);
-                break;
-            case 2:
-                noiseCallback(buffer, framesize, userData);
-                break;
-                
-            default:
-                sineCallback(buffer, framesize, userData);
-        }
+        for (int i = 0; i < framesize; i ++ ) {
+            double num_inst = .001;
+            StkFloat sample = 0.0;
+            if (instrumentFlags[0]) {
+                sample += sine->tick();
+                num_inst += 1.0;
+            }
+            
+            if (instrumentFlags[1]) {
+                sample += square->tick();
+                num_inst += 1.0;
+            }
+            
+            if (instrumentFlags[2]) {
+                sample += saw->tick();
+                num_inst += 1.0;
+            }
+            
+            if (instrumentFlags[3]) {
+                sample += moog->tick();
+                num_inst += 1.0;
+            }
+            
+            if (instrumentFlags[4]) {
+                sample += noise->tick();
+                num_inst += 1;
+            }
+            
+            if (instrumentFlags[5]) {
+                sample += blit->tick();
+            }
+            
+            sample /= num_inst;
+            // no reverb yet
+            //sample = rev->tick(sample);
+            
+            
+			buffer[2*i] = sample;
+            buffer[2*i + 1] = sample;
+		}
     }
 }
 
-// sine callback (C++) that may be called within audioCallback
-void sineCallback(Float32 *buffer, UInt32 framesize, void *userData) {
-    static float phase = frequency/SRATE;
-    for (int i = 0; i < framesize; i++) {
-        buffer[2*i] = buffer[2*i+1] = gain*sin(2.0*M_PI*phase);
-        phase += frequency/((double)SRATE);
-        if (phase > 1.0f) phase -= 1.0f;
-    }
-}
+@end
 
-// square callback (C++) possibly called within audioCallback
-void squareCallback(Float32 *buffer, UInt32 framesize, void *userData) {
-    static float phase = frequency/SRATE;
-    for (int i = 0; i < framesize; i++) {
-        buffer[2*i] = buffer[2*i+1] = (gain*sin(2.0*M_PI*phase) > 0);
-        phase += frequency/((double)SRATE);
-        if (phase > 1.0f) phase -= 1.0f;
-    }
-}
-
-// noise callback (C++) possibly called within audioCallback
-void noiseCallback(Float32 *buffer, UInt32 framesize, void *userData) {
-    static float phase = frequency/SRATE;
-    for (int i = 0; i < framesize; i++) {
-        buffer[2*i] = buffer[2*i+1] = (rand()%1000)/1000.0;
-        phase += frequency/((double)SRATE);
-        if (phase > 1.0f) phase -= 1.0f;
-    }
-}
-
-/*@implementation Tone
+@implementation Tone
 
 @synthesize frequency;
-@synthesize phase;
-@synthesize j;
-@synthesize cycleLength;
-@synthesize sample;
+@synthesize amplitude;
+@synthesize duration;
+@synthesize instrument;
 
-@end*/
+@end

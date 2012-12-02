@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "TempMainViewController.h"
+#import "StartScreenViewController.h"
 
 @implementation AppDelegate
 
@@ -15,8 +15,8 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
-    TempMainViewController *tempMainViewController = [[TempMainViewController alloc] init];
-    self.window.rootViewController = tempMainViewController;
+    StartScreenViewController *startScreenViewController = [[StartScreenViewController alloc] init];
+    self.window.rootViewController = startScreenViewController;
     self.window.backgroundColor = [UIColor whiteColor];
     
     [self.window makeKeyAndVisible];

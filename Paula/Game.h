@@ -13,6 +13,7 @@ enum GameModes {
     SINGLE_PLAYER = 0,
     MULTI_PLAYER_COMPETE = 1,
     MULTI_PLAYER_MIMIC = 2,
+    JUST_PlAY = 3
 };
 
 @class Player;
@@ -39,6 +40,7 @@ enum GameModes {
 
 #pragma mark - Public Methods
 - (id)initWithGameMode:(enum GameModes)m;
+- (id)initWithTempo:(double)t AndGameMode:(enum GameModes)m;
 - (void)addPlayerInput:(int)tile;
 - (void)addPaulaInput:(int)tile;
 - (int)rewardOrPenalize:(BOOL)mistakesWereMade;
@@ -46,6 +48,7 @@ enum GameModes {
 - (void)makePaulasTurn;
 - (BOOL)isPaulasTurn;
 - (void)newRound;
+- (void)generateSimpleLevel;
 - (NSArray *)currentRound;
 
 @end
@@ -84,6 +87,7 @@ enum GameModes {
 @property (strong, nonatomic) NSNumber *currentSection;
 
 #pragma mark - Public Methods
+- (id)initWithTempo:(double)t;
 - (void)addSection:(Section *)section;
 
 
@@ -100,6 +104,7 @@ enum GameModes {
 @property (strong, nonatomic) NSArray *layers;
 @property (strong, nonatomic) NSArray *order;
 @property (strong, nonatomic) NSNumber *currentLayer;
+@property (strong, nonatomic) NSArray *currentLayers;
 
 #pragma mark - Public Methods
 - (void)addLayer:(Layer *)layer;
@@ -119,6 +124,7 @@ enum GameModes {
 @property (strong, nonatomic) NSArray *scale;
 @property (strong, nonatomic) NSNumber *currentNote;
 @property (strong, nonatomic) NSNumber *currentStopIndex;
+@property (strong, nonatomic) NSNumber *beatResolution;
 
 @end
 

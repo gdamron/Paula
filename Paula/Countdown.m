@@ -102,7 +102,7 @@
         won = NO;
         
         double r = (arc4random()%11)/10.0;
-        double g = (arc4random()%11)/10.0;
+        double g = MIN((arc4random()%11)/10.0, 0.6);
         double b = (arc4random()%11)/10.0;
         label = [[UILabel alloc] initWithFrame:CGRectMake(width/2-110, height/2-155, 220, 220)];
         label.backgroundColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
@@ -131,12 +131,27 @@
 //  Congratulate and show score
 //  Currently, the only option is to quit
 //
-- (void)gameWon:(int)totalScore isMultiplayer:(BOOL)multiPlayer {
+- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
     NSString *title = @"View Score";
-    if(multiPlayer) {
+    if(isMulti) {
+        title = @"Waiting...";
+    }
+    [button setTitle:title forState:UIControlStateNormal];
+}
+
+//
+//  layerComplete
+//
+//  Congratulate, show score, and get ready to move on
+//
+- (void)layerComplete:(int)totalScore isMultiPlayer:(BOOL)isMulti {
+    won = NO;
+    label.text = [NSString stringWithFormat:@"Layer Complete.\nScore: %d", totalScore];
+    NSString *title = @"Continue";
+    if(isMulti) {
         title = @"Waiting...";
     }
     [button setTitle:title forState:UIControlStateNormal];

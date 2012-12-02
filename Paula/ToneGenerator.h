@@ -8,6 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+enum waveforms {
+    sine_wave = 0,
+    square_wave = 1,
+    saw_wave = 2,
+    moog_wave = 3,
+    noise_wave = 4,
+    blit_wave = 5
+};
+
 @interface ToneGenerator : NSObject
 
 @property (assign, nonatomic) BOOL isOn;
@@ -15,19 +24,21 @@
 @property (assign, nonatomic) double globalGain;
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s;
+- (void)noteOff:(double)freq withSoundType:(int)s;
 - (void)noteOff:(double)freq;
+- (void)noteOffWithsoundType:(int)s;
 - (void)noteOff;
 - (void)start;
 - (void)stop;
+//- (void)newInstrument:(int)s;
 
 @end
 
-/*@interface Tone : NSObject
+@interface Tone : NSObject
 
 @property (assign, nonatomic) double frequency;
-@property (assign, nonatomic) double phase;
-@property (assign, nonatomic) double j;
-@property (assign, nonatomic) double cycleLength;
-@property (assign, nonatomic) double sample;
+@property (assign, nonatomic) enum waveforms instrument;
+@property (assign, nonatomic) double amplitude;
+@property (assign, nonatomic) double duration;
 
-@end*/
+@end
