@@ -13,7 +13,8 @@ enum GameModes {
     SINGLE_PLAYER = 0,
     MULTI_PLAYER_COMPETE = 1,
     MULTI_PLAYER_MIMIC = 2,
-    JUST_PlAY = 3
+    MULTI_PLAYER_COMPOSE = 3,
+    JUST_PlAY = 4
 };
 
 @class Player;
