@@ -32,15 +32,15 @@
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
-        [self.view setBackgroundColor:[UIColor colorWithRed:0.13 green:0.13 blue:0.13 alpha:1.0]];
+        [self.view setBackgroundColor:[UIColor blackColor]];
         
-        toSinglePlayer = setupMenuButton(toSinglePlayer, 1, @"Single Player", width, height);
+        toSinglePlayer = setupMenuButtonWithImage(toSinglePlayer, 1, [UIImage imageNamed:@"single-player.gif"], width, height);
         [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toMultiPlayer = setupMenuButton(toMultiPlayer, 2, @"Multi-Player", width, height);
+        toMultiPlayer = setupMenuButtonWithImage(toMultiPlayer, 2, [UIImage imageNamed:@"multi-player.gif"], width, height);
         [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEnyu = setupMenuButton(toEnyu, 3, @"Just Play", width, height);
+        toEnyu = setupMenuButtonWithImage(toEnyu, 3, [UIImage imageNamed:@"just-play.gif"], width, height);
         [toEnyu addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toEugene = setupMenuButton(toEugene, 4, @"Scoreboard", width, height);
+        toEugene = setupMenuButtonWithImage(toEugene, 4, [UIImage imageNamed:@"scoreboard.gif"], width, height);
         [toEugene addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];

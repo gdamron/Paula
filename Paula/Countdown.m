@@ -102,7 +102,7 @@
         won = NO;
         
         double r = (arc4random()%11)/10.0;
-        double g = (arc4random()%11)/10.0;
+        double g = MIN((arc4random()%11)/10.0, 0.6);
         double b = (arc4random()%11)/10.0;
         label = [[UILabel alloc] initWithFrame:CGRectMake(width/2-110, height/2-155, 220, 220)];
         label.backgroundColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
