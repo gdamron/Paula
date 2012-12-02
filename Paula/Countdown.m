@@ -93,7 +93,7 @@
 #pragma mark - Implementation
 @implementation GameOver
 
-@synthesize button,label;
+@synthesize button,label,listenButton;
 @synthesize isMultiPlayer;
 
 - (id)initWithWidth:(double)width AndHeight:(double)height {
@@ -112,12 +112,20 @@
         label.textAlignment = NSTextAlignmentCenter;
         label.font = [UIFont systemFontOfSize:42];
         
+        // the first button, with a variable message
         button = [[UIButton alloc] initWithFrame:CGRectMake(width/2-110, height/2+70, 220, 48)];
         button.backgroundColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
         [button setTitle:@"" forState:UIControlStateNormal];
         [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         
         button.titleLabel.font = [UIFont systemFontOfSize:24];
+        
+        // the button for playback.
+        listenButton = [[UIButton alloc] initWithFrame:CGRectMake(width/2+2, height/2+70, 108, 48)];
+        listenButton.backgroundColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
+        [listenButton setTitle:@"Listen" forState:UIControlStateNormal];
+        [listenButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        listenButton.titleLabel.font = [UIFont systemFontOfSize:24];
         
         //[button addTarget:self action:@selector(gameOverButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     }
@@ -135,9 +143,15 @@
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
-    NSString *title = @"View Score";
+    NSString *title = @"Score";
     if(isMulti) {
         title = @"Waiting...";
+    } else {
+    
+        CGRect bFrame = [button frame];
+        bFrame.size.width = bFrame.size.width/2 - 2;
+        [button setFrame:bFrame];
+        
     }
     [button setTitle:title forState:UIControlStateNormal];
 }
@@ -172,6 +186,7 @@
     }
     [button setTitle:title forState:UIControlStateNormal];
 }
+
 
 /*- (void)gameOverButtonPressed {
     [button removeFromSuperview];

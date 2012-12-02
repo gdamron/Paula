@@ -82,6 +82,12 @@
     [self noteOffWithNumber:num sendMessage:send AndSoundType:s];
 }
 
+//
+//  noteOnWithNumber:SendMessage:AndSoundType:
+//
+//  Plays a tone and lights up a tile.  Takes tile number, whether or not to
+//  send a multiplayer message, and the instrument type (converted to enum waveforms)
+// 
 - (void)noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
     if (num==1) {
         sineButton1.alpha = 1.0;
@@ -121,7 +127,12 @@
         [game addPlayerInput:num];
 }
 
-// keeping this separate until after merging branches
+//  keeping this separate until after merging branches
+//
+//  noteOnNoLightWithNumber:SendMessage:AndSoundType:
+//
+//  similar to noteOnWithNumber:SendMessage:AndSoundType but does not light up a tile
+//
 - (void)noteOnNoLightWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
     if(send) {
         uint8_t c = 0;
@@ -143,6 +154,12 @@
         [game addPlayerInput:num];
 }
 
+//
+//  noteOffWithNumber:sendMessage:AndSoundType
+//
+//  Sends noteOff message to ToneGenerator and returns tile alpha of corresponding note
+//  to resting state.  If send=YES, a multiplayer message is sent (nothing happens now, though)
+//
 - (void)noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
     if (num==1) {
         sineButton1.alpha = OFFALPHA;
@@ -170,7 +187,13 @@
         [self checkContinueConditions];
 }
 
-// keeping this separate until after merging branches
+//  keeping this separate until after merging branches
+//
+//  noteOffNoLightWithNumber:sendMessage:AndSoundType
+//
+//  Sends noteOff message to ToneGenerator without altering alpha of tile.  If
+//  send=YES, a multiplayer message is sent (nothing happens now, though)
+//
 - (void)noteOffNoLightWithNumber:(NSInteger)num sendMessage:(BOOL)send AndSoundType:(NSInteger)s {
     if(send) {
         //        [self.controller send:'0'];
@@ -230,10 +253,20 @@
     [self playCountdownWithSelector:@selector(startGame)];
 }
 
+//
+//  playCountdownAndContinueGame
+//
+//  Show countdown and tempo before starting a new layer
+//
 - (void)playCountdownAndContinueGame {
     [self playCountdownWithSelector:@selector(continueGame)];
 }
 
+//
+//  playCountdownWithSelector:
+//
+//  Starts countdown, assigning appropriate selector
+//
 - (void)playCountdownWithSelector:(SEL)sel {
     [NSTimer scheduledTimerWithTimeInterval:(3.25*(60.0/TEMP_BPM)) target:self selector:sel userInfo:nil repeats:NO];
     Countdown *countdown = [[Countdown alloc] initWithWidth:self.view.frame.size.width AndHeight:self.view.frame.size.height];
@@ -362,7 +395,7 @@
         for (int j = 0; j < [currentSection.currentLayer intValue]+1; j++) {
             Layer *layer = currentSection.layers[j];
             int note = [layer.notes[index] intValue];
-            NSLog(@"%d", note);
+            //NSLog(@"%d", note);
             // not very safe
             if (note > 0) {
                 if (j < [currentSection.currentLayer intValue]) {
@@ -386,6 +419,38 @@
 - (void)playerClickListen:(id)sender {
     [self allNotesOff];
     NSLog(@"click!");
+}
+
+//
+//  listenClickListen
+//
+//
+//
+- (void)listenClickListen:(id)sender {
+    [self allNotesOff];
+    Section *currentSection = game.level.sections[[game.level.currentSection intValue]];
+    Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
+    // get the index in the layer of the current note
+    int index = [currentLayer.currentNote intValue];
+    // get the index in the layer of the note stop at for this round
+    int noteCount = currentLayer.notes.count-1;
+    
+    if (index >= noteCount) {
+        index = 0;
+        [metronome turnOff];
+        NSLog(@"Metronome Off");
+    } else {
+        for (int j = 0; j < [currentSection.currentLayer intValue]+1; j++) {
+            Layer *layer = currentSection.layers[j];
+            int note = [layer.notes[index] intValue];
+            // not very safe
+            if (note > 0) {
+                [self noteOnNoLightWithNumber:note sendMessage:NO AndSoundType:j];
+            }
+        }
+        index++;
+    }
+    currentLayer.currentNote = [NSNumber numberWithInt:index];
 }
 
 //
@@ -460,8 +525,11 @@
             break;
         case 2:
             [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi];
-            if (!multi)
+            if (!multi) {
                 [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [gameOver.listenButton addTarget:self action:@selector(listenButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [self.view addSubview:gameOver.listenButton];
+            }
             break;
             
         default:
@@ -497,6 +565,25 @@
                 [NSNumber numberWithInt:7], nil];
 }
 
+
+//
+//
+//
+//
+//
+- (void)listenToCurrentLevel {
+    game.level.currentSection = 0;
+    for (int i = 0; i < game.level.sections.count; i++) {
+        Section *section = game.level.sections[i];
+        section.currentLayer = 0;
+        for (int j = 0; j < section.layers.count; j++) {
+            Layer *layer = section.layers[j];
+            layer.currentNote = 0;
+            layer.currentStopIndex = [NSNumber numberWithInt:layer.notes.count-1 ];
+        }
+    }
+    [metronome turnOnWithNotification:@"listenClick"];
+}
 /////////////////// NAVIGATION ////////////
 #pragma mark - Navigation
 
@@ -547,6 +634,7 @@
     [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
+    [gameOver.listenButton removeFromSuperview];
 //    [self playCountdownAndStartGame];
     
     //show score view
@@ -560,6 +648,13 @@
     }];
 }
 
+- (void)listenButtonPressed {
+    [gameOver.label removeFromSuperview];
+    [gameOver.button removeFromSuperview];
+    [gameOver.listenButton removeFromSuperview];
+    [self listenToCurrentLevel];
+}
+
 /////////////////// VIEW SETUP ////////////
 #pragma mark - Initialize and Setup
 
@@ -571,6 +666,7 @@
 	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listenClickListen:) name:@"listenClick" object:metronome];
     
 }
 

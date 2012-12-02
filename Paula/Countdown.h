@@ -38,6 +38,7 @@
 
 @property (strong,nonatomic) UILabel *label;
 @property (strong,nonatomic) UIButton *button;
+@property (strong,nonatomic) UIButton *listenButton;
 @property (nonatomic) BOOL isMultiPlayer;
 
 #pragma mark - Public Methods
