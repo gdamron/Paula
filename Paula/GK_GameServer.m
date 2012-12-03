@@ -13,6 +13,7 @@
     NSMutableArray *_connectedPlayerNames;
     
     NSMapTable *_playerTracker;
+    NSMapTable *_turnTracker;
     
     GK_GamePacket *packet;
 }
@@ -20,6 +21,7 @@
 @synthesize maxPlayers;
 @synthesize session = _session;
 @synthesize delegate = _delegate;
+@synthesize mode = _mode;
 
 -(id)init {
     self = [super init];
@@ -29,6 +31,7 @@
         _connectedPlayerNames = [NSMutableArray arrayWithCapacity:self.maxPlayers];
         //initialize player tracker, may need refactoring as this is not the right place for this logic
         _playerTracker = [[NSMapTable alloc] init];
+        _turnTracker = [[NSMapTable alloc] init];
         packet = [[GK_GamePacket alloc] initWithPacketType:GAME_START];
         
         self.dataHandler = [[GK_GameDataHandler alloc] init];
@@ -40,13 +43,7 @@
         //do nothing for server
 }
 
-- (void) trackScores:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
-    
-    //means self (server) score
-    if(peerID == nil) {
-        peerID = [_session peerID];
-    }
-    
+- (BOOL) storeScoreForCompeteMode:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
     if([_playerTracker objectForKey:peerID] == nil) {
         Player *player = [[Player alloc] init];
         
@@ -60,18 +57,78 @@
         [_playerTracker setObject:player forKey:peerID];
     }
     
-    if([_playerTracker count] == [_connectedPlayers count] + 1) {
-        NSEnumerator *enumerator = [_playerTracker objectEnumerator];
-        id value;
+    return ([_playerTracker count] == [_connectedPlayers count] + 1);
+}
+
+- (BOOL) storeScoreForMimicMode:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
+    
+    if([_playerTracker objectForKey:peerID] == nil) {
+        Player *player = [[Player alloc] init];
         
-        NSMutableArray *data = [[NSMutableArray alloc] init];
-        while((value = [enumerator nextObject])) {
-            [data addObject:value];
+        if(![_connectedPlayers containsObject:peerID]) {
+            player.name = [_session displayName];
+        } else {
+            player.name = [_connectedPlayerNames objectAtIndex:[_connectedPlayers indexOfObject:peerID]];
         }
+        player.score = score;
+        player.mistakesMade = mistakes;
+        [_playerTracker setObject:player forKey:peerID];
+    } else {
+        Player *player = [_playerTracker objectForKey:peerID];
+        player.score = [NSNumber numberWithInt:[player.score intValue]+[score intValue]];
+        player.mistakesMade = [NSNumber numberWithInt:[player.mistakesMade intValue]+[mistakes intValue]];;
+    }
+    
+    return ([_turnTracker count] == [_connectedPlayers count] + 1);
+}
+
+- (void) setTurn:(NSString *)peerID {
+    if(peerID == nil) {
+        peerID = [_session peerID];
+    }
+    [_turnTracker setObject:peerID forKey:peerID];
+    
+    for(int i=0; i<[_connectedPlayers count]; i++) {
+        NSString *peer = [_connectedPlayers objectAtIndex:i];
         
-        [self sendScoreToAllClients:data];
-        [_delegate showScore:data];
-        [_playerTracker removeAllObjects];
+        if([_turnTracker objectForKey:peerID] == nil) {
+            [packet setPacketType:GAME_CHANGE_TURNSTATE];
+            NSError *error;
+            [_session sendData:[packet data] toPeers:[NSArray arrayWithObject:peer] withDataMode:GKSendDataReliable error:&error];
+            break;
+        }
+    }
+}
+
+- (void) sendAndShowScore {
+    NSEnumerator *enumerator = [_playerTracker objectEnumerator];
+    id value;
+    
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    while((value = [enumerator nextObject])) {
+        [data addObject:value];
+    }
+    
+    [self sendScoreToAllClients:data];
+    [_delegate showScore:data];
+    [_playerTracker removeAllObjects];
+}
+
+- (void) trackScores:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
+    
+    //means self (server) score
+    if(peerID == nil) {
+        peerID = [_session peerID];
+    }
+    
+    if(_mode == MULTI_PLAYER_COMPETE) {
+        if([self storeScoreForCompeteMode:peerID score:score mistakes:mistakes]) {
+            [self sendAndShowScore];
+        }
+    } else if (_mode == MULTI_PLAYER_MIMIC) {
+        if([self storeScoreForMimicMode:peerID score:score mistakes:mistakes]) {
+            [self sendAndShowScore];
+        }
     }
 }
 
@@ -125,6 +182,26 @@
     [_session sendDataToAllPeers:[packet data] withDataMode:GKSendDataReliable error:&error];
 }
 
+-(void) sendMelody:(NSArray *)melody {
+    NSLog(@"sending melody : %@", melody);
+    NSError *error;
+    [packet setPacketType:GAME_SEND_MELODY];
+    
+    NSMutableData *d = [packet data];
+    if(melody) {
+        [d rw_appendInt8:[melody count]];
+        NSEnumerator *en = [melody objectEnumerator];
+        NSNumber *note;
+        while((note = en.nextObject)) {
+            [d rw_appendInt8:[note charValue]];
+        }
+        
+        if(![_session sendDataToAllPeers:d withDataMode:GKSendDataReliable error:&error]) {
+            NSLog(@"error sending melody - %@", error);
+        }
+    }
+}
+
 #pragma mark - GK_GameDataDelegate
 - (NSMutableArray *) getInternalData {
     return _connectedPlayerNames;
@@ -145,6 +222,15 @@
 				if (![_connectedPlayers containsObject:peerID]) {
 					[_connectedPlayers addObject:peerID];
                     [_connectedPlayerNames addObject:[_session displayNameForPeer:peerID]];
+                    
+                    [packet setPacketType:GAME_MODE_RETURN_TYPE];
+                    NSMutableData *d = [packet data];
+                    [d rw_appendInt8:self.mode];
+                    NSError *error;
+                    if(![session sendData:d toPeers:[NSArray arrayWithObject:peerID] withDataMode:GKSendDataReliable error:&error]) {
+                        NSLog(@"problem sending mode to peerId: %@", peerID);
+                    }
+                    
                     [self.delegate updateUI:_connectedPlayers];
 				}
 			break;
@@ -164,7 +250,7 @@
 
 - (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID
 {
-	NSLog(@"MatchmakingServer: connection request from peer %@", peerID);
+	NSLog(@"PaulaServer: connection request from peer %@", peerID);
     if([_connectedPlayers count] < self.maxPlayers) {
         NSError *error;
         if([session acceptConnectionFromPeer:peerID error:&error]) {

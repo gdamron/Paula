@@ -22,9 +22,11 @@
 @property (nonatomic) int maxPlayers;
 @property (nonatomic, strong, readonly) NSArray *connectedPlayers;
 @property (nonatomic, strong, readonly) GKSession *session;
+@property (nonatomic, assign) enum GameModes mode;
 
 - (void) startAcceptConnectionForSessionID:(NSString *)sessionID;
 - (void) close;
 - (void) startGame;
-
+- (void) sendMelody:(NSArray *)melody;
+- (void) setTurn:(NSString *)peerID;
 @end

@@ -13,7 +13,7 @@
 
 @synthesize packetType = _packetType;
 
--(id)initWithPacketType:(CommPacketType*)type {
+-(id)initWithPacketType:(CommPacketType)type {
     self = [[self class] alloc];
     
     if(self) {

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Game.h"
 
 //
 //  Class: Countdown
@@ -43,8 +44,8 @@
 
 #pragma mark - Public Methods
 - (id)initWithWidth:(double)width AndHeight:(double)height;
-- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti;
+- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti gameMode:(enum GameModes)mode;
 - (void)layerComplete:(int)totalScore isMultiPlayer:(BOOL)isMulti;
-- (void)gameLost:(BOOL)isMulti;
+- (void)gameLost:(BOOL)isMulti gameMode:(enum GameModes)mode;
 
 @end

@@ -32,6 +32,9 @@
 @property (strong, nonatomic) UIButton *sineButton8;
 @property (strong, nonatomic) UILabel *scoreDisplay;
 @property (strong, nonatomic) UILabel *mistakesLeftDisplay;
+
+@property (strong, nonatomic) UIButton *startDoneButton;
+
 @property (strong) Metronome *metronome;
 @property (strong) Game *game;
 @property (strong) ToneGenerator *toneGen;
@@ -46,6 +49,8 @@
 - (void) allNotesOff;
 - (void) playCountdownAndStartGame;
 
-- (id) initWithGameMode:(enum GameModes)mode;
+- (id) initWithGameModeAndState:(enum GameModes)mode gameState:(enum GameStates)state;
+- (void) setGameWithNotes:(NSArray *)notes;
+- (void) changeGameState;
 
 @end

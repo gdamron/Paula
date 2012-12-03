@@ -21,5 +21,5 @@
 @property (strong, nonatomic) UIButton *searchGameButton;
 
 - (void) setGameOption:(enum GameModes) mode;
-
+- (void) setMelodyAndStartGame:(NSArray *)melody;
 @end

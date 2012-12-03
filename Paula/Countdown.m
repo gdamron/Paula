@@ -139,19 +139,37 @@
 //  Congratulate and show score
 //  Currently, the only option is to quit
 //
-- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti {
+- (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti gameMode:(enum GameModes)mode {
     won = YES;
     label.text = [NSString stringWithFormat:@"Nice Job!\nScore: %d", totalScore];
     //[button setTitle:@"Play Again!" forState:UIControlStateNormal];
     NSString *title = @"Score";
-    if(isMulti) {
+    if(isMulti && mode == MULTI_PLAYER_COMPETE) {
         title = @"Waiting...";
+    } else if (isMulti && mode == MULTI_PLAYER_MIMIC) {
+        title = @"Continue";
     } else {
-    
         CGRect bFrame = [button frame];
         bFrame.size.width = bFrame.size.width/2 - 2;
         [button setFrame:bFrame];
-        
+    }
+    [button setTitle:title forState:UIControlStateNormal];
+}
+
+//
+//  gameLost
+//
+//  Chastize for losing
+//  Currently, the only option is to quit
+//
+- (void)gameLost:(BOOL)isMulti gameMode:(enum GameModes)mode {
+    won = NO;
+    label.text = @"You Didn't keep up with Paula";
+    NSString *title = @"View Score";
+    if(isMulti && mode == MULTI_PLAYER_COMPETE) {
+        title = @"Waiting...";
+    } else if (isMulti && mode == MULTI_PLAYER_MIMIC) {
+        title = @"Continue";
     }
     [button setTitle:title forState:UIControlStateNormal];
 }
@@ -170,23 +188,6 @@
     }
     [button setTitle:title forState:UIControlStateNormal];
 }
-
-//
-//  gameLost
-//
-//  Chastize for losing
-//  Currently, the only option is to quit
-//
-- (void)gameLost:(BOOL)isMulti {
-    won = NO;
-    label.text = @"You Didn't keep up with Paula";
-    NSString *title = @"View Score";
-    if(isMulti) {
-        title = @"Waiting...";
-    }
-    [button setTitle:title forState:UIControlStateNormal];
-}
-
 
 /*- (void)gameOverButtonPressed {
     [button removeFromSuperview];

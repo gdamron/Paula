@@ -15,6 +15,7 @@
 @property (nonatomic) HostGameViewController *hostGameView;
 @property (nonatomic) SearchGameViewController *searchGameView;
 @property (nonatomic) MultiPlayerOptionViewController *optionController;
+@property (nonatomic) SinglePlayerViewController *singleViewController;
 @property (nonatomic) enum GameModes mode;
 @property (nonatomic) BOOL isServer;
 
@@ -64,8 +65,10 @@
 
 - (void)setGameOption:(enum GameModes)mode {
     self.mode = mode;
-    self.hostGameView = [[HostGameViewController alloc] init];
+    self.hostGameView = [HostGameViewController alloc];
     [self.hostGameView setNetworkViewDelegate:self];
+    [self.hostGameView setMode:mode];
+    self.hostGameView = [self.hostGameView init];
     [self presentViewController:self.hostGameView animated:NO completion:nil];
 }
 
@@ -87,11 +90,52 @@
     }
 }
 
+- (void) sendMelody:(NSArray *)melody {
+    if(self.isServer) {
+        [self.hostGameView sendMelody:melody];
+    } else {
+        [self.searchGameView sendMelody:melody];
+    }
+}
+
 - (void) showPlayView {
-    SinglePlayerViewController *singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:MULTI_PLAYER_COMPETE];
-    [singlePlayerViewController setDelegate:self];
-    [singlePlayerViewController playCountdownAndStartGame];
-    [self presentViewController:singlePlayerViewController animated:YES completion:nil];
+    enum GameStates gs = GAME_MY_TURN;
+    if(self.singleViewController == nil) {
+        self.singleViewController = [[SinglePlayerViewController alloc] initWithGameModeAndState:self.mode gameState:gs];
+        [self.singleViewController setDelegate:self];
+    }
+    
+    if(self.mode != MULTI_PLAYER_COMPETE) {
+        gs = self.isServer?GAME_MY_TURN:GAME_WAITING;
+    } else {
+        [self setMelodyAndStartGame:nil];
+    }
+    
+    [self presentViewController:self.singleViewController animated:YES completion:nil];
+}
+
+- (void) setMelodyAndStartGame:(NSArray *)melody {
+    if(self.singleViewController) {
+        if(self.mode == MULTI_PLAYER_COMPETE) {
+            [self.singleViewController setGameWithNotes:nil];
+            [self.singleViewController playCountdownAndStartGame];
+        } else if (self.mode == MULTI_PLAYER_MIMIC) {
+            [self.singleViewController setGameWithNotes:melody];
+            [self.singleViewController playCountdownAndStartGame];
+        }
+    }
+}
+
+- (void) changeGameState {
+    if(self.singleViewController) {
+        [self.singleViewController changeGameState];
+    }
+}
+
+- (void) grabMelodyFromGame {
+    if(self.singleViewController) {
+        
+    }
 }
 
 - (void) showScoreView:(NSMutableArray *)data {

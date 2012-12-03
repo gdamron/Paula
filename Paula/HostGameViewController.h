@@ -17,5 +17,4 @@
 @property (nonatomic, assign) enum GameModes mode;
 
 -(void) sendScore:(Player *)player;
-
 @end

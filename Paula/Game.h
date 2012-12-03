@@ -14,8 +14,27 @@ enum GameModes {
     MULTI_PLAYER_COMPETE = 1,
     MULTI_PLAYER_MIMIC = 2,
     MULTI_PLAYER_COMPOSE = 3,
-    JUST_PlAY = 4
+    JUST_PlAY = 4,
+    UNKNOW = 10
 };
+
+enum GameStates {
+    GAME_WAITING = 0,
+    GAME_MY_TURN = 1
+};
+
+static NSString* getStringOfGameMode(enum GameModes mode) {
+    switch(mode) {
+        case SINGLE_PLAYER: return @"Single Player Mode";
+        case MULTI_PLAYER_COMPETE: return @"Compete Mode";
+        case MULTI_PLAYER_COMPOSE: return @"Compose Mode";
+        case MULTI_PLAYER_MIMIC: return @"Challenge Mode";
+        case JUST_PlAY: return @"Just Play Mode";
+        case UNKNOW: return @"Unknown";
+        defaul: return @"Just Play Mode";
+    }
+    return nil;
+}
 
 @class Player;
 @class Level;
@@ -38,6 +57,7 @@ enum GameModes {
 @property (strong, nonatomic) Paula *paula;
 @property (strong, nonatomic) NSDate *date;
 @property (assign, nonatomic) enum GameModes mode;
+@property (assign, nonatomic) enum GameStates state;
 
 #pragma mark - Public Methods
 - (id)initWithGameMode:(enum GameModes)m;

@@ -28,7 +28,7 @@
 #pragma mark - Implementation
 @implementation Game
 
-@synthesize date, level, player, paula, currentRound, paulasTurn, mode, tempo;
+@synthesize date, level, player, paula, currentRound, paulasTurn, mode, tempo, state;
 
 - (id)init
 {

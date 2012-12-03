@@ -30,6 +30,9 @@
 @property (assign) BOOL isMultiPlayerMode;
 @property (strong, nonatomic) GameOver *gameOver;
 @property (nonatomic) NSNumber *currentInstrument;
+@property (nonatomic) BOOL isRecording;
+
+@property (nonatomic) NSMutableArray *notesRecording;
 @end
 
 #pragma mark - SinglePlayerViewController inplementation
@@ -54,6 +57,7 @@
 @synthesize currentInstrument;
 @synthesize gameOver;
 @synthesize delegate=_delegate;
+@synthesize startDoneButton;
 
 //////////////////  NOTE ON AND OFF /////////////
 #pragma mark - Note on and Off Methods
@@ -65,8 +69,16 @@
 //  add a tone to the stack
 //
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    Section *section = game.level.sections[[game.level.currentSection intValue]];
-    int s = [section.currentLayer intValue];
+    int s = 1;
+    if(self.isMultiPlayerMode == NO) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
+    else if (self.isRecording == NO) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
+    NSLog(@"Note On: %d", num);
     [self noteOnWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -77,8 +89,16 @@
 //  remove a tone from the stack
 //
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    Section *section = game.level.sections[[game.level.currentSection intValue]];
-    int s = [section.currentLayer intValue];
+    int s = 1;
+    if(self.isMultiPlayerMode == NO) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
+    else if (self.isRecording == NO) {
+        Section *section = game.level.sections[[game.level.currentSection intValue]];
+        s = [section.currentLayer intValue];
+    }
+    NSLog(@"Note Off: %d", num);
     [self noteOffWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -183,7 +203,7 @@
     }
     [toneGen noteOff:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0))withSoundType:s];
     
-    if (![game isPaulasTurn])
+    if (![game isPaulasTurn] && self.isRecording == NO)
         [self checkContinueConditions];
 }
 
@@ -210,8 +230,16 @@
 //  wrapper for noteOnWithNumber, used by UIButtons
 //
 - (void)noteOn:(id)sender {
-    UIButton *button = (UIButton *)sender;
-    [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+    if(game) {
+        if(game.state == GAME_MY_TURN) {
+            UIButton *button = (UIButton *)sender;
+            [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+            
+            if(self.isRecording) {
+                [self.notesRecording addObject:[NSNumber numberWithInt:[button.titleLabel.text integerValue]]];
+            }
+        }
+    }
 }
 
 //
@@ -283,9 +311,9 @@
 //
 - (void)startGame {
     game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-    toneGen = [[ToneGenerator alloc] init];
+//    toneGen = [[ToneGenerator alloc] init];
     [self setupGame];
-    [toneGen start];
+//    [toneGen start];
     Section *section = game.level.sections[[game.level.currentSection intValue]];
     currentInstrument = [NSNumber numberWithInt:[section.currentLayer intValue]];
     [metronome turnOnWithNotification:@"paulaClick"];
@@ -304,24 +332,31 @@
     [metronome turnOnWithNotification:@"paulaClick"];
 }
 
+- (void) setGameWithNotes:(NSArray *)notes {
+    if(notes) {
+        melNotes = notes;
+    } else {
+        [self setTempMultiPlayerMelody];
+    }
+}
+
 //
 //  setupGame
 //
 //  configure game's initial settings, depending on the current mode
 //
 - (void)setupGame {
-    
     if (game.mode==SINGLE_PLAYER) {
         [game generateSimpleLevel];
-    } else if (game.mode==MULTI_PLAYER_COMPETE) {
+    } else {
         Layer *newLayer = [[Layer alloc] init];
-        [self setTempMultiPlayerMelody];
         newLayer.notes = [[NSArray alloc] initWithArray:melNotes];
         Section *newSection = [[Section alloc] init];
         [newSection addLayer:newLayer];
         [game.level addSection:newSection];
+        game.state = GAME_MY_TURN;
+//        [self playCountdownAndStartGame];
     }
-    
 }
 
 //
@@ -374,6 +409,11 @@
 //  is possible.
 //
 - (void)paulaClickListen:(id)sender {
+    
+    if(self.isRecording) {
+        return;
+    }
+    
     [self allNotesOff];
     Section *currentSection = game.level.sections[[game.level.currentSection intValue]];
     Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
@@ -499,6 +539,56 @@
     [self processGameStatus:2];
 }
 
+- (void) showScoreViewScreen {
+    //show score view
+    [self dismissViewControllerAnimated:YES completion:^{
+        if(game.mode == SINGLE_PLAYER) {
+            game.player.name = @"Me";
+            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
+        }
+        else {
+            [_delegate sendScore:game.player];
+        }
+    }];
+}
+
+// For now, this just goes back to the main view controller
+- (void)gameLostButtonPressed {
+    [toneGen stop];
+    [self setupGame];
+    [self removeLabelsAndButtons];
+    //    [self playCountdownAndStartGame];
+    
+    [self showScoreViewScreen];
+}
+
+// Starts the next layer
+- (void)layerCompleteButtonPressed {
+    [self removeLabelsAndButtons];
+    [self playCountdownAndContinueGame];
+}
+
+// For now, this just goes back to the main view controller
+- (void)gameWonButtonPressed {
+    [toneGen stop];
+    [self setupGame];
+    [self removeLabelsAndButtons];
+    //    [self playCountdownAndStartGame];
+    
+    [self showScoreViewScreen];
+}
+
+- (void)listenButtonPressed {
+    [self removeLabelsAndButtons];
+    [self listenToCurrentLevel];
+}
+
+- (void) removeLabelsAndButtons {
+    [gameOver.label removeFromSuperview];
+    [gameOver.button removeFromSuperview];
+    [gameOver.listenButton removeFromSuperview];
+}
+
 //
 //  processGameStatus
 //
@@ -512,23 +602,41 @@
     [self.metronome turnOff];
     BOOL multi = (game.mode != SINGLE_PLAYER)?YES:NO;
     gameOver = [[GameOver alloc] initWithWidth:self.view.bounds.size.width AndHeight:self.view.bounds.size.height];
+    
+    SEL selector = nil;
     switch (status) {
         case 0:
-            [gameOver gameLost:multi];
-            if (!multi)
-                [gameOver.button addTarget:self action:@selector(gameLostButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+            [gameOver gameLost:multi gameMode:game.mode];
+            
+            selector = nil;
+            if (game.mode == SINGLE_PLAYER)
+                selector = @selector(gameLostButtonPressed);
+            else if (game.mode == MULTI_PLAYER_MIMIC)
+                selector = @selector(removeLabelsAndButtons);
+            
+            if(selector != nil)
+                [gameOver.button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
             break;
         case 1:
             [gameOver layerComplete:[game.player.score intValue] isMultiPlayer:multi];
-            if (!multi)
-                [gameOver.button addTarget:self action:@selector(layerCompleteButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+            
+            selector = nil;
+            if (game.mode == SINGLE_PLAYER)
+                selector = @selector(layerCompleteButtonPressed);
+            else if (game.mode == MULTI_PLAYER_MIMIC)
+                selector = @selector(removeLabelsAndButtons);
+            
+            if (selector != nil)
+                [gameOver.button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
             break;
         case 2:
-            [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi];
-            if (!multi) {
+            [gameOver gameWon:[game.player.score intValue] isMultiPlayer:multi gameMode:game.mode];
+            if (game.mode == SINGLE_PLAYER) {
                 [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
                 [gameOver.listenButton addTarget:self action:@selector(listenButtonPressed) forControlEvents:UIControlEventTouchUpInside];
                 [self.view addSubview:gameOver.listenButton];
+            } else if (game.mode == MULTI_PLAYER_MIMIC) {
+                [gameOver.button addTarget:self action:@selector(removeLabelsAndButtons) forControlEvents:UIControlEventTouchUpInside];
             }
             break;
             
@@ -601,60 +709,6 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-// For now, this just goes back to the main view controller
-- (void)gameLostButtonPressed {
-    [toneGen stop];
-    [self setupGame];
-    [gameOver.label removeFromSuperview];
-    [gameOver.button removeFromSuperview];
-//    [self playCountdownAndStartGame];
-    
-    //show score view
-    [self dismissViewControllerAnimated:YES completion:^{
-        if(game.mode != SINGLE_PLAYER)
-            [_delegate sendScore:game.player];
-        else {
-            game.player.name = @"Me";
-            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
-        }
-    }];
-}
-
-// Starts the next layer
-- (void)layerCompleteButtonPressed {
-    
-    [gameOver.label removeFromSuperview];
-    [gameOver.button removeFromSuperview];
-    [self playCountdownAndContinueGame];
-}
-
-// For now, this just goes back to the main view controller
-- (void)gameWonButtonPressed {
-    [toneGen stop];
-    [self setupGame];
-    [gameOver.label removeFromSuperview];
-    [gameOver.button removeFromSuperview];
-    [gameOver.listenButton removeFromSuperview];
-//    [self playCountdownAndStartGame];
-    
-    //show score view
-    [self dismissViewControllerAnimated:YES completion:^{
-        if(game.mode != SINGLE_PLAYER)
-            [_delegate sendScore:game.player];
-        else {
-            game.player.name = @"Me";
-            [_delegate showScoreView:[NSMutableArray arrayWithObject:game.player]];
-        }
-    }];
-}
-
-- (void)listenButtonPressed {
-    [gameOver.label removeFromSuperview];
-    [gameOver.button removeFromSuperview];
-    [gameOver.listenButton removeFromSuperview];
-    [self listenToCurrentLevel];
-}
-
 /////////////////// VIEW SETUP ////////////
 #pragma mark - Initialize and Setup
 
@@ -668,6 +722,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listenClickListen:) name:@"listenClick" object:metronome];
     
+    toneGen = [[ToneGenerator alloc] init];
+    [toneGen start];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -675,17 +731,23 @@
     [metronome turnOff];
 }
 
-- (id)initWithGameMode:(enum GameModes)mode {
+- (id)initWithGameModeAndState:(enum GameModes)mode gameState:(enum GameStates)state {
     self = [self initWithNibName:nil bundle:nil];
     
     if(self) {
+        
         if(game) {
             game.mode = mode;
+            game.state = state;
         }
         
-        if (game.mode == JUST_PlAY) {
-            toneGen = [[ToneGenerator alloc] init];
-            [toneGen start];
+        if(game) {
+            if(game.mode != SINGLE_PLAYER && game.mode != JUST_PlAY) {
+                self.isMultiPlayerMode = YES;
+                [self setupStartDoneFunc];
+            } else {
+                self.isMultiPlayerMode = NO;
+            }
         }
     }
     
@@ -715,12 +777,12 @@
         
         sineButton1 = [self setupButton:sineButton1 OnScreenWithX:BUTTONOFFSET YOffset:BUTTONOFFSET andNumber:1];
         sineButton2 = [self setupButton:sineButton2 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:BUTTONOFFSET andNumber:2];
-        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:BUTTONOFFSET YOffset:(height-20)/4+BUTTONOFFSET/2 andNumber:3];
-        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-20)/4+BUTTONOFFSET/2 andNumber:4];
-        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:BUTTONOFFSET YOffset:(height-20)/2 andNumber:5];
-        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-20)/2 andNumber:6];
-        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:BUTTONOFFSET YOffset:(height-20)*.75-BUTTONOFFSET/2 andNumber:7];
-        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-20)*.75-BUTTONOFFSET/2 andNumber:8];
+        sineButton3 = [self setupButton:sineButton3 OnScreenWithX:BUTTONOFFSET YOffset:(height-50)/4+BUTTONOFFSET/2 andNumber:3];
+        sineButton4 = [self setupButton:sineButton4 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-50)/4+BUTTONOFFSET/2 andNumber:4];
+        sineButton5 = [self setupButton:sineButton5 OnScreenWithX:BUTTONOFFSET YOffset:(height-50)/2 andNumber:5];
+        sineButton6 = [self setupButton:sineButton6 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-50)/2 andNumber:6];
+        sineButton7 = [self setupButton:sineButton7 OnScreenWithX:BUTTONOFFSET YOffset:(height-50)*.75-BUTTONOFFSET/2 andNumber:7];
+        sineButton8 = [self setupButton:sineButton8 OnScreenWithX:width/2+BUTTONOFFSET/2 YOffset:(height-50)*.75-BUTTONOFFSET/2 andNumber:8];
         
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];
@@ -742,7 +804,7 @@
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
     sender.backgroundColor = [UIColor colorWithRed:(arc4random()%11)/10.0 green:(arc4random()%11)/10.0 blue:(arc4random()%11)/10.0 alpha:1.0];
     [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    sender.frame = CGRectMake(x, y, width/2-BUTTONOFFSET, (height-20)/4-BUTTONOFFSET);
+    sender.frame = CGRectMake(x, y, width/2-BUTTONOFFSET, (height-50)/4-BUTTONOFFSET);
     sender.titleLabel.alpha = 0.0;
     [sender setTitle:[NSString stringWithFormat:@"%d", num] forState:UIControlStateNormal];
     [self.view addSubview:sender];
@@ -750,6 +812,60 @@
     [sender addTarget:self action:@selector(noteOff:) forControlEvents:UIControlEventTouchUpInside|UIControlEventTouchUpOutside|UIControlEventTouchDragExit];
     sender.alpha = OFFALPHA;
     return sender;
+}
+
+- (void) setupStartDoneFunc {
+    CGFloat width = self.view.bounds.size.width;
+    CGFloat height = self.view.bounds.size.height;
+    startDoneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    startDoneButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
+                                              blue:(arc4random()%1000+1)/1000.0
+                                             alpha:1.0];
+    [startDoneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    startDoneButton.titleLabel.font = [UIFont boldSystemFontOfSize:16];
+    startDoneButton.frame = CGRectMake(75, height - 50, width - 150, 32);
+    [startDoneButton setTitle:@"Start" forState:UIControlStateNormal];
+    
+    [self refreshButtonStatus];
+    
+    [startDoneButton addTarget:self action:@selector(startStopRecording) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
+}
+
+- (void) startStopRecording {
+    if(self.isRecording) {
+        self.isRecording = NO;
+        [startDoneButton setTitle:@"Start" forState:UIControlStateNormal];
+        NSLog(@"%@", self.notesRecording);
+        [self.delegate sendMelody:self.notesRecording];
+        game.state = GAME_WAITING;
+    } else {
+        self.isRecording = YES;
+        self.notesRecording = [[NSMutableArray alloc] initWithCapacity:20];
+        [startDoneButton setTitle:@"Done" forState:UIControlStateNormal];
+    }
+}
+
+- (void) refreshButtonStatus {
+    if(game) {
+        if(game.state == GAME_WAITING) {
+            [startDoneButton removeFromSuperview];
+        } else {
+            [self.view addSubview:startDoneButton];
+        }
+    }
+}
+
+- (void) changeGameState {
+    if(self.game) {
+        if(game.state == GAME_WAITING) {
+            game.state = GAME_MY_TURN;
+        } else {
+            game.state = GAME_WAITING;
+        }
+        
+        [self refreshButtonStatus];
+    }
 }
 
 //

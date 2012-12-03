@@ -8,13 +8,17 @@
 #import "SearchGameViewController.h"
 #import "NetworkTableViewController.h"
 #import "SinglePlayerViewController.h"
+#import "JoinedViewController.h"
 #import "GK_GameServer.h"
 #import "GK_GameClient.h"
 
 @interface SearchGameViewController ()
-@property (strong, nonatomic) UIButton* startButton;
+@property (strong, nonatomic) UIButton *joinButton;
 @property (strong, nonatomic) UIButton *backButton;
 @property (strong, nonatomic) NetworkTableViewController *ntvc;
+@property (strong, nonatomic) Jo_inedViewController *jController;
+@property (nonatomic) NSInteger selectedServerIdx;
+@property (nonatomic) enum GameModes joinedMode;
 @end
 
 @implementation SearchGameViewController {
@@ -46,6 +50,18 @@
         [self.view addSubview:self.backButton];
         [self.view addSubview:self.ntvc.view];
         
+        self.joinButton = [[UIButton alloc] initWithFrame:CGRectMake(width/2 - 40, height - 100, 80, 30)];
+        
+        self.joinButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                                           green:(arc4random()%1000+1)/1000.0
+                                                            blue:(arc4random()%1000+1)/1000.0
+                                                           alpha:1.0];
+        [self.joinButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [self.joinButton setTitle:@"Join" forState:UIControlStateNormal];
+        [self.joinButton addTarget:self action:@selector(joinGame) forControlEvents:UIControlEventTouchUpInside];
+        
+        [self.view addSubview:self.joinButton];
+        
         if (_gameClient == nil) {
             _gameClient = [[GK_GameClient alloc] init];
             [_gameClient setDelegate:self];
@@ -72,6 +88,9 @@
 }
 
 - (void) backButtonPressed {
+    if(_gameClient) {
+        [_gameClient disconnectFromServer];
+    }
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -82,7 +101,32 @@
 
 - (void) connectToServer:(NSInteger)idx {
     NSLog(@"connecting to server at idx : %d", idx);
-    [_gameClient connectToServerWithIdx:idx];
+    self.selectedServerIdx = idx;
+}
+
+- (void) joinGame {
+    [_gameClient connectToServerWithIdx:self.selectedServerIdx];
+}
+
+- (enum GameModes) getGameMode {
+    return UNKNOW;
+}
+
+- (void) setGameMode:(enum GameModes) mode {
+    self.joinedMode = mode;
+    [self.networkViewDelegate setGameOption:mode];
+    
+    NSString *serverName = [_gameClient getConnectedServerName];
+    NSString *gameModeName = getStringOfGameMode(self.joinedMode);
+    
+    self.jController = [[Jo_inedViewController alloc] initWithNameAndMode:serverName modeName:gameModeName];
+    [self.jController setSearchController:self];
+    
+    [self presentViewController:self.jController animated:NO completion:nil];
+}
+
+- (void) disconnect {
+    [_gameClient disconnect];
 }
 
 - (void) disAndReturn:(BOOL)ret error:(enum CommErrorType)error {
@@ -101,7 +145,9 @@
 
 - (void) startGame {
     [self dismissViewControllerAnimated:NO completion:^{
-        [self.networkViewDelegate showPlayView];
+        [self dismissViewControllerAnimated:NO completion:^{
+            [self.networkViewDelegate showPlayView];
+        }];
     }];
 }
 
@@ -111,6 +157,14 @@
 
 - (void) showScore:(NSMutableArray *)data {
     [self.networkViewDelegate showScoreView:data];
+}
+
+- (void) setGameMelody:(NSArray *)melody {
+    [self.networkViewDelegate setMelodyAndStartGame:melody];
+}
+
+- (void) sendMelody:(NSArray *)melody {
+    [_gameClient sendMelody:melody];
 }
 
 @end
