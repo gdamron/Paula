@@ -75,7 +75,7 @@
 
 - (void)calculateBeatsAndDurations {
     beatDuration = 60.0/tempo;
-    beatsPerLayer = inputDuration/numSections/beatDuration;
+    beatsPerLayer = ((inputDuration/numSections)/60.0)*tempo;
     layerDuration = beatDuration * beatsPerLayer;
 }
 

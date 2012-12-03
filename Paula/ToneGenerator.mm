@@ -82,6 +82,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             moog = new Moog();
             noise = new Noise();
             blit = new Blit();
+            blit->setHarmonics(8);
         }
     }
     return self;
@@ -158,6 +159,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             [tones[i] removeAllObjects];
         instrumentFlags[i] = NO;
     }
+    
 }
 
 - (void)setFrequencyForInstrument:(Tone *)tone {
@@ -175,7 +177,10 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             break;
             
         case moog_wave:
-            moog->noteOn(tone.frequency, tone.amplitude);
+            if (tone.frequency>0)
+                moog->noteOn(tone.frequency, 128);
+            else
+                moog->noteOff(128);
             break;
             
         case noise_wave:
@@ -221,7 +226,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
             double num_inst = .001;
             StkFloat sample = 0.0;
             if (instrumentFlags[0]) {
-                sample += sine->tick();
+                sample += blit->tick();
                 num_inst += 1.0;
             }
             
@@ -241,12 +246,12 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
             }
             
             if (instrumentFlags[4]) {
-                sample += noise->tick();
+                sample += sine->tick();
                 num_inst += 1;
             }
             
             if (instrumentFlags[5]) {
-                sample += blit->tick();
+                sample += noise->tick();
             }
             
             sample /= num_inst;
