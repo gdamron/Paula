@@ -32,7 +32,7 @@
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
-        [self.view setBackgroundColor:[UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0]];
+        [self.view setBackgroundColor:[UIColor blackColor]];
         
         backButton = addBackButton(width, height);
         [backButton addTarget:self action:@selector(backButtonPressed) forControlEvents:UIControlEventTouchUpInside];

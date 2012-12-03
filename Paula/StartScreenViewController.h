@@ -1,9 +1,9 @@
 //
-//  TempMainViewController.h
-//  Paula
+// TempMainViewController.h
+// Paula
 //
-//  Created by Grant Damron on 10/10/12.
-//  Copyright (c) 2012 Grant Damron. All rights reserved.
+// Created by Grant Damron on 10/10/12.
+// Copyright (c) 2012 Grant Damron. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -19,10 +19,9 @@
 
 @interface StartScreenViewController : UIViewController <MainViewDelegate>
 
-@property (strong, nonatomic) UIButton *toEnyu;
-@property (strong, nonatomic) UIButton *toEugene;
 @property (strong, nonatomic) UIButton *toSinglePlayer;
 @property (strong, nonatomic) UIButton *toMultiPlayer;
+@property (strong, nonatomic) UIButton *toJustPlay;
 @property (strong, nonatomic) ScoreViewController *scoreViewController;
 
 @end

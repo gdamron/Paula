@@ -25,9 +25,9 @@
 #include "Moog.h"
 #include "Noise.h"
 
-#define SRATE 44100
-#define FRAMESIZE 128
-#define NUMCHANNELS 2
+//#define SRATE 44100
+//#define FRAMESIZE 128
+//#define NUMCHANNELS 2
 #define BUFFER_COUNT    3
 #define BUFFER_DURATION 0.5
 #define NUM_INSTRUMENTS 6
@@ -74,25 +74,34 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
         tones = [[NSMutableArray alloc] init];
         for (int i = 0; i < NUM_INSTRUMENTS; i++)
             [tones addObject:[[NSMutableArray alloc] init]];
-        sine = new SineWave();
-        square = new BlitSquare();
-        saw = new BlitSaw();
-        moog = new Moog();
-        noise = new Noise();
-        blit = new Blit();
+        // assuming that if one is nil, all are nil
+        if (sine==nil) {
+            sine = new SineWave();
+            square = new BlitSquare();
+            saw = new BlitSaw();
+            moog = new Moog();
+            noise = new Noise();
+            blit = new Blit();
+        }
         
     }
     return self;
 }
 
+// I really hope commenting this out isn't causing a memory leak
+// but not deleting my c++ objects seems to keep the app from crashing...
+/*
 - (void)dealloc {
-    delete sine;
-    delete square;
-    delete saw;
-    delete moog;
-    delete noise;
-    delete blit;
+    if (sine!=nil) {
+        delete sine;
+        delete square;
+        delete saw;
+        delete moog;
+        delete noise;
+        delete blit;
+    }
 }
+*/
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s {
     g_on = YES;
@@ -150,7 +159,6 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             [tones[i] removeAllObjects];
         instrumentFlags[i] = NO;
     }
-    //NSLog(@"All notes off");
 }
 
 - (void)setFrequencyForInstrument:(Tone *)tone {
@@ -184,28 +192,24 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void) start {
+    g_on = NO;
     NSLog(@"Starting real time audio...");
-    if (!(MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS))) {
-        NSLog(@"Cannot initialize real time audio. Exiting.");
-    }
     if (!(MoAudio::start(audioCallback, nil))) {
         NSLog(@"Cannot start real time audio.");
     }
 }
 
 - (void)stop {
-    g_on = NO;
+    [self noteOff];
+    NSLog(@"Stopping real time audio...");
     MoAudio::stop();
-    //MoAudio::shutdown();
 }
 
 
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
     if (!g_on) {
-        for (int i = 0; i < framesize; i++) {
-            buffer[2*i] = buffer[2*i+1] = 0.0;
-        }
+        memset(buffer, 0, framesize*2);
     } else {
         for (int i = 0; i < framesize; i ++ ) {
             double num_inst = .001;

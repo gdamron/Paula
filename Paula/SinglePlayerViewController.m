@@ -66,7 +66,7 @@
 //  add a tone to the stack
 //
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    int s = 1;
+    int s = [currentInstrument intValue];
     if (game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
@@ -81,7 +81,7 @@
 //  remove a tone from the stack
 //
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    int s = 1;
+    int s = [currentInstrument intValue];
     if (game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
@@ -290,9 +290,7 @@
 //
 - (void)startGame {
     game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-    toneGen = [[ToneGenerator alloc] init];
     [self setupGame];
-    [toneGen start];
     Section *section = game.level.sections[[game.level.currentSection intValue]];
     currentInstrument = [NSNumber numberWithInt:[section.currentLayer intValue]];
     [metronome turnOnWithNotification:@"paulaClick"];
@@ -620,14 +618,12 @@
 
 // Back to the main view controller
 - (void) backButtonPressed {
-    [toneGen stop];
     // melIndex = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 // For now, this just goes back to the main view controller
 - (void)gameLostButtonPressed {
-    [toneGen stop];
     [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
@@ -654,7 +650,6 @@
 
 // For now, this just goes back to the main view controller
 - (void)gameWonButtonPressed {
-    [toneGen stop];
     [self setupGame];
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
@@ -684,6 +679,9 @@
 
 - (void)viewDidLoad
 {
+    if (toneGen==nil)
+        toneGen = [[ToneGenerator alloc] init];
+    
     [super viewDidLoad];
     game = [[Game alloc] init];
     currentInstrument = [NSNumber numberWithInt:1];
@@ -692,6 +690,10 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listenClickListen:) name:@"listenClick" object:metronome];
     
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [toneGen start];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -708,8 +710,7 @@
         }
         
         if (game.mode == JUST_PlAY) {
-            toneGen = [[ToneGenerator alloc] init];
-            [toneGen start];
+            [self setupJustPlayMode];
         }
     }
     
@@ -734,6 +735,7 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
+        
         
         [self setupPlayerDisplayInfo];
         
@@ -802,5 +804,16 @@
     [self.view addSubview:scoreDisplay];
     [self.view addSubview:mistakesLeftDisplay];
 }
+
+//
+//  setupJustPlayMode
+//
+//  remove score and mistake info and (TODO) add settings page
+//
+- (void) setupJustPlayMode {
+    [scoreDisplay removeFromSuperview];
+    [mistakesLeftDisplay removeFromSuperview];
+}
+
 
 @end
