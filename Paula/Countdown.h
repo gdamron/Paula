@@ -47,5 +47,6 @@
 - (void)gameWon:(int)totalScore isMultiPlayer:(BOOL)isMulti gameMode:(enum GameModes)mode;
 - (void)layerComplete:(int)totalScore isMultiPlayer:(BOOL)isMulti;
 - (void)gameLost:(BOOL)isMulti gameMode:(enum GameModes)mode;
+- (void)levelPlayedBack:(int)totalScore isMultiPlayer:(BOOL)isMulti;
 
 @end

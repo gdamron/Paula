@@ -439,7 +439,6 @@ bool MoAudio::init( Float64 srate, UInt32 frameSize, UInt32 numChannels )
         // TODO: error message
         return false;
     }
-    
     // TODO: fix this
     assert( numChannels == 2 );
     
@@ -598,7 +597,6 @@ bool MoAudio::init( Float64 srate, UInt32 frameSize, UInt32 numChannels )
         // TODO: "couldn't allocate memory for I/O buffer"
         return false;
     }
-    
     // check audio input
     checkInput();
 

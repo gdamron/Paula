@@ -12,8 +12,9 @@
 #define OFFALPHA 0.5
 #define BUTTONOFFSET 2.0
 
+// these don't do anything
 #define TEMP_BPM 100.0
-#define TEMP_DUR 10.0
+#define TEMP_DUR 5.0
 #define TEMP_LAYERS 3
 #define TEMP_SECTIONS 1
 
@@ -29,6 +30,11 @@
 @property (nonatomic) NSError *error;
 @property (assign) BOOL isMultiPlayerMode;
 @property (strong, nonatomic) GameOver *gameOver;
+@property (nonatomic) UIButton *instrSelect0;
+@property (nonatomic) UIButton *instrSelect1;
+@property (nonatomic) UIButton *instrSelect2;
+@property (nonatomic) UIButton *instrSelect3;
+@property (nonatomic) UIButton *instrSelect4;
 @property (nonatomic) NSNumber *currentInstrument;
 @property (nonatomic) BOOL isRecording;
 
@@ -48,6 +54,11 @@
 @synthesize sineButton6;
 @synthesize sineButton7;
 @synthesize sineButton8;
+@synthesize instrSelect0;
+@synthesize instrSelect1;
+@synthesize instrSelect2;
+@synthesize instrSelect3;
+@synthesize instrSelect4;
 @synthesize scoreDisplay;
 @synthesize mistakesLeftDisplay;
 @synthesize toneGen;
@@ -78,7 +89,7 @@
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    NSLog(@"Note On: %d", num);
+    
     [self noteOnWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -98,7 +109,7 @@
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    NSLog(@"Note Off: %d", num);
+    
     [self noteOffWithNumber:num sendMessage:send AndSoundType:s];
 }
 
@@ -143,7 +154,7 @@
     }
     [toneGen noteOn:220*(pow (2, ([[scale objectAtIndex:num-1]intValue])/12.0)) withGain:1.0 andSoundType:s];
     
-    if (![game isPaulasTurn] ) 
+    if (![game isPaulasTurn])
         [game addPlayerInput:num];
 }
 
@@ -392,6 +403,7 @@
     } else if (continueCondition==2) {
         [self gameLost];
     } else if (continueCondition==3) {
+        [game makePaulasTurn];
         [self gameWon];
     } else if (continueCondition==4) {
         [game makePaulasTurn];
@@ -472,20 +484,21 @@
     Layer *currentLayer = currentSection.layers[[currentSection.currentLayer intValue]];
     // get the index in the layer of the current note
     int index = [currentLayer.currentNote intValue];
+    //NSLog(@"note index: %d", index);
     // get the index in the layer of the note stop at for this round
-    int noteCount = currentLayer.notes.count-1;
+    int noteCount = currentLayer.notes.count;
     
     if (index >= noteCount) {
         index = 0;
         [metronome turnOff];
-        NSLog(@"Metronome Off");
+        [self playbackFinished];
     } else {
         for (int j = 0; j < [currentSection.currentLayer intValue]+1; j++) {
             Layer *layer = currentSection.layers[j];
             int note = [layer.notes[index] intValue];
             // not very safe
             if (note > 0) {
-                [self noteOnNoLightWithNumber:note sendMessage:NO AndSoundType:j];
+                [self noteOnWithNumber:note sendMessage:NO AndSoundType:j];
             }
         }
         index++;
@@ -534,7 +547,7 @@
 //  for now, this means a layer was correctly input without making too many mistakes
 //
 - (void)gameWon {
-    [toneGen noteOff];
+    //[toneGen noteOff];
     [game newRound];
     [self processGameStatus:2];
 }
@@ -588,6 +601,12 @@
     [gameOver.button removeFromSuperview];
     [gameOver.listenButton removeFromSuperview];
 }
+    
+- (void)playbackFinished {
+    //[toneGen noteOff];
+    [game newRound];
+    [self processGameStatus:3];
+}
 
 //
 //  processGameStatus
@@ -639,6 +658,14 @@
                 [gameOver.button addTarget:self action:@selector(removeLabelsAndButtons) forControlEvents:UIControlEventTouchUpInside];
             }
             break;
+        case 3:
+            [gameOver levelPlayedBack:[game.player.score intValue] isMultiPlayer:multi];
+            if (!multi) {
+                [gameOver.button addTarget:self action:@selector(gameWonButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [gameOver.listenButton addTarget:self action:@selector(listenButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+                [self.view addSubview:gameOver.listenButton];
+            }
+            break;
             
         default:
             break;
@@ -683,15 +710,16 @@
     game.level.currentSection = 0;
     for (int i = 0; i < game.level.sections.count; i++) {
         Section *section = game.level.sections[i];
-        section.currentLayer = 0;
+        section.currentLayer = [NSNumber numberWithInt:section.layers.count-1];
         for (int j = 0; j < section.layers.count; j++) {
             Layer *layer = section.layers[j];
             layer.currentNote = 0;
-            layer.currentStopIndex = [NSNumber numberWithInt:layer.notes.count-1 ];
+            layer.currentStopIndex = [NSNumber numberWithInt:layer.notes.count-1];
         }
     }
     [metronome turnOnWithNotification:@"listenClick"];
 }
+
 /////////////////// NAVIGATION ////////////
 #pragma mark - Navigation
 
@@ -704,9 +732,21 @@
 
 // Back to the main view controller
 - (void) backButtonPressed {
-    [toneGen stop];
     // melIndex = 0;
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+
+- (void)instrButtonPressed:(id)sender {
+    [instrSelect0 setTitle:@"" forState:UIControlStateNormal];
+    [instrSelect1 setTitle:@"" forState:UIControlStateNormal];
+    [instrSelect2 setTitle:@"" forState:UIControlStateNormal];
+    [instrSelect3 setTitle:@"" forState:UIControlStateNormal];
+    [instrSelect4 setTitle:@"" forState:UIControlStateNormal];
+    
+    UIButton *button = (UIButton*)sender;
+    [button setTitle:@"X" forState:UIControlStateNormal];
+    currentInstrument = [NSNumber numberWithInt:button.tag];
 }
 
 /////////////////// VIEW SETUP ////////////
@@ -714,6 +754,9 @@
 
 - (void)viewDidLoad
 {
+    if (toneGen==nil)
+        toneGen = [[ToneGenerator alloc] init];
+    
     [super viewDidLoad];
     game = [[Game alloc] init];
     currentInstrument = [NSNumber numberWithInt:1];
@@ -723,6 +766,10 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listenClickListen:) name:@"listenClick" object:metronome];
     
     toneGen = [[ToneGenerator alloc] init];
+    [toneGen start];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
     [toneGen start];
 }
 
@@ -772,6 +819,7 @@
         
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
+        
         
         [self setupPlayerDisplayInfo];
         
@@ -894,5 +942,66 @@
     [self.view addSubview:scoreDisplay];
     [self.view addSubview:mistakesLeftDisplay];
 }
+
+//
+//  setupJustPlayMode
+//
+//  remove score and mistake info and (TODO) add settings page
+//
+- (void) setupJustPlayMode {
+    CGFloat width = self.view.bounds.size.width;
+    CGFloat height = self.view.bounds.size.height;
+    
+    [scoreDisplay removeFromSuperview];
+    [mistakesLeftDisplay removeFromSuperview];
+    currentInstrument = [NSNumber numberWithInt:0];
+    
+    UILabel *instrLabel = [[UILabel alloc] initWithFrame:CGRectMake(width/2-120, height-18, 80, 16)];
+    instrLabel.backgroundColor = [UIColor clearColor];
+    [instrLabel setTextColor:[UIColor cyanColor]];
+    instrLabel.text = @" instrument: ";
+    [instrLabel setFont:[UIFont systemFontOfSize:14]];
+    [self.view addSubview:instrLabel];
+    
+    
+    instrSelect0 = [self addJustplayInstrumentButton:instrSelect0 index:0];
+    instrSelect1 = [self addJustplayInstrumentButton:instrSelect1 index:1];
+    instrSelect2 = [self addJustplayInstrumentButton:instrSelect2 index:2];
+    instrSelect3 = [self addJustplayInstrumentButton:instrSelect3 index:3];
+    instrSelect4 = [self addJustplayInstrumentButton:instrSelect4 index:4];
+    
+    [self.view addSubview:instrSelect0];
+    [self.view addSubview:instrSelect1];
+    [self.view addSubview:instrSelect2];
+    [self.view addSubview:instrSelect3];
+    [self.view addSubview:instrSelect4];
+    
+    [instrSelect0 setTitle:@"X" forState:UIControlStateNormal];
+    
+    [instrSelect0 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [instrSelect1 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [instrSelect2 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [instrSelect3 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [instrSelect4 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    
+    
+}
+
+- (UIButton *) addJustplayInstrumentButton:(UIButton *)button index:(int)idx {
+    CGFloat width = self.view.bounds.size.width;
+    CGFloat height = self.view.bounds.size.height;
+    
+    button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.backgroundColor = [UIColor clearColor];
+    [button setTitleColor:[UIColor cyanColor] forState:UIControlStateNormal];
+    button.frame = CGRectMake(width/2+idx*40-40, height-18, 38, 16);
+    [[button layer] setBorderWidth:1.0f];
+    [button.layer setBorderColor:[[UIColor cyanColor] CGColor]];
+    [button setTitle:@"" forState:UIControlStateNormal];
+    [button.titleLabel setFont:[UIFont systemFontOfSize:14]];
+    [button setTag:idx];
+    return button;
+}
+
 
 @end

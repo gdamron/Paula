@@ -9,12 +9,12 @@
 #import <Foundation/Foundation.h>
 
 enum waveforms {
-    sine_wave = 0,
+    blit_wave = 0,
     square_wave = 1,
     saw_wave = 2,
     moog_wave = 3,
-    noise_wave = 4,
-    blit_wave = 5
+    sine_wave = 4,
+    noise_wave = 5
 };
 
 @interface ToneGenerator : NSObject

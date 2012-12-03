@@ -11,6 +11,7 @@
 
 @interface StartScreenViewController ()
 @property (nonatomic) SinglePlayerViewController *singlePlayerViewController;
+@property (nonatomic) SinglePlayerViewController *justPlayViewController;
 @property (nonatomic) NetworkViewController *networkViewController;
 
 @end
@@ -20,6 +21,7 @@
 
 @synthesize toSinglePlayer;
 @synthesize toMultiPlayer;
+@synthesize toJustPlay;
 @synthesize networkViewController;
 @synthesize scoreViewController;
 
@@ -27,21 +29,23 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
         [self.view setBackgroundColor:[UIColor blackColor]];
         
-        toSinglePlayer = setupMenuButtonWithImage(toSinglePlayer, 1, [UIImage imageNamed:@"single-player.gif"], width, height);
+        toSinglePlayer = setupMenuButton(toSinglePlayer, 1, @"single player", width, height);
         [toSinglePlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-        toMultiPlayer = setupMenuButtonWithImage(toMultiPlayer, 2, [UIImage imageNamed:@"multi-player.gif"], width, height);
+        toMultiPlayer = setupMenuButton(toMultiPlayer, 2, @"multi-player", width, height);
         [toMultiPlayer addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        toJustPlay = setupMenuButton(toJustPlay, 3, @"just play", width, height);
+        [toJustPlay addTarget:self action:@selector(nameButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:setupLogo(width, height)];
         [self.view addSubview:toSinglePlayer];
         [self.view addSubview:toMultiPlayer];
-        
-        //toneGenerator = [[ToneGenerator alloc] init];
+        [self.view addSubview:toJustPlay];
     }
     return self;
 }
@@ -67,6 +71,10 @@
     } else if (sender==toMultiPlayer) {
         networkViewController = [[NetworkViewController alloc] init];
         [self presentViewController:networkViewController animated:NO completion:nil];
+    } else if (sender==toJustPlay) {
+        self.justPlayViewController = [[SinglePlayerViewController alloc] initWithGameModeAndState:JUST_PlAY gameState:GAME_MY_TURN];
+        [self.justPlayViewController setDelegate:self];
+        [self presentViewController:self.justPlayViewController animated:YES completion:nil];
     }
 }
 

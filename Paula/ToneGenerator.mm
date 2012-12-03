@@ -74,25 +74,34 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
         tones = [[NSMutableArray alloc] init];
         for (int i = 0; i < NUM_INSTRUMENTS; i++)
             [tones addObject:[[NSMutableArray alloc] init]];
-        sine = new SineWave();
-        square = new BlitSquare();
-        saw = new BlitSaw();
-        moog = new Moog();
-        noise = new Noise();
-        blit = new Blit();
-        
+        // assuming that if one is nil, all are nil
+        if (sine==nil) {
+            sine = new SineWave();
+            square = new BlitSquare();
+            saw = new BlitSaw();
+            moog = new Moog();
+            noise = new Noise();
+            blit = new Blit();
+            blit->setHarmonics(8);
+        }
     }
     return self;
 }
 
+// I really hope commenting this out isn't causing a memory leak
+// but not deleting my c++ objects seems to keep the app from crashing...
+/*
 - (void)dealloc {
-    delete sine;
-    delete square;
-    delete saw;
-    delete moog;
-    delete noise;
-    delete blit;
+    if (sine!=nil) {
+        delete sine;
+        delete square;
+        delete saw;
+        delete moog;
+        delete noise;
+        delete blit;
+    }
 }
+*/
 
 - (void)noteOn:(double)freq withGain:(double)g andSoundType:(int)s {
     g_on = YES;
@@ -109,7 +118,6 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 - (void)noteOff:(double)freq withSoundType:(int)s {
     // first remove the note from its instrument's stack
     [tones[s] removeObject:[NSNumber numberWithDouble:freq ]];
-    
     // check to see if we need to turn the instrument (or
     // all instruments) off
     if (!tones[s]) {
@@ -140,7 +148,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
         square->setFrequency([[freqs lastObject] doubleValue]);
     } else {
         g_on = NO;
-        NSLog(@"Note off");
+        //NSLog(@"Note off");
     }
 }
 
@@ -151,7 +159,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             [tones[i] removeAllObjects];
         instrumentFlags[i] = NO;
     }
-    NSLog(@"All notes off");
+    
 }
 
 - (void)setFrequencyForInstrument:(Tone *)tone {
@@ -169,7 +177,10 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             break;
             
         case moog_wave:
-            moog->noteOn(tone.frequency, tone.amplitude);
+            if (tone.frequency>0)
+                moog->noteOn(tone.frequency, 128);
+            else
+                moog->noteOff(128);
             break;
             
         case noise_wave:
@@ -185,19 +196,22 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 }
 
 - (void) start {
+    g_on = NO;
+    
+    NSLog(@"Initializing real time audio...");
+    if ((!MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS)))
+        NSLog(@"Cannot initialize realtime audio");
+    
     NSLog(@"Starting real time audio...");
-    if (!(MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS))) {
-        NSLog(@"Cannot initialize real time audio. Exiting.");
-    }
     if (!(MoAudio::start(audioCallback, nil))) {
         NSLog(@"Cannot start real time audio.");
     }
 }
 
 - (void)stop {
-    g_on = NO;
+    [self noteOff];
+    NSLog(@"Stopping real time audio...");
     MoAudio::stop();
-    //MoAudio::shutdown();
 }
 
 
@@ -212,7 +226,7 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
             double num_inst = .001;
             StkFloat sample = 0.0;
             if (instrumentFlags[0]) {
-                sample += sine->tick();
+                sample += blit->tick();
                 num_inst += 1.0;
             }
             
@@ -232,12 +246,12 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
             }
             
             if (instrumentFlags[4]) {
-                sample += noise->tick();
+                sample += sine->tick();
                 num_inst += 1;
             }
             
             if (instrumentFlags[5]) {
-                sample += blit->tick();
+                sample += noise->tick();
             }
             
             sample /= num_inst;

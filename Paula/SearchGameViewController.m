@@ -112,6 +112,10 @@
     return UNKNOW;
 }
 
+- (void) changeGameState {
+    
+}
+
 - (void) setGameMode:(enum GameModes) mode {
     self.joinedMode = mode;
     [self.networkViewDelegate setGameOption:mode];
