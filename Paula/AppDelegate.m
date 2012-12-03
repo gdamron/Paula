@@ -9,19 +9,10 @@
 #import "AppDelegate.h"
 #import "StartScreenViewController.h"
 
-#include "mo_audio.h"
-
-#define SRATE 44100
-#define FRAMESIZE 128
-#define NUMCHANNELS 2
-
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSLog(@"Initializing real time audio...");
-    if ((!MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS)))
-        NSLog(@"Cannot initialize realtime audio");
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     StartScreenViewController *startScreenViewController = [[StartScreenViewController alloc] init];
@@ -56,7 +47,7 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    MoAudio::shutdown();
+    //MoAudio::shutdown();
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 

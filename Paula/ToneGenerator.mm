@@ -25,9 +25,9 @@
 #include "Moog.h"
 #include "Noise.h"
 
-//#define SRATE 44100
-//#define FRAMESIZE 128
-//#define NUMCHANNELS 2
+#define SRATE 44100
+#define FRAMESIZE 128
+#define NUMCHANNELS 2
 #define BUFFER_COUNT    3
 #define BUFFER_DURATION 0.5
 #define NUM_INSTRUMENTS 6
@@ -83,7 +83,6 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
             noise = new Noise();
             blit = new Blit();
         }
-        
     }
     return self;
 }
@@ -193,6 +192,11 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 
 - (void) start {
     g_on = NO;
+    
+    NSLog(@"Initializing real time audio...");
+    if ((!MoAudio::init(SRATE, FRAMESIZE, NUMCHANNELS)))
+        NSLog(@"Cannot initialize realtime audio");
+    
     NSLog(@"Starting real time audio...");
     if (!(MoAudio::start(audioCallback, nil))) {
         NSLog(@"Cannot start real time audio.");
@@ -209,7 +213,9 @@ void audioCallback(Float32 *buffer, UInt32 framesize, void *userData);
 // basic audio callback (C++)
 void audioCallback(Float32 *buffer, UInt32 framesize, void *userData) {
     if (!g_on) {
-        memset(buffer, 0, framesize*2);
+        for (int i = 0; i < framesize; i++) {
+            buffer[2*i] = buffer[2*i+1] = 0.0;
+        }
     } else {
         for (int i = 0; i < framesize; i ++ ) {
             double num_inst = .001;

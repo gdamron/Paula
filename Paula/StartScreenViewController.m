@@ -29,6 +29,7 @@
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        
         CGFloat width = self.view.bounds.size.width;
         CGFloat height = self.view.bounds.size.height;
         
