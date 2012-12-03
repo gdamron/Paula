@@ -734,14 +734,17 @@
 
 
 - (void)instrButtonPressed:(id)sender {
-    [instrSelect0 setTitle:@"" forState:UIControlStateNormal];
-    [instrSelect1 setTitle:@"" forState:UIControlStateNormal];
-    [instrSelect2 setTitle:@"" forState:UIControlStateNormal];
-    [instrSelect3 setTitle:@"" forState:UIControlStateNormal];
-    [instrSelect4 setTitle:@"" forState:UIControlStateNormal];
+    instrSelect0.backgroundColor = [UIColor clearColor];
+    instrSelect1.backgroundColor = [UIColor clearColor];
+    instrSelect2.backgroundColor = [UIColor clearColor];
+    instrSelect3.backgroundColor = [UIColor clearColor];
+    instrSelect4.backgroundColor = [UIColor clearColor];
     
     UIButton *button = (UIButton*)sender;
-    [button setTitle:@"X" forState:UIControlStateNormal];
+    button.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
+                                              blue:(arc4random()%1000+1)/1000.0
+                                             alpha:1.0];
     currentInstrument = [NSNumber numberWithInt:button.tag];
 }
 
@@ -950,28 +953,25 @@
     [scoreDisplay removeFromSuperview];
     [mistakesLeftDisplay removeFromSuperview];
     currentInstrument = [NSNumber numberWithInt:0];
+    double bWidth = width/6.0 - 4.0;
+    [backButton setFrame:CGRectMake(2, height-bWidth, bWidth, bWidth)];
     
-    UILabel *instrLabel = [[UILabel alloc] initWithFrame:CGRectMake(width/2-120, height-18, 80, 16)];
-    instrLabel.backgroundColor = [UIColor clearColor];
-    [instrLabel setTextColor:[UIColor cyanColor]];
-    instrLabel.text = @" instrument: ";
-    [instrLabel setFont:[UIFont systemFontOfSize:14]];
-    [self.view addSubview:instrLabel];
+    instrSelect0 = [self addJustplayInstrumentButton:instrSelect0 index:0 title:@"blit"];
+    instrSelect1 = [self addJustplayInstrumentButton:instrSelect1 index:1 title:@"square"];
+    instrSelect2 = [self addJustplayInstrumentButton:instrSelect2 index:2 title:@"saw"];
+    instrSelect3 = [self addJustplayInstrumentButton:instrSelect3 index:3 title:@"moog"];
+    instrSelect4 = [self addJustplayInstrumentButton:instrSelect4 index:4 title:@"sine"];
     
-    
-    instrSelect0 = [self addJustplayInstrumentButton:instrSelect0 index:0];
-    instrSelect1 = [self addJustplayInstrumentButton:instrSelect1 index:1];
-    instrSelect2 = [self addJustplayInstrumentButton:instrSelect2 index:2];
-    instrSelect3 = [self addJustplayInstrumentButton:instrSelect3 index:3];
-    instrSelect4 = [self addJustplayInstrumentButton:instrSelect4 index:4];
+    instrSelect0.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                                                   green:MIN((arc4random()%1000+1)/1000.0, 0.6)
+                                                    blue:(arc4random()%1000+1)/1000.0
+                                                   alpha:1.0];
     
     [self.view addSubview:instrSelect0];
     [self.view addSubview:instrSelect1];
     [self.view addSubview:instrSelect2];
     [self.view addSubview:instrSelect3];
     [self.view addSubview:instrSelect4];
-    
-    [instrSelect0 setTitle:@"X" forState:UIControlStateNormal];
     
     [instrSelect0 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     [instrSelect1 addTarget:self action:@selector(instrButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
@@ -982,17 +982,18 @@
     
 }
 
-- (UIButton *) addJustplayInstrumentButton:(UIButton *)button index:(int)idx {
+- (UIButton *) addJustplayInstrumentButton:(UIButton *)button index:(int)idx title:(NSString *)title {
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
+    double bWidth = width/6.0 - 4.0;
     
     button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.backgroundColor = [UIColor clearColor];
     [button setTitleColor:[UIColor cyanColor] forState:UIControlStateNormal];
-    button.frame = CGRectMake(width/2+idx*40-40, height-18, 38, 16);
+    button.frame = CGRectMake(idx*(bWidth+4)+bWidth+6, height-bWidth, bWidth, bWidth);
     [[button layer] setBorderWidth:1.0f];
     [button.layer setBorderColor:[[UIColor cyanColor] CGColor]];
-    [button setTitle:@"" forState:UIControlStateNormal];
+    [button setTitle:title forState:UIControlStateNormal];
     [button.titleLabel setFont:[UIFont systemFontOfSize:14]];
     [button setTag:idx];
     return button;
