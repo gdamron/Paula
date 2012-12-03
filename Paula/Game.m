@@ -8,8 +8,11 @@
 
 #import "Game.h"
 
-#define DEFAULT_PLAYER_MISTAKES_ALLOWED 1
+#define DEFAULT_PLAYER_MISTAKES_ALLOWED 5
 #define DEFAULT_GAME_TEMPO 100
+// note that the beat resolution property of the metronome can change the duration
+// meaning 5 seconds here with a resolution of 2 really means 2.5 seconds. Obviously,
+// this needs to be fixed
 #define DEFAULT_GAME_DUR 5.0
 #define DEFAULT_GAME_LAYERS 3
 #define DEFAULT_GAME_SECTIONS 1

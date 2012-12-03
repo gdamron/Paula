@@ -80,12 +80,12 @@
 //  add a tone to the stack
 //
 - (void) noteOnWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    int s = 1;
-    if(self.isMultiPlayerMode == NO) {
+    int s = [currentInstrument intValue];
+    if(self.isMultiPlayerMode == NO && game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    else if (self.isRecording == NO) {
+    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
@@ -100,12 +100,12 @@
 //  remove a tone from the stack
 //
 - (void) noteOffWithNumber:(NSInteger)num sendMessage:(BOOL)send {
-    int s = 1;
-    if(self.isMultiPlayerMode == NO) {
+    int s = [currentInstrument intValue];
+    if(self.isMultiPlayerMode == NO && game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    else if (self.isRecording == NO) {
+    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
@@ -322,9 +322,7 @@
 //
 - (void)startGame {
     game.paula = [[Paula alloc] initWithDuration:TEMP_DUR Tempo:TEMP_BPM NumberOfLayers:TEMP_LAYERS AndSections:TEMP_SECTIONS];
-//    toneGen = [[ToneGenerator alloc] init];
     [self setupGame];
-//    [toneGen start];
     Section *section = game.level.sections[[game.level.currentSection intValue]];
     currentInstrument = [NSNumber numberWithInt:[section.currentLayer intValue]];
     [metronome turnOnWithNotification:@"paulaClick"];
@@ -567,7 +565,6 @@
 
 // For now, this just goes back to the main view controller
 - (void)gameLostButtonPressed {
-    [toneGen stop];
     [self setupGame];
     [self removeLabelsAndButtons];
     //    [self playCountdownAndStartGame];
@@ -583,7 +580,6 @@
 
 // For now, this just goes back to the main view controller
 - (void)gameWonButtonPressed {
-    [toneGen stop];
     [self setupGame];
     [self removeLabelsAndButtons];
     //    [self playCountdownAndStartGame];
@@ -759,14 +755,11 @@
     
     [super viewDidLoad];
     game = [[Game alloc] init];
-    currentInstrument = [NSNumber numberWithInt:1];
+    currentInstrument = [NSNumber numberWithInt:0];
 	metronome = [[Metronome alloc] initWithBPM:TEMP_BPM AndResolution:2];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(paulaClickListen:) name:@"paulaClick" object:metronome];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerClickListen:) name:@"playerClick" object:metronome];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(listenClickListen:) name:@"listenClick" object:metronome];
-    
-    toneGen = [[ToneGenerator alloc] init];
-    [toneGen start];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -792,6 +785,8 @@
             if(game.mode != SINGLE_PLAYER && game.mode != JUST_PlAY) {
                 self.isMultiPlayerMode = YES;
                 [self setupStartDoneFunc];
+            } else if (game.mode == JUST_PlAY) {
+                [self setupJustPlayMode];
             } else {
                 self.isMultiPlayerMode = NO;
             }
