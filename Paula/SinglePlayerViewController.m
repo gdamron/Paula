@@ -355,10 +355,10 @@
 //  determines whether it is player's turn, paula's turn, game has been won, etc
 //
 - (void)checkContinueConditions {
-    [self updatePlayerDisplayInfo];
     BOOL mistakesWereMade = [game.paula checkMistakesInInput:[NSArray arrayWithArray: game.player.currentInput]
                                               VsCurrentLayer:[game currentRound]];
     int continueCondition = [game rewardOrPenalize:mistakesWereMade];
+    [self updatePlayerDisplayInfo];
     if (continueCondition==0) {
         //[self updatePlayerDisplayInfo];
     } else if (continueCondition==1) {
@@ -488,7 +488,7 @@
 //
 - (void)gameLost {
     mistakesLeftDisplay.text = @"mistakes: 0";
-    [toneGen noteOff];
+    //[toneGen noteOff];
     [game newRound];
     [self processGameStatus:0];
 }
