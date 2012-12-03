@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Game.h"
 
 enum CommErrorType {
     SERVER_DOWN = 0,
@@ -20,7 +21,12 @@ enum CommErrorType {
 - (void) connectToServer:(NSInteger)idx;
 - (void) disAndReturn:(BOOL)ret error:(enum CommErrorType)error;
 - (void) startGame;
+- (void) disconnect;
 - (void) showScore:(NSMutableArray *)data;
+- (void) setGameMode:(enum GameModes) mode;
+- (void) setGameMelody:(NSArray *)melody;
+- (void) sendMelody:(NSArray *)melody;
+- (void) changeGameState;
 @end
 
 @protocol GK_GameDataDelegate <NSObject>
@@ -28,4 +34,6 @@ enum CommErrorType {
 - (NSMutableArray *) getInternalData;
 - (void) trackScores:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes;
 - (void) receiveScores:(NSMutableArray *)players;
+- (void) sendMelody:(NSArray *)melody;
+- (void) setTurn:(NSString *)peerID;
 @end

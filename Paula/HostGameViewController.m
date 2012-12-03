@@ -67,12 +67,24 @@
             _gameServer = [[GK_GameServer alloc] init];
             [_gameServer setDelegate:self];
             [_gameServer startAcceptConnectionForSessionID:SESSION_ID];
-            
+            [_gameServer setMode:self.mode];
             [self.ntvc setCommDelegate:self];
             [self.ntvc setDataDelegate:_gameServer];
         }
     }
     return self;
+}
+
+- (enum GameModes) getGameMode {
+    return self.mode;
+}
+
+- (void) setGameMode:(enum GameModes)mode {
+    //do nothing
+}
+
+- (void) disconnect {
+    [_gameServer close];
 }
 
 - (void)viewDidLoad {
@@ -126,6 +138,19 @@
 
 - (void) showScore:(NSMutableArray *)data {
     [self.networkViewDelegate showScoreView:data];
+}
+
+- (void) setGameMelody:(NSArray *)melody {
+    [self.networkViewDelegate setMelodyAndStartGame:melody];
+}
+
+- (void) sendMelody:(NSArray *)melody {
+    [_gameServer sendMelody:melody];
+    [_gameServer setTurn:nil];
+}
+
+- (void) changeGameState {
+    
 }
 
 @end

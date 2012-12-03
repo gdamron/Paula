@@ -11,6 +11,7 @@
 #import "GK_GameComm.h"
 #import "GK_GamePacket.h"
 #import "GK_GameDataHandler.h"
+#import "Game.h"
 
 @interface GK_GameClient : NSObject <GKSessionDelegate, GK_GameDataDelegate>
 
@@ -23,5 +24,8 @@
 - (void)startSearchServerForSessionID:(NSString *)sessionID;
 - (void)connectToServerWithIdx:(NSInteger)idx;
 - (void)sendScore:(NSNumber *)score mistakes:(NSNumber *)mistakes;
+- (void)disconnectFromServer;
+- (void)disconnect;
+- (NSString*) getConnectedServerName;
 
 @end

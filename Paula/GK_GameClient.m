@@ -13,6 +13,7 @@
     NSMutableArray *_availableServerNames;
     
     NSString *_serverId;
+    NSString *_serverName;
     
     GK_GamePacket *packet;
 }
@@ -44,6 +45,7 @@
 
 - (void)connectToServerWithIdx:(NSInteger)idx {
     _serverId = [_availableServers objectAtIndex:(int)idx];
+    _serverName = [_session displayNameForPeer:_serverId];
     NSLog(@"connecting to %@", _serverId);
     [_session connectToPeer:_serverId withTimeout:_session.disconnectTimeout];
 }
@@ -85,11 +87,42 @@
 		case GKPeerStateConnected:
 			break;
 		case GKPeerStateDisconnected:
-            [self disconnectFromServer];
+            [self disconnect];
 			break;
         default:
             break;
     }
+}
+
+- (void) trackScores:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
+        //do nothing
+}
+
+-(void) sendMelody:(NSArray *)melody {
+    NSError *error;
+    [packet setPacketType:GAME_SEND_MELODY];
+    
+    NSMutableData *d = [packet data];
+    if(melody) {
+        [d rw_appendInt8:[melody count]];
+        NSEnumerator *en = [melody objectEnumerator];
+        NSNumber *note;
+        while((note = en.nextObject)) {
+            [d rw_appendInt8:[note charValue]];
+        }
+        
+        if(![_session sendData:d toPeers:[NSArray arrayWithObject:_serverId] withDataMode:GKSendDataReliable error:&error]) {
+            NSLog(@"error sending melody - %@", error);
+        }
+    }
+}
+
+- (void) setTurn:(NSString *)peerID {
+    //do nothing
+}
+
+- (void) disconnect {
+    [_session disconnectFromAllPeers];
 }
 
 - (void)disconnectFromServer {
@@ -102,6 +135,13 @@
 	_serverId = nil;
     
     [self.delegate disAndReturn:YES error:SERVER_DOWN];
+}
+
+- (NSString*) getConnectedServerName {
+    if(_serverName) {
+        return _serverName;
+    }
+    return nil;
 }
 
 - (void)session:(GKSession *)session didReceiveConnectionRequestFromPeer:(NSString *)peerID {

@@ -8,7 +8,7 @@
 
 #import "Game.h"
 
-#define DEFAULT_PLAYER_MISTAKES_ALLOWED 5
+#define DEFAULT_PLAYER_MISTAKES_ALLOWED 1
 #define DEFAULT_GAME_TEMPO 100
 #define DEFAULT_GAME_DUR 5.0
 #define DEFAULT_GAME_LAYERS 3
@@ -28,7 +28,7 @@
 #pragma mark - Implementation
 @implementation Game
 
-@synthesize date, level, player, paula, currentRound, paulasTurn, mode, tempo;
+@synthesize date, level, player, paula, currentRound, paulasTurn, mode, tempo, state;
 
 - (id)init
 {

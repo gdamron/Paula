@@ -64,7 +64,7 @@
 
 - (void)nameButtonPressed:(id)sender {
     if (sender==toSinglePlayer) {
-        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:SINGLE_PLAYER];
+        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameModeAndState:SINGLE_PLAYER gameState:GAME_MY_TURN];
         [self.singlePlayerViewController setDelegate:self];
         [self.singlePlayerViewController playCountdownAndStartGame];
         [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
@@ -72,7 +72,7 @@
         networkViewController = [[NetworkViewController alloc] init];
         [self presentViewController:networkViewController animated:NO completion:nil];
     } else if (sender==toJustPlay) {
-        self.justPlayViewController = [[SinglePlayerViewController alloc] initWithGameMode:JUST_PlAY];
+        self.justPlayViewController = [[SinglePlayerViewController alloc] initWithGameModeAndState:JUST_PlAY gameState:GAME_MY_TURN];
         [self.justPlayViewController setDelegate:self];
         [self presentViewController:self.justPlayViewController animated:YES completion:nil];
     }
@@ -86,11 +86,6 @@
 
 - (void) showPlayView {
     if(self.singlePlayerViewController != nil) {
-        [self.singlePlayerViewController playCountdownAndStartGame];
-        [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
-    } else {
-        self.singlePlayerViewController = [[SinglePlayerViewController alloc] initWithGameMode:MULTI_PLAYER_COMPETE];
-        [self.singlePlayerViewController setDelegate:self];
         [self.singlePlayerViewController playCountdownAndStartGame];
         [self presentViewController:self.singlePlayerViewController animated:YES completion:nil];
     }
