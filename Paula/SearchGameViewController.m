@@ -62,7 +62,10 @@
         
         [self.view addSubview:self.joinButton];
         
-        if (_gameClient == nil) {
+        if(_gameClient != nil) {
+            [_gameClient disconnect];
+        }
+        else if (_gameClient == nil) {
             _gameClient = [[GK_GameClient alloc] init];
             [_gameClient setDelegate:self];
             [_gameClient startSearchServerForSessionID:SESSION_ID];
@@ -169,6 +172,10 @@
 
 - (void) sendMelody:(NSArray *)melody {
     [_gameClient sendMelody:melody];
+}
+
+-(void)reset {
+    [_gameClient disconnect];
 }
 
 @end

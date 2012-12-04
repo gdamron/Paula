@@ -99,15 +99,18 @@
 }
 
 - (void) showPlayView {
-    enum GameStates gs = GAME_MY_TURN;
+    enum GameStates gs = self.isServer?GAME_MY_TURN:GAME_WAITING;
+    
+    if(self.mode == MULTI_PLAYER_COMPETE) {
+        gs = GAME_MY_TURN;
+    }
+    
     if(self.singleViewController == nil) {
         self.singleViewController = [[SinglePlayerViewController alloc] initWithGameModeAndState:self.mode gameState:gs];
         [self.singleViewController setDelegate:self];
     }
     
-    if(self.mode != MULTI_PLAYER_COMPETE) {
-        gs = self.isServer?GAME_MY_TURN:GAME_WAITING;
-    } else {
+    if(self.mode == MULTI_PLAYER_COMPETE) {
         [self setMelodyAndStartGame:nil];
     }
     
@@ -141,7 +144,14 @@
 - (void) showScoreView:(NSMutableArray *)data {
     [self dismissViewControllerAnimated:NO completion:^{
         ScoreViewController *scoreViewController = [[ScoreViewController alloc] initWithData:data];
-        [self presentViewController:scoreViewController animated:YES completion:nil];
+        [self presentViewController:scoreViewController animated:YES completion:^ {
+            if(self.isServer) {
+                [self.hostGameView reset];
+            } else {
+                [self.searchGameView reset];
+            }
+            [self.singleViewController removeLabelsAndButtons];
+        }];
     }];
 }
 

@@ -15,5 +15,6 @@
 @property (nonatomic, assign) NetworkViewController *networkViewDelegate;
 
 -(void) sendScore:(Player *)player;
+-(void) reset;
 
 @end

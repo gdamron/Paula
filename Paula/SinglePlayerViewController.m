@@ -37,6 +37,7 @@
 @property (nonatomic) UIButton *instrSelect4;
 @property (nonatomic) NSNumber *currentInstrument;
 @property (nonatomic) BOOL isRecording;
+@property (nonatomic) BOOL startButtonPressed;
 
 @property (nonatomic) NSMutableArray *notesRecording;
 @end
@@ -69,6 +70,7 @@
 @synthesize gameOver;
 @synthesize delegate=_delegate;
 @synthesize startDoneButton;
+@synthesize flashLabel;
 
 //////////////////  NOTE ON AND OFF /////////////
 #pragma mark - Note on and Off Methods
@@ -85,10 +87,10 @@
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
-        Section *section = game.level.sections[[game.level.currentSection intValue]];
-        s = [section.currentLayer intValue];
-    }
+//    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
+//        Section *section = game.level.sections[[game.level.currentSection intValue]];
+//        s = [section.currentLayer intValue];
+//    }
     
     [self noteOnWithNumber:num sendMessage:send AndSoundType:s];
 }
@@ -105,10 +107,10 @@
         Section *section = game.level.sections[[game.level.currentSection intValue]];
         s = [section.currentLayer intValue];
     }
-    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
-        Section *section = game.level.sections[[game.level.currentSection intValue]];
-        s = [section.currentLayer intValue];
-    }
+//    else if (self.isRecording == NO && game.mode != JUST_PlAY) {
+//        Section *section = game.level.sections[[game.level.currentSection intValue]];
+//        s = [section.currentLayer intValue];
+//    }
     
     [self noteOffWithNumber:num sendMessage:send AndSoundType:s];
 }
@@ -244,10 +246,15 @@
     if(game) {
         if(game.state == GAME_MY_TURN) {
             UIButton *button = (UIButton *)sender;
-            [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
             
-            if(self.isRecording) {
-                [self.notesRecording addObject:[NSNumber numberWithInt:[button.titleLabel.text integerValue]]];
+            if(game.mode != MULTI_PLAYER_MIMIC) {
+                [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+            }
+            else if(game.mode == MULTI_PLAYER_MIMIC) {
+                [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+                
+                if(self.isRecording)
+                    [self.notesRecording addObject:[NSNumber numberWithInt:[button.titleLabel.text integerValue]]];
             }
         }
     }
@@ -259,8 +266,14 @@
 //  wrapper for noteOffWithNumber, used by UIButtons
 //
 - (void)noteOff:(id)sender {
-    UIButton *button = (UIButton *)sender;
-    [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+    if(game) {
+        if(game.state == GAME_MY_TURN) {
+            UIButton *button = (UIButton *)sender;
+            [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+            
+            //wondering if should add blank notes as well
+        }
+    }
 }
 
 //
@@ -290,6 +303,7 @@
 //
 - (void)playCountdownAndStartGame {
     [self playCountdownWithSelector:@selector(startGame)];
+    [flashLabel removeFromSuperview];
 }
 
 //
@@ -596,6 +610,12 @@
     [gameOver.label removeFromSuperview];
     [gameOver.button removeFromSuperview];
     [gameOver.listenButton removeFromSuperview];
+    
+    if(game) {
+        if(game.mode == MULTI_PLAYER_MIMIC) {
+            [self refreshButtonStatus];
+        }
+    }
 }
     
 - (void)playbackFinished {
@@ -778,7 +798,7 @@
     self = [self initWithNibName:nil bundle:nil];
     
     if(self) {
-        
+        self.startButtonPressed = NO;
         if(game) {
             game.mode = mode;
             game.state = state;
@@ -790,6 +810,7 @@
                 [self setupStartDoneFunc];
             } else if (game.mode == JUST_PlAY) {
                 [self setupJustPlayMode];
+                self.isMultiPlayerMode = NO;
             } else {
                 self.isMultiPlayerMode = NO;
             }
@@ -873,30 +894,52 @@
     startDoneButton.frame = CGRectMake(75, height - 50, width - 150, 32);
     [startDoneButton setTitle:@"Start" forState:UIControlStateNormal];
     
-    [self refreshButtonStatus];
-    
     [startDoneButton addTarget:self action:@selector(startStopRecording) forControlEvents:UIControlEventTouchDown|UIControlEventTouchDragEnter];
+    
+    flashLabel = [[UILabel alloc] initWithFrame:CGRectMake(75, height - 50, width - 150, 32)];
+    flashLabel.text = @"Wait...";
+    flashLabel.textColor = [UIColor whiteColor];
+    flashLabel.backgroundColor = [UIColor blackColor];
+    flashLabel.textAlignment = UITextAlignmentCenter;
+    
+    [self refreshButtonStatus];
 }
 
 - (void) startStopRecording {
     if(self.isRecording) {
         self.isRecording = NO;
+        self.startButtonPressed = NO;
         [startDoneButton setTitle:@"Start" forState:UIControlStateNormal];
         NSLog(@"%@", self.notesRecording);
         [self.delegate sendMelody:self.notesRecording];
         game.state = GAME_WAITING;
     } else {
         self.isRecording = YES;
+        self.startButtonPressed = YES;
         self.notesRecording = [[NSMutableArray alloc] initWithCapacity:20];
         [startDoneButton setTitle:@"Done" forState:UIControlStateNormal];
     }
+    
+    [self refreshButtonStatus];
 }
 
 - (void) refreshButtonStatus {
     if(game) {
         if(game.state == GAME_WAITING) {
             [startDoneButton removeFromSuperview];
+            [self.view addSubview:flashLabel];
+            void (^animationLabel) (void) = ^{
+                flashLabel.alpha = 0;
+            };
+            void (^completionLabel) (BOOL) = ^(BOOL f) {
+                flashLabel.alpha = 1;
+            };
+            
+            NSUInteger opts =  UIViewAnimationOptionAutoreverse | UIViewAnimationOptionRepeat;
+            [UIView animateWithDuration:1.f delay:0 options:opts
+                             animations:animationLabel completion:completionLabel];
         } else {
+            [flashLabel removeFromSuperview];
             [self.view addSubview:startDoneButton];
         }
     }

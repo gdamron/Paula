@@ -153,4 +153,8 @@
     
 }
 
+-(void)reset {
+    [_gameServer close];
+}
+
 @end

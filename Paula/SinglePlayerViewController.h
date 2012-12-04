@@ -34,6 +34,7 @@
 @property (strong, nonatomic) UILabel *mistakesLeftDisplay;
 
 @property (strong, nonatomic) UIButton *startDoneButton;
+@property (strong, nonatomic) UILabel *flashLabel;
 
 @property (strong) Metronome *metronome;
 @property (strong) Game *game;
@@ -52,5 +53,6 @@
 - (id) initWithGameModeAndState:(enum GameModes)mode gameState:(enum GameStates)state;
 - (void) setGameWithNotes:(NSArray *)notes;
 - (void) changeGameState;
+- (void) removeLabelsAndButtons;
 
 @end

@@ -123,6 +123,13 @@
 
 - (void) disconnect {
     [_session disconnectFromAllPeers];
+	_session.available = NO;
+	_session.delegate = nil;
+	_session = nil;
+    
+	_availableServers = nil;
+    _availableServerNames = nil;
+	_serverId = nil;
 }
 
 - (void)disconnectFromServer {
@@ -132,6 +139,7 @@
 	_session = nil;
     
 	_availableServers = nil;
+    _availableServerNames = nil;
 	_serverId = nil;
     
     [self.delegate disAndReturn:YES error:SERVER_DOWN];
