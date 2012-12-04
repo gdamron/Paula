@@ -761,10 +761,7 @@
     instrSelect4.backgroundColor = [UIColor clearColor];
     
     UIButton *button = (UIButton*)sender;
-    button.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
-                                              blue:(arc4random()%1000+1)/1000.0
-                                             alpha:1.0];
+    button.backgroundColor = randomColor();
     currentInstrument = [NSNumber numberWithInt:button.tag];
 }
 
@@ -885,10 +882,7 @@
     CGFloat width = self.view.bounds.size.width;
     CGFloat height = self.view.bounds.size.height;
     startDoneButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    startDoneButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
-                                              blue:(arc4random()%1000+1)/1000.0
-                                             alpha:1.0];
+    startDoneButton.backgroundColor = randomColor();
     [startDoneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     startDoneButton.titleLabel.font = [UIFont boldSystemFontOfSize:16];
     startDoneButton.frame = CGRectMake(75, height - 50, width - 150, 32);
@@ -1005,10 +999,7 @@
     instrSelect3 = [self addJustplayInstrumentButton:instrSelect3 index:3 title:@"moog"];
     instrSelect4 = [self addJustplayInstrumentButton:instrSelect4 index:4 title:@"sine"];
     
-    instrSelect0.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                                   green:MIN((arc4random()%1000+1)/1000.0, 0.6)
-                                                    blue:(arc4random()%1000+1)/1000.0
-                                                   alpha:1.0];
+    instrSelect0.backgroundColor = randomColor();
     
     [self.view addSubview:instrSelect0];
     [self.view addSubview:instrSelect1];

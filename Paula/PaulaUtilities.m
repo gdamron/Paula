@@ -8,15 +8,19 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+static UIColor* randomColor() {
+    return [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
+                           green:MIN((arc4random()%1000+1)/1000.0, 0.6)
+                            blue:(arc4random()%1000+1)/1000.0
+                           alpha:1.0];
+}
+
 static UIButton* setupMenuButton(UIButton* sender, NSInteger idx, NSString* name, CGFloat screenWidth, CGFloat screenHeight) {
     CGFloat width = screenWidth;
     CGFloat height = screenHeight;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
     // clamping green to 0.6 seems to prevent buttons from getting too light
-    sender.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
-                                              blue:(arc4random()%1000+1)/1000.0
-                                             alpha:1.0];
+    sender.backgroundColor = randomColor();
     [sender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     sender.titleLabel.font = [UIFont boldSystemFontOfSize:32];
     sender.frame = CGRectMake(0, (height/7) * idx + 100, width, 60);
@@ -30,10 +34,7 @@ static UIButton* setupMenuButtonWithImage(UIButton* sender, NSInteger idx, UIIma
     CGFloat height = screenHeight;
     sender = [UIButton buttonWithType:UIButtonTypeCustom];
     // clamping green to 0.6 seems to prevent buttons from getting too light
-    sender.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                             green:MIN((arc4random()%1000+1)/1000.0, 0.6)
-                                              blue:(arc4random()%1000+1)/1000.0
-                                             alpha:1.0];
+    sender.backgroundColor = randomColor();
     [sender setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     sender.titleLabel.font = [UIFont boldSystemFontOfSize:32];
     sender.frame = CGRectMake(0, (height/7) * idx + 50, width, 60);
@@ -51,10 +52,12 @@ static UIImageView* setupLogo(CGFloat width, CGFloat height) {
 }
 
 static UIButton* addBackButton(CGFloat width, CGFloat height) {
+    double bWidth = width/6.0 - 4.0;
     UIButton *back = [UIButton buttonWithType:UIButtonTypeCustom];
     back.backgroundColor = [UIColor clearColor];
+    
     [back setTitleColor:[UIColor cyanColor] forState:UIControlStateNormal];
-    back.frame = CGRectMake(2, height-18, 32, 16);
+    back.frame = CGRectMake(2, height-bWidth, bWidth, bWidth);
     [[back layer] setBorderWidth:1.0f];
     [back.layer setBorderColor:[[UIColor cyanColor] CGColor]];
     [back setTitle:@"<<" forState:UIControlStateNormal];
