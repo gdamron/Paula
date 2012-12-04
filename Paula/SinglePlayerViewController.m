@@ -748,7 +748,7 @@
     currentInstrument = [NSNumber numberWithInt:button.tag];
 }
 
-/////////////////// VIEW SETUP ////////////
+/////////////////// VIEW SETUP /////////////
 #pragma mark - Initialize and Setup
 
 - (void)viewDidLoad
