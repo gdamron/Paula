@@ -82,6 +82,23 @@
                 [_uidelegate setGameMelody:notes];
             }
             break;
+        case GAME_SEND_COMPOSE_MELODY:
+            if(_datadelegate != nil) {
+                uint8_t count = [data rw_int8AtOffset:2];
+                int offset = 2;
+                NSMutableArray *notes = [[NSMutableArray alloc] initWithCapacity:count];
+                for(uint8_t i = 0; i<count; i++) {
+                    [notes addObject:[NSNumber numberWithChar:[data rw_int8AtOffset:++offset]]];
+                }
+                
+                NSLog(@"received composed melody: %@", notes);
+                
+                if([_datadelegate trackComposedMelody:peerID melody:notes]) {
+                    if(_uidelegate != nil) {                        
+                        [_uidelegate showPlayButton];
+                    }
+                }
+            }
         case GAME_CHANGE_TURNSTATE:
             if(_uidelegate != nil) {
                 

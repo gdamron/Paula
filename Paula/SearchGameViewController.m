@@ -174,6 +174,14 @@
     [_gameClient sendMelody:melody];
 }
 
+- (void) showPlayButton {
+    //do nada
+}
+
+- (void) sendComposeMelody:(NSArray *)melody {
+    [_gameClient sendComposeMelody:melody];
+}
+
 -(void)reset {
     [_gameClient disconnect];
 }

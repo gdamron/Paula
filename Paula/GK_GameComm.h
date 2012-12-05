@@ -26,14 +26,19 @@ enum CommErrorType {
 - (void) setGameMode:(enum GameModes) mode;
 - (void) setGameMelody:(NSArray *)melody;
 - (void) sendMelody:(NSArray *)melody;
+- (void) sendComposeMelody:(NSArray *)melody;
 - (void) changeGameState;
+- (void) showPlayButton;
 @end
 
 @protocol GK_GameDataDelegate <NSObject>
 @required
 - (NSMutableArray *) getInternalData;
+- (NSMapTable *) getComposedMelody;
 - (void) trackScores:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes;
 - (void) receiveScores:(NSMutableArray *)players;
 - (void) sendMelody:(NSArray *)melody;
+- (void) sendComposeMelody:(NSArray *)melody;
 - (void) setTurn:(NSString *)peerID;
+- (BOOL) trackComposedMelody:(NSString *)peerID melody:(NSArray *)melody;
 @end

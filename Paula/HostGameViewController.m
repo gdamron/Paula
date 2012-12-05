@@ -144,6 +144,10 @@
     [self.networkViewDelegate setMelodyAndStartGame:melody];
 }
 
+- (void) showPlayButton {
+    [self.networkViewDelegate showPlayButton:[_gameServer getComposedMelody]];
+}
+
 - (void) sendMelody:(NSArray *)melody {
     [_gameServer sendMelody:melody];
     [_gameServer setTurn:nil];
@@ -155,6 +159,12 @@
 
 -(void)reset {
     [_gameServer close];
+}
+
+- (void) sendComposeMelody:(NSArray *)melody {
+    if([_gameServer trackComposedMelody:nil melody:melody]) {
+        [self.networkViewDelegate showPlayButton:[_gameServer getComposedMelody]];
+    }
 }
 
 @end

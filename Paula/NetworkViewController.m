@@ -98,10 +98,25 @@
     }
 }
 
+- (void) sendComposeMelody:(NSArray *)melody {
+    if(self.isServer) {
+        [self.hostGameView sendComposeMelody:melody];
+    } else {
+        [self.searchGameView sendComposeMelody:melody];
+    }
+}
+
+- (void) showPlayButton:(NSMapTable *)melody {
+    if(self.singleViewController) {
+        NSLog(@"COMPOSED: %@", melody);
+        [self.singleViewController showPlayButtonAndStore:melody];
+    }
+}
+
 - (void) showPlayView {
     enum GameStates gs = self.isServer?GAME_MY_TURN:GAME_WAITING;
     
-    if(self.mode == MULTI_PLAYER_COMPETE) {
+    if(self.mode == MULTI_PLAYER_COMPETE || self.mode == MULTI_PLAYER_COMPOSE) {
         gs = GAME_MY_TURN;
     }
     

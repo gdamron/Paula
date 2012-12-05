@@ -40,6 +40,10 @@
 @property (nonatomic) BOOL startButtonPressed;
 
 @property (nonatomic) NSMutableArray *notesRecording;
+
+@property (nonatomic) NSDate *timeStart;
+@property (nonatomic) NSDate *timeEnd;
+
 @end
 
 #pragma mark - SinglePlayerViewController inplementation
@@ -247,14 +251,16 @@
         if(game.state == GAME_MY_TURN) {
             UIButton *button = (UIButton *)sender;
             
-            if(game.mode != MULTI_PLAYER_MIMIC) {
-                [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
-            }
-            else if(game.mode == MULTI_PLAYER_MIMIC) {
+            if(game.mode == MULTI_PLAYER_MIMIC || game.mode == MULTI_PLAYER_COMPOSE) {
                 [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
                 
-                if(self.isRecording)
+                if(self.isRecording) {
+                    NSLog(@"storing: %d", [button.titleLabel.text integerValue]);
                     [self.notesRecording addObject:[NSNumber numberWithInt:[button.titleLabel.text integerValue]]];
+                    self.timeStart = [[NSDate alloc] init];
+                }
+            } else {
+                [self noteOnWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
             }
         }
     }
@@ -270,6 +276,15 @@
         if(game.state == GAME_MY_TURN) {
             UIButton *button = (UIButton *)sender;
             [self noteOffWithNumber:[button.titleLabel.text integerValue] sendMessage:NO];
+            
+            if(game.mode == MULTI_PLAYER_COMPOSE) {
+                self.timeEnd = [[NSDate alloc] init];
+                int timeDiff = (int)[self.timeEnd timeIntervalSinceDate:self.timeStart];
+                NSLog(@"time diff %d", timeDiff);
+                [self.notesRecording addObject:[NSNumber numberWithInt:timeDiff==0?1:timeDiff]];
+                
+                NSLog(@"notes so far : %@", self.notesRecording);
+            }
             
             //wondering if should add blank notes as well
         }
@@ -784,6 +799,63 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [toneGen start];
+//    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(testMe) userInfo:nil repeats:NO];
+//    [self testMe];
+}
+
+- (void) testMe {
+    NSArray *m1 = [NSArray arrayWithObjects:
+//                   [NSNumber numberWithInt:0],
+                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:3],
+                   [NSNumber numberWithInt:2],
+                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:3],
+                   [NSNumber numberWithInt:2],
+                   [NSNumber numberWithInt:4],
+                   [NSNumber numberWithInt:3],nil];
+    
+    NSArray *m2 = [NSArray arrayWithObjects:
+//                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:5],
+                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:4],
+                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:7],
+                   [NSNumber numberWithInt:1],
+                   [NSNumber numberWithInt:8],
+                   [NSNumber numberWithInt:1],nil];
+
+    NSMapTable *al = [[NSMapTable alloc] init];
+    [al setObject:m1 forKey:@"12345"];
+    [al setObject:m2 forKey:@"67890"];
+    
+    [self showPlayButtonAndStore:al];
+//    NSThread *th1 = [[NSThread alloc] initWithTarget:self selector:@selector(scheduleMelody:) object:m1];
+//    [th1 start];
+//    
+//    NSThread *th2 = [[NSThread alloc] initWithTarget:self selector:@selector(scheduleMelody:) object:m2];
+//    [th2 start];
+}
+//
+- (void) scheduleMelody:(NSArray *)melody {
+//    NSNumber *instrument = 1;
+    int intstru = 1;//[instrument intValue];
+    
+    NSLog(@"schedule melody called %@", melody);
+    
+    for(int i=1; i<[melody count]; i+=2) {
+        NSNumber *n = (NSNumber *)[melody objectAtIndex:i-1];
+        NSNumber *delay = (NSNumber *)[melody objectAtIndex:i];
+        if([n intValue] == 0) {
+            [NSThread sleepForTimeInterval:[delay intValue]];
+            continue;
+        }
+        
+        [self noteOnWithNumber:[n intValue] sendMessage:NO AndSoundType:intstru];
+        [NSThread sleepForTimeInterval:[delay intValue]];
+        [self noteOffWithNumber:[n intValue] sendMessage:NO AndSoundType:intstru];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -905,7 +977,10 @@
         self.startButtonPressed = NO;
         [startDoneButton setTitle:@"Start" forState:UIControlStateNormal];
         NSLog(@"%@", self.notesRecording);
-        [self.delegate sendMelody:self.notesRecording];
+        if(game.mode == MULTI_PLAYER_MIMIC)
+            [self.delegate sendMelody:self.notesRecording];
+        else if (game.mode == MULTI_PLAYER_COMPOSE)
+            [self.delegate sendComposeMelody:self.notesRecording];
         game.state = GAME_WAITING;
     } else {
         self.isRecording = YES;
@@ -915,6 +990,19 @@
     }
     
     [self refreshButtonStatus];
+}
+
+- (void) showPlayButtonAndStore:(NSMapTable *)melody {
+    if(melody) {
+        NSEnumerator *e = [melody keyEnumerator];
+        id key;
+        while((key = [e nextObject])) {
+            NSArray *mel = [melody objectForKey:key];
+            NSLog(@"Running Thread for : %@", mel);
+            NSThread *th = [[NSThread alloc] initWithTarget:self selector:@selector(scheduleMelody:) object:mel];
+            [th start];
+        }
+    }
 }
 
 - (void) refreshButtonStatus {

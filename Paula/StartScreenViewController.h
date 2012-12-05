@@ -16,7 +16,9 @@
 - (void) showPlayView;
 - (void) sendScore:(Player *)player;
 - (void) sendMelody:(NSArray *)melody;
+- (void) sendComposeMelody:(NSArray *)melody;
 - (void) changeGameState;
+- (void) showPlayButton:(NSMapTable *)melody;
 @end
 
 @interface StartScreenViewController : UIViewController <MainViewDelegate>

@@ -54,5 +54,6 @@
 - (void) setGameWithNotes:(NSArray *)notes;
 - (void) changeGameState;
 - (void) removeLabelsAndButtons;
+- (void) showPlayButtonAndStore:(NSMapTable *)melody;
 
 @end

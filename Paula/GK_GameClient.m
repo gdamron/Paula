@@ -33,6 +33,15 @@
     return self;
 }
 
+- (BOOL) trackComposedMelody:(NSString *)peerID melody:(NSArray *)melody {
+        //do nada
+    return NO;
+}
+
+- (NSMapTable *) getComposedMelody {
+    return nil;
+}
+
 - (void)startSearchServerForSessionID:(NSString *)sessionID {
 	_session = [[GKSession alloc] initWithSessionID:sessionID displayName:nil sessionMode:GKSessionModeClient];
 	_session.delegate = self;
@@ -101,6 +110,25 @@
 -(void) sendMelody:(NSArray *)melody {
     NSError *error;
     [packet setPacketType:GAME_SEND_MELODY];
+    
+    NSMutableData *d = [packet data];
+    if(melody) {
+        [d rw_appendInt8:[melody count]];
+        NSEnumerator *en = [melody objectEnumerator];
+        NSNumber *note;
+        while((note = en.nextObject)) {
+            [d rw_appendInt8:[note charValue]];
+        }
+        
+        if(![_session sendData:d toPeers:[NSArray arrayWithObject:_serverId] withDataMode:GKSendDataReliable error:&error]) {
+            NSLog(@"error sending melody - %@", error);
+        }
+    }
+}
+
+- (void) sendComposeMelody:(NSArray *)melody {
+    NSError *error;
+    [packet setPacketType:GAME_SEND_COMPOSE_MELODY];
     
     NSMutableData *d = [packet data];
     if(melody) {

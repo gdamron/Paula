@@ -16,6 +16,8 @@
     NSMapTable *_turnTracker;
     
     GK_GamePacket *packet;
+    
+    NSMapTable *_composeTracker;
 }
 
 @synthesize maxPlayers;
@@ -32,6 +34,7 @@
         //initialize player tracker, may need refactoring as this is not the right place for this logic
         _playerTracker = [[NSMapTable alloc] init];
         _turnTracker = [[NSMapTable alloc] init];
+        _composeTracker = [[NSMapTable alloc] init];
         packet = [[GK_GamePacket alloc] initWithPacketType:GAME_START];
         
         self.dataHandler = [[GK_GameDataHandler alloc] init];
@@ -39,8 +42,22 @@
     return self;
 }
 
+- (NSMapTable *) getComposedMelody {
+    return _composeTracker;
+}
+
 - (void) receiveScores:(NSMutableArray *)players {
         //do nothing for server
+}
+
+- (BOOL) trackComposedMelody:(NSString *)peerID melody:(NSArray *)melody {
+    if(peerID == nil) {
+        peerID = [_session peerID];
+    }
+    
+    [_composeTracker setObject:melody forKey:peerID];
+    
+    return [_composeTracker count] == [_connectedPlayers count] + 1;
 }
 
 - (BOOL) storeScoreForCompeteMode:(NSString *)peerID score:(NSNumber *)score mistakes:(NSNumber *)mistakes {
@@ -200,6 +217,10 @@
             NSLog(@"error sending melody - %@", error);
         }
     }
+}
+
+-(void) sendComposeMelody:(NSArray *)melody {
+    
 }
 
 #pragma mark - GK_GameDataDelegate
