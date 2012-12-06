@@ -7,6 +7,8 @@
 //
 
 #import "ScoreViewController.h"
+#import "SharetoFBViewController.h"
+#import "PaulaUtilities.m"
 
 @interface ScoreViewController ()
 @property UILabel *title;
@@ -14,6 +16,9 @@
 @property NSInteger screenWidth;
 @property NSInteger rowHeight;
 @property UIButton *startButton;
+@property UIButton *shareButton;
+@property SharetoFBViewController *sharetoFBViewController;
+@property NSString *scoreText;
 @end
 
 @implementation ScoreViewController
@@ -22,6 +27,9 @@
 @synthesize screenHeight;
 @synthesize screenWidth;
 @synthesize rowHeight;
+@synthesize shareButton;
+@synthesize sharetoFBViewController = _sharetoFBViewController;
+@synthesize scoreText;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -59,15 +67,19 @@
         
         self.startButton = [[UIButton alloc] initWithFrame:CGRectMake(self.screenWidth/2 - 40, self.screenHeight - 100, 80, 30)];
         
-        self.startButton.backgroundColor = [UIColor colorWithRed:(arc4random()%1000+1)/1000.0
-                                                           green:(arc4random()%1000+1)/1000.0
-                                                            blue:(arc4random()%1000+1)/1000.0
-                                                           alpha:1.0];
+        self.startButton.backgroundColor = randomColor();
         [self.startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         [self.startButton setTitle:@"Okay" forState:UIControlStateNormal];
         [self.startButton addTarget:self action:@selector(endGame) forControlEvents:UIControlEventTouchUpInside];
         
         [self.view addSubview:self.startButton];
+        
+        self.shareButton = [[UIButton alloc] initWithFrame:CGRectMake(self.screenWidth/2 - 40, self.screenHeight - 150, 80, 30)];
+        self.shareButton.backgroundColor = randomColor();
+        [self.shareButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [self.shareButton setTitle:@"Share" forState:UIControlStateNormal];
+        [self.shareButton addTarget:self action:@selector(shareButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:self.shareButton];
     }
     return self;
 }
@@ -94,6 +106,8 @@
             p2.score = [[NSNumber alloc] initWithInt:50];
             p2.mistakesMade = [[NSNumber alloc] initWithInt:10];
             [data addObject:p2];
+            
+            self.scoreText = @"101";
         }
         
         if(data != nil) {
@@ -115,6 +129,8 @@
                 [self.view addSubview:nameColumn];
                 [self.view addSubview:mistakeColumn];
                 [self.view addSubview:scoreColumn];
+                
+                self.scoreText = scoreColumn.text;
             }
         }
     }
@@ -132,6 +148,15 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)shareButtonPressed:(id)sender {
+    if (sender == shareButton)
+    {
+        self.sharetoFBViewController = [[SharetoFBViewController alloc] init];
+        self.sharetoFBViewController.scoreShare = self.scoreText;
+        [self presentViewController:self.sharetoFBViewController animated:YES completion:nil];
+    }
 }
 
 @end
